@@ -9,14 +9,15 @@
 캐글 상위권에 있는 풀이 1개 이상 읽고 이해한 뒤 다음 회의 때 돌아가면서 설명해주기. (이거 못하는 사람이 밥 or 음료수 사기) </p>
 
 
-### 참고1:
+### 참고
 
-김성훈교수 강의
+1. 김성훈교수 강의 <br>
 https://www.youtube.com/watch?v=BS6O0zOGX4E&list=PLlMkM4tgfjnLSOjrEJN31gZATbcj_MpUm
 
-### 참고2:
+<img width="837" alt="2018-04-03 11 58 13" src="https://user-images.githubusercontent.com/33567817/38257355-07cc400c-379b-11e8-9f8d-dc39bde8d498.png">
 
-캐글 데이터셋
+2. 캐글 데이터셋 <br>
 https://www.kaggle.com/c/digit-recognizer
  
+<img width="853" alt="2018-04-03 11 58 44" src="https://user-images.githubusercontent.com/33567817/38257379-1355b1b0-379b-11e8-9bea-f34a7d30d7f7.png">
 

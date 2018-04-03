@@ -29,3 +29,4 @@ https://www.youtube.com/watch?v=BS6O0zOGX4E&list=PLlMkM4tgfjnLSOjrEJN31gZATbcj_M
 
 https://www.kaggle.com/c/digit-recognizer
  
+수정했다 움퓃퓃퓃!!!!

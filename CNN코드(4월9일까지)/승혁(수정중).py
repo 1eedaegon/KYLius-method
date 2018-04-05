@@ -1,8 +1,4 @@
-# Input data files are available in the "../input/" directory.
-# For example, running this (by clicking run or pressing Shift+Enter) will list the files in the input directory
-import os
-print(os.listdir("../input"))
-
+# 가장 간단하게 돌려만 보려고 하는데 현재 상태론 안돌아감 ㅎㅎ 성공하면 제목 바꾸겠음.
 # Any results you write to the current directory are saved as output.
 import pandas as pd
 train = pd.read_csv("../input/train.csv")

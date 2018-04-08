@@ -1,3 +1,4 @@
+# 꼬인 것 같음 ^^; 
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """

@@ -8,7 +8,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sun Apr  8 15:23:47 2018 
-
 @author: kimseunghyuck(smallerhand)
 """
 ## 개선할 사항: layer수 늘리기, weight 초기값 xavier(오류나서 못했음), activation function 은 maxout을 쓰자. 
@@ -33,8 +32,8 @@ def one_hot(x):
 trainLabel=one_hot(train_set.values[:,0])
 validateLabel=one_hot(validate_set.values[:,0])
 # parameters
-learning_rate = 0.001
-training_epochs = 20
+learning_rate = 0.002
+training_epochs = 40
 batch_size = 100
 # input place holders
 X = tf.placeholder(tf.float32, [None, 784])
@@ -81,3 +80,5 @@ correct_prediction = tf.equal(tf.argmax(hypothesis, 1), tf.argmax(Y, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 print('Accuracy:', sess.run(accuracy, feed_dict={
       X: validateData, Y: validateLabel}))
+    
+#94~96퍼센트 정확도 나옴.

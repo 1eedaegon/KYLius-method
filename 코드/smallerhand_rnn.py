@@ -25,35 +25,28 @@ validateLabel=validate_set.values[:,0]
 
 # parameters
 learning_rate = 0.002
-training_epochs = 40
+training_epochs = 10
 batch_size = 100
-steps_for_validate = 5
+steps_for_print = 5
+steps_for_validate = 10
 keep_prob = tf.placeholder(tf.float32)
 
 # input place holders
 X = tf.placeholder(tf.float32, [None, 784])
+X_img = tf.reshape(X, [-1, 28, 28])
 Y = tf.placeholder(tf.int32, [None, 1])
 Y_onehot=tf.reshape(tf.one_hot(Y, 10), [-1, 10])
 
-# weights & bias for nn layers
-W1 = tf.Variable(tf.random_normal([784, 256]))
-b1 = tf.Variable(tf.random_normal([256]))
-L1 = tf.nn.relu(tf.matmul(X, W1) + b1)
-L1 = tf.nn.dropout(L1, keep_prob=keep_prob)
+# layers
+cells = tf.nn.rnn_cell.MultiRNNCell([DropoutWrapper(tf.nn.rnn_cell.BasicLSTMCell(num_units=256),
+                                                    output_keep_prob=keep_prob) for _ in range(3)])
+h0 = cells.zero_state(batch_size, dtype=tf.float32)
+output, hs = tf.nn.dynamic_rnn(cells, inputs=X_img, initial_state=h0)
+L1 = output[:, -1, :]
 
-W2 = tf.Variable(tf.random_normal([256, 256]))
-b2 = tf.Variable(tf.random_normal([256]))
-L2 = tf.nn.relu(tf.matmul(L1, W2) + b2)
-L2 = tf.nn.dropout(L2, keep_prob=keep_prob)
-
-W3 = tf.Variable(tf.random_normal([256, 256]))
-b3 = tf.Variable(tf.random_normal([256]))
-L3 = tf.nn.relu(tf.matmul(L2, W3) + b3)
-L3 = tf.nn.dropout(L3, keep_prob=keep_prob)
-
-W4 = tf.Variable(tf.random_normal([256, 10]))
-b4 = tf.Variable(tf.random_normal([10]))
-hypothesis = tf.matmul(L3, W4) + b4
+W2 = tf.Variable(tf.random_normal([256, 10]))
+b2 = tf.Variable(tf.random_normal([10]))
+hypothesis = tf.matmul(L1, W2) + b2
 
 # define cost/loss & optimizer
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
@@ -71,30 +64,19 @@ for epoch in range(training_epochs):
     for i in range(total_batch):
         batch_xs = trainData[i*batch_size:(i+1)*batch_size]
         batch_ys = trainLabel[i*batch_size:(i+1)*batch_size].reshape(-1, 1)
-        feed_dict = {X: batch_xs, Y: batch_ys, keep_prob: 1}
+        feed_dict = {X: batch_xs, Y: batch_ys, keep_prob: .5}
         c, _ = sess.run([cost, optimizer], feed_dict=feed_dict) 
-        avg_cost += c / total_batch     
-    print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost))
-    if epoch % steps_for_validate ==0:
+        avg_cost += c / total_batch         
+    if epoch % steps_for_print == steps_for_print - 1:
+        print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost))
+    if epoch % steps_for_validate == steps_for_validate - 1:
         correct_prediction = tf.equal(tf.argmax(hypothesis, 1), tf.argmax(Y_onehot, 1))
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
         print('Accuracy:', sess.run(accuracy, feed_dict={
                 X: validateData, Y: validateLabel.reshape(-1, 1), keep_prob: 1}))       
 print('Finished!')
 
-#최종 정확도 측정
-correct_prediction = tf.equal(tf.argmax(hypothesis, 1), tf.argmax(Y_onehot, 1))
-accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-print('Accuracy:', sess.run(accuracy, feed_dict={
-        X: validateData, Y: validateLabel.reshape(-1, 1), keep_prob: 1}))  
 """
-4개 layer(hidden 2개), learning rate=0.002, training epoch =40, batch size =100
-각 레이어의 인풋과 아웃풋은 784->256->256->256->10
-1. 기본
-정확도 95.90%, 95.69%, 95.04%, 95.17%, 95.54%, 95.65%, 95.41%, 95.60%
-2. dropout 이용
-keep_prob=0.5 : 정확도 13.07%, keep_prob=0.7: 정확도 35.38%
-일단 droupout 이용안하고 다른 걸 바꿔서 정확도 높여봐야 하겠다.
-
-
+lstm cell 넣었음. 돌아가는 것 같긴 한데 너무 부하가 큰 것 같아서 겁나서 멈춤. GPU로 돌려보겠음.
+돌아가는지만 보려고 시험삼아 total_batch를 줄여서 돌려봤는데 돌아가고 출력되긴함.
 """

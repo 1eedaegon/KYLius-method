@@ -7,6 +7,7 @@ Created on Sun Apr  8 15:23:47 2018
 @author: kimseunghyuck(smallerhand)
 """
 import tensorflow as tf
+from tensorflow.python.ops.rnn_cell_impl import DropoutWrapper
 import pandas as pd
 import numpy as np
 train = pd.read_csv('desktop/python/train.csv')
@@ -27,8 +28,6 @@ learning_rate = 0.002
 training_epochs = 40
 batch_size = 100
 steps_for_validate = 5
-
-# dropout (keep_prob) rate  0.7~0.5 on training, but should be 1 for testing
 keep_prob = tf.placeholder(tf.float32)
 
 # input place holders
@@ -76,7 +75,7 @@ for epoch in range(training_epochs):
         c, _ = sess.run([cost, optimizer], feed_dict=feed_dict) 
         avg_cost += c / total_batch     
     print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost))
-    if epoch % steps_for_validate == steps_for_validate-1:
+    if epoch % steps_for_validate ==0:
         correct_prediction = tf.equal(tf.argmax(hypothesis, 1), tf.argmax(Y_onehot, 1))
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
         print('Accuracy:', sess.run(accuracy, feed_dict={

@@ -11,7 +11,6 @@ from tensorflow.python.ops.rnn_cell_impl import DropoutWrapper
 import pandas as pd
 import numpy as np
 train = pd.read_csv('desktop/python/train.csv')
-test = pd.read_csv('desktop/python/test.csv')
 
 #훈련세트, validation세트 나누기
 tf.reset_default_graph()     #그래프 초기화
@@ -60,6 +59,7 @@ sess.run(tf.global_variables_initializer())  #글로벌 변수 초기화
 # train my model
 for epoch in range(training_epochs):
     avg_cost = 0
+    """
     total_batch = int(len(trainData) / batch_size)
     for i in range(total_batch):
         batch_xs = trainData[i*batch_size:(i+1)*batch_size]
@@ -69,6 +69,7 @@ for epoch in range(training_epochs):
         avg_cost += c / total_batch         
     if epoch % steps_for_print == steps_for_print - 1:
         print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost))
+    """
     if epoch % steps_for_validate == steps_for_validate - 1:
         correct_prediction = tf.equal(tf.argmax(hypothesis, 1), tf.argmax(Y_onehot, 1))
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
@@ -77,6 +78,6 @@ for epoch in range(training_epochs):
 print('Finished!')
 
 """
-lstm cell 넣었음. 돌아가는 것 같긴 한데 너무 부하가 큰 것 같아서 겁나서 멈춤. GPU로 돌려보겠음.
-돌아가는지만 보려고 시험삼아 total_batch를 줄여서 돌려봤는데 돌아가고 출력되긴함.
+lstm cell.
+validate test 부분에 문제가 있는 것 같아서 training부분 주석처리 하고 수정중.
 """

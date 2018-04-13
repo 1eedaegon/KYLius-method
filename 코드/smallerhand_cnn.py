@@ -42,7 +42,15 @@ L1 = tf.nn.relu(L1)
 L1 = tf.nn.max_pool(L1, ksize=[1, 2, 2, 1],
                     strides=[1, 2, 2, 1], padding='SAME')
 L1 = tf.nn.dropout(L1, keep_prob=keep_prob)
-L1_flat = tf.reshape(L1, [-1, 14 * 14 * 32])
+
+# L1_2
+W1_2 = tf.Variable(tf.random_normal([5, 5, 1, 32], stddev=0.01))
+L1_2 = tf.nn.conv2d(X_img, W1_2, strides=[1, 1, 1, 1], padding='SAME')
+L1_2 = tf.nn.relu(L1)
+L1_2 = tf.nn.max_pool(L1_2, ksize=[1, 7, 7, 1],
+                    strides=[1, 7, 7, 1], padding='SAME')
+L1_2 = tf.nn.dropout(L1_2, keep_prob=keep_prob)
+L1_2_flat = tf.reshape(L1_2, [-1, 4 * 4 * 32])
 
 # L2 ImgIn shape=(?, 14, 14, 10)
 W2 = tf.Variable(tf.random_normal([3, 3, 32, 64], stddev=0.01))
@@ -51,7 +59,6 @@ L2 = tf.nn.relu(L2)
 L2 = tf.nn.max_pool(L2, ksize=[1, 2, 2, 1],
                     strides=[1, 2, 2, 1], padding='SAME')
 L2 = tf.nn.dropout(L2, keep_prob=keep_prob)
-L2_flat = tf.reshape(L2, [-1, 7 * 7 * 64])
 
 # L3
 W3 = tf.Variable(tf.random_normal([3, 3, 64, 128], stddev=0.01))
@@ -63,17 +70,12 @@ L3 = tf.nn.dropout(L3, keep_prob=keep_prob)
 L3_flat = tf.reshape(L3, [-1, 4 * 4 * 128])
 
 # Final FC 7x7x64 inputs -> 10 outputs
-"""
-W4_1 = tf.get_variable("W4_1", shape=[14 * 14 * 32, 10],
-                     initializer=tf.contrib.layers.xavier_initializer())
-"""
-W4_2 = tf.get_variable("W4_2", shape=[7 * 7 * 64, 10],
+W4_2 = tf.get_variable("W4_2", shape=[4 * 4 * 32, 10],
                      initializer=tf.contrib.layers.xavier_initializer())
 W4_3 = tf.get_variable("W4_3", shape=[4 * 4 * 128, 10],
                      initializer=tf.contrib.layers.xavier_initializer())
 b = tf.Variable(tf.random_normal([10]))
-#logits = tf.matmul(L1_flat, W4_1) + tf.matmul(L2_flat, W4_2) + tf.matmul(L3_flat, W4_3) + b
-logits = tf.matmul(L2_flat, W4_2) + tf.matmul(L3_flat, W4_3) + b
+logits = tf.matmul(L1_2_flat, W4_2) + tf.matmul(L3_flat, W4_3) + b
 
 # define cost/loss & optimizer
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(

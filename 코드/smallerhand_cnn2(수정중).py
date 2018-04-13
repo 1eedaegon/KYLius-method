@@ -22,7 +22,7 @@ validateLabel=validate_set.values[:,0]
 
 # hyper parameters
 learning_rate = 0.001
-training_epochs = 5
+training_epochs = 20
 batch_size = 100
 steps_for_validate = 5
 keep_prob = tf.placeholder(tf.float32)
@@ -116,7 +116,6 @@ sess.run(tf.global_variables_initializer())
 print('Learning started. It takes sometime.')
 for epoch in range(training_epochs):
     avg_cost = 0
-    """
     total_batch = int(len(trainData) / batch_size)
     for i in range(total_batch):
         batch_xs = trainData[i*batch_size:(i+1)*batch_size]
@@ -125,7 +124,6 @@ for epoch in range(training_epochs):
         c, _ = sess.run([cost, optimizer], feed_dict=feed_dict)
         avg_cost += c / total_batch
     print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost))
-    """
     if epoch % steps_for_validate == steps_for_validate-1:
         correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(Y_onehot, 1))
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
@@ -153,5 +151,5 @@ w2=2*2, 64개/ 3*3, 64개/ 4*4, 64개
 
 8. 7에서 1층에서 2층으로도, 3층으로도 전달.
 최종 layer에서 w1과 w2의 출력값을 모두 받음.
-오류남. 
+97.93% (epoch 20)
 """

@@ -22,7 +22,7 @@ validateLabel=validate_set.values[:,0]
 
 # hyper parameters
 learning_rate = 0.001
-training_epochs = 15
+training_epochs = 5
 batch_size = 100
 steps_for_validate = 5
 keep_prob = tf.placeholder(tf.float32)
@@ -34,20 +34,12 @@ Y = tf.placeholder(tf.int32, [None, 1])
 Y_onehot=tf.reshape(tf.one_hot(Y, 10), [-1, 10])
 
 # L1 ImgIn shape=(?, 28, 28, 1)
-W1 = tf.Variable(tf.random_normal([5, 5, 1, 32], stddev=0.01))
+W1 = tf.Variable(tf.random_normal([3, 3, 1, 32], stddev=0.01))
 L1 = tf.nn.conv2d(X_img, W1, strides=[1, 1, 1, 1], padding='SAME')
 L1 = tf.nn.relu(L1)
 L1 = tf.nn.max_pool(L1, ksize=[1, 2, 2, 1],
                     strides=[1, 2, 2, 1], padding='SAME')
 L1 = tf.nn.dropout(L1, keep_prob=keep_prob)
-
-# L1_2 추가
-W1_2 = tf.Variable(tf.random_normal([3, 3, 1, 36], stddev=0.01))
-L1_2 = tf.nn.conv2d(X_img, W1_2, strides=[1, 1, 1, 1], padding='SAME')
-L1_2 = tf.nn.relu(L1_2)
-L1_2 = tf.nn.max_pool(L1_2, ksize=[1, 2, 2, 1],
-                    strides=[1, 2, 2, 1], padding='SAME')
-L1_2 = tf.nn.dropout(L1_2, keep_prob=keep_prob)
 
 # L2 ImgIn shape=(?, 14, 14, 10)
 W2 = tf.Variable(tf.random_normal([3, 3, 32, 64], stddev=0.01))
@@ -56,24 +48,21 @@ L2 = tf.nn.relu(L2)
 L2 = tf.nn.max_pool(L2, ksize=[1, 2, 2, 1],
                     strides=[1, 2, 2, 1], padding='SAME')
 L2 = tf.nn.dropout(L2, keep_prob=keep_prob)
-L2_flat = tf.reshape(L2, [-1, 7 * 7 * 64])
 
-# L2_2 추가
-W2_2 = tf.Variable(tf.random_normal([3, 3, 36, 40], stddev=0.01))
-L2_2 = tf.nn.conv2d(L1_2, W2_2, strides=[1, 1, 1, 1], padding='SAME')
-L2_2 = tf.nn.relu(L2_2)
-L2_2 = tf.nn.max_pool(L2_2, ksize=[1, 2, 2, 1],
+# L3
+W3 = tf.Variable(tf.random_normal([3, 3, 64, 128], stddev=0.01))
+L3 = tf.nn.conv2d(L2, W3, strides=[1, 1, 1, 1], padding='SAME')
+L3 = tf.nn.relu(L3)
+L3 = tf.nn.max_pool(L3, ksize=[1, 2, 2, 1],
                     strides=[1, 2, 2, 1], padding='SAME')
-L2_2 = tf.nn.dropout(L2_2, keep_prob=keep_prob)
-L2_flat_2 = tf.reshape(L2_2, [-1, 7 * 7 * 40])
+L3 = tf.nn.dropout(L3, keep_prob=keep_prob)
+L3_flat = tf.reshape(L3, [-1, 128*4*4])
 
 # Final FC 7x7x64 inputs -> 10 outputs
-W3 = tf.get_variable("W3", shape=[7 * 7 * 64, 10],
-                     initializer=tf.contrib.layers.xavier_initializer())
-W3_2 = tf.get_variable("W3_2", shape=[7 * 7 * 40, 10],
+W4 = tf.get_variable("W3", shape=[128*4*4, 10],
                      initializer=tf.contrib.layers.xavier_initializer())
 b = tf.Variable(tf.random_normal([10]))
-logits = tf.matmul(L2_flat, W3) + tf.matmul(L2_flat_2, W3_2) + b
+logits = tf.matmul(L3_flat, W4) + b
 
 # define cost/loss & optimizer
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
@@ -108,33 +97,9 @@ print('Finished!')
 learning_rate = 0.001
 training_epochs = 15
 batch_size = 100
-1. window = 3*3, 32개/ 3*3, 64개
-정확도 98.57%
+1. 기존꺼에서 병렬 레이어 제거
+98.34%(epoch 5)
+2. 상욱이가 올린 김성훈교수 코드 인수 넣음.
+98.77%(epoch 5)
 
-2. window = 4*4, 32개/ 4*4, 64개
-정확도 98.48%/ 98.36%/ 98.56%
-
-3. 정확도가 낮아질 것 같긴 하지만 비교삼아 윈도우 개수를 적게 해봄
-window = 5*5, 10개/ 3*3, 5개
-정확도 97.48%
-
-4. 3에서 병렬로 구성, window 크기를 다르게 L1_2랑 L2_2 만듬.
-w1, w2= 5*5, 10개/ 3*3, 5개
-w1_2, w2_2 = 3*3, 12개/ 3*3, 5개
-정확도 98.09%
-(3번보다 정확도 높아졌으므로 이 구조에서 window개수를 다시 늘리면 더 높아질 듯.)
-
-5. 병렬로 구성하고 window 크기도 원래만큼 늘림.
-w1, w2= 5*5, 32개/ 3*3, 64개
-w1_2, w2_2 = 3*3, 36개/ 3*3, 40개
-정확도 98.48%
-생각보다 높지 않았다.
-
-6. 5에서 dropout추가
-정확도 98.78% 
-
-7. 아직 안해봤지만 아래처럼 구상 중
-w1= 2*2, 20개/ 3*3, 20개/ 4*4, 20개
-w2=2*2, 10개/ 3*3, 10개/ 4*4, 10개 
-최종 layer에서 w1과 w2의 출력값을 모두 받음.
 """

@@ -40,7 +40,7 @@ L1 = tf.nn.relu(L1)
 L1 = tf.nn.max_pool(L1, ksize=[1, 2, 2, 1],
                     strides=[1, 2, 2, 1], padding='SAME')
 L1 = tf.nn.dropout(L1, keep_prob=keep_prob)
-L1_flat = tf.reshape(L1, [-1, 7 * 7 * 32])
+L1_flat = tf.reshape(L1, [-1, 14 * 14 * 32])
 
 # L1_2 추가
 W1_2 = tf.Variable(tf.random_normal([3, 3, 1, 32], stddev=0.01))
@@ -49,7 +49,7 @@ L1_2 = tf.nn.relu(L1_2)
 L1_2 = tf.nn.max_pool(L1_2, ksize=[1, 2, 2, 1],
                     strides=[1, 2, 2, 1], padding='SAME')
 L1_2 = tf.nn.dropout(L1_2, keep_prob=keep_prob)
-L1_flat_2 = tf.reshape(L1_2, [-1, 7 * 7 * 32])
+L1_flat_2 = tf.reshape(L1_2, [-1, 14 * 14 * 32])
 
 # L1_3 추가
 W1_3 = tf.Variable(tf.random_normal([4, 4, 1, 32], stddev=0.01))
@@ -58,7 +58,7 @@ L1_3 = tf.nn.relu(L1_3)
 L1_3 = tf.nn.max_pool(L1_3, ksize=[1, 2, 2, 1],
                     strides=[1, 2, 2, 1], padding='SAME')
 L1_3 = tf.nn.dropout(L1_3, keep_prob=keep_prob)
-L1_flat_3 = tf.reshape(L1_3, [-1, 7 * 7 * 32])
+L1_flat_3 = tf.reshape(L1_3, [-1, 14 * 14 * 32])
 
 # L2 ImgIn shape=(?, 14, 14, 10)
 W2 = tf.Variable(tf.random_normal([2, 2, 32, 64], stddev=0.01))
@@ -94,15 +94,13 @@ W3_2 = tf.get_variable("W3_2", shape=[7 * 7 * 64, 10],
                      initializer=tf.contrib.layers.xavier_initializer())
 W3_3 = tf.get_variable("W3_3", shape=[7 * 7 * 64, 10],
                      initializer=tf.contrib.layers.xavier_initializer()) 
-W32 = tf.get_variable("W32", shape=[7 * 7 * 32, 10],
+W32 = tf.get_variable("W32", shape=[14 * 14 * 32, 10],
                      initializer=tf.contrib.layers.xavier_initializer())
-W3_22 = tf.get_variable("W3_22", shape=[7 * 7 * 32, 10],
+W3_22 = tf.get_variable("W3_22", shape=[14 * 14 * 32, 10],
                      initializer=tf.contrib.layers.xavier_initializer())
-W3_32 = tf.get_variable("W3_32", shape=[7 * 7 * 32, 10],
+W3_32 = tf.get_variable("W3_32", shape=[14 * 14 * 32, 10],
                      initializer=tf.contrib.layers.xavier_initializer()) 
 logits = tf.matmul(L2_flat, W3) + tf.matmul(L2_flat_2, W3_2) + tf.matmul(L2_flat_3, W3_3) + tf.matmul(L1_flat, W32) + tf.matmul(L1_flat_2, W3_32) + tf.matmul(L1_flat_3, W3_32) 
-
-
 
 
 # define cost/loss & optimizer
@@ -118,6 +116,7 @@ sess.run(tf.global_variables_initializer())
 print('Learning started. It takes sometime.')
 for epoch in range(training_epochs):
     avg_cost = 0
+    """
     total_batch = int(len(trainData) / batch_size)
     for i in range(total_batch):
         batch_xs = trainData[i*batch_size:(i+1)*batch_size]
@@ -126,6 +125,7 @@ for epoch in range(training_epochs):
         c, _ = sess.run([cost, optimizer], feed_dict=feed_dict)
         avg_cost += c / total_batch
     print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost))
+    """
     if epoch % steps_for_validate == steps_for_validate-1:
         correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(Y_onehot, 1))
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))

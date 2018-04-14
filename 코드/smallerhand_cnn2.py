@@ -22,7 +22,7 @@ validateLabel=validate_set.values[:,0]
 
 # hyper parameters
 learning_rate = 0.001
-training_epochs = 5
+training_epochs = 20
 batch_size = 100
 steps_for_validate = 5
 keep_prob = tf.placeholder(tf.float32)
@@ -40,7 +40,7 @@ L1 = tf.nn.relu(L1)
 L1 = tf.nn.max_pool(L1, ksize=[1, 2, 2, 1],
                     strides=[1, 2, 2, 1], padding='SAME')
 L1 = tf.nn.dropout(L1, keep_prob=keep_prob)
-L1_flat = tf.reshape(L1, [-1, 7 * 7 * 32])
+L1_flat = tf.reshape(L1, [-1, 14 * 14 * 32])
 
 # L1_2 추가
 W1_2 = tf.Variable(tf.random_normal([3, 3, 1, 32], stddev=0.01))
@@ -49,7 +49,7 @@ L1_2 = tf.nn.relu(L1_2)
 L1_2 = tf.nn.max_pool(L1_2, ksize=[1, 2, 2, 1],
                     strides=[1, 2, 2, 1], padding='SAME')
 L1_2 = tf.nn.dropout(L1_2, keep_prob=keep_prob)
-L1_flat_2 = tf.reshape(L1_2, [-1, 7 * 7 * 32])
+L1_flat_2 = tf.reshape(L1_2, [-1, 14 * 14 * 32])
 
 # L1_3 추가
 W1_3 = tf.Variable(tf.random_normal([4, 4, 1, 32], stddev=0.01))
@@ -58,7 +58,7 @@ L1_3 = tf.nn.relu(L1_3)
 L1_3 = tf.nn.max_pool(L1_3, ksize=[1, 2, 2, 1],
                     strides=[1, 2, 2, 1], padding='SAME')
 L1_3 = tf.nn.dropout(L1_3, keep_prob=keep_prob)
-L1_flat_3 = tf.reshape(L1_3, [-1, 7 * 7 * 32])
+L1_flat_3 = tf.reshape(L1_3, [-1, 14 * 14 * 32])
 
 # L2 ImgIn shape=(?, 14, 14, 10)
 W2 = tf.Variable(tf.random_normal([2, 2, 32, 64], stddev=0.01))
@@ -94,15 +94,13 @@ W3_2 = tf.get_variable("W3_2", shape=[7 * 7 * 64, 10],
                      initializer=tf.contrib.layers.xavier_initializer())
 W3_3 = tf.get_variable("W3_3", shape=[7 * 7 * 64, 10],
                      initializer=tf.contrib.layers.xavier_initializer()) 
-W32 = tf.get_variable("W32", shape=[7 * 7 * 32, 10],
+W32 = tf.get_variable("W32", shape=[14 * 14 * 32, 10],
                      initializer=tf.contrib.layers.xavier_initializer())
-W3_22 = tf.get_variable("W3_22", shape=[7 * 7 * 32, 10],
+W3_22 = tf.get_variable("W3_22", shape=[14 * 14 * 32, 10],
                      initializer=tf.contrib.layers.xavier_initializer())
-W3_32 = tf.get_variable("W3_32", shape=[7 * 7 * 32, 10],
+W3_32 = tf.get_variable("W3_32", shape=[14 * 14 * 32, 10],
                      initializer=tf.contrib.layers.xavier_initializer()) 
 logits = tf.matmul(L2_flat, W3) + tf.matmul(L2_flat_2, W3_2) + tf.matmul(L2_flat_3, W3_3) + tf.matmul(L1_flat, W32) + tf.matmul(L1_flat_2, W3_32) + tf.matmul(L1_flat_3, W3_32) 
-
-
 
 
 # define cost/loss & optimizer
@@ -153,5 +151,5 @@ w2=2*2, 64개/ 3*3, 64개/ 4*4, 64개
 
 8. 7에서 1층에서 2층으로도, 3층으로도 전달.
 최종 layer에서 w1과 w2의 출력값을 모두 받음.
-오류남. 
+97.93% (epoch 20)
 """

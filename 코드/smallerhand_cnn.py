@@ -129,4 +129,5 @@ batch_size = 100
 Adam -> RMSPropOptimizer
 99.3%대(epoch 100~300)
 5. 오 상욱이가 leaky relu 로 99.5% 달성함.
+6.xxx
 """

@@ -29,21 +29,24 @@ steps_for_validate = 5
 keep_prob = tf.placeholder(tf.float32)
 
 # L1 ImgIn shape=(?, 28, 28, 1)
-W1 = tf.Variable(tf.random_normal([3, 3, 1, 32], stddev=0.01))
+#W1 = tf.Variable(tf.random_normal([3, 3, 1, 32], stddev=0.01))
+W1 = tf.get_variable("W1", shape=[3, 3, 1, 32],initializer=tf.contrib.layers.xavier_initializer())
 L1 = tf.nn.conv2d(X_img, W1, strides=[1, 1, 1, 1], padding='SAME')
 L1 = tf.nn.relu(L1)
 L1 = tf.nn.max_pool(L1, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='SAME') # l1 shape=(?, 14, 14, 32)
 L1 = tf.nn.dropout(L1, p_keep_conv)
 
 # L2 ImgIn shape=(?, 14, 14, 10)
-W2 = tf.Variable(tf.random_normal([3, 3, 32, 64], stddev=0.01))
+#W2 = tf.Variable(tf.random_normal([3, 3, 32, 64], stddev=0.01))
+W2 = tf.get_variable("W2", shape=[3, 3, 32, 64],initializer=tf.contrib.layers.xavier_initializer())
 L2 = tf.nn.conv2d(L1, W2, strides=[1, 1, 1, 1], padding='SAME')
 L2 = tf.nn.relu(L2)
 L2 = tf.nn.max_pool(L2, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='SAME') # l2 shape=(?, 7, 7, 64)
 L2 = tf.nn.dropout(L2, p_keep_conv)
 
 # L3 ImgIn shape=(?, 7, 7, 128)
-W3 = tf.Variable(tf.random_normal([3, 3, 64, 128], stddev=0.01))
+#W3 = tf.Variable(tf.random_normal([3, 3, 64, 128], stddev=0.01))
+W3 = tf.get_variable("W3", shape=[3, 3, 64, 128],initializer=tf.contrib.layers.xavier_initializer())
 L3 = tf.nn.conv2d(L2, W3, strides=[1, 1, 1, 1], padding='SAME')
 L3 = tf.nn.relu(L3)
 L3 = tf.nn.max_pool(L3, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='SAME') # l3 shape=(?, 4, 4, 128)
@@ -52,16 +55,18 @@ L3_flat = tf.reshape(L3, shape=[-1, 128 * 4 * 4])    # reshape to (?, 2048)
 
 
 # Final FC 4x4x128 inputs -> 10 outputs
-W4 = tf.Variable(tf.random_normal([128 * 4 * 4, 625], stddev=0.01))
+#W4 = tf.Variable(tf.random_normal([128 * 4 * 4, 625], stddev=0.01))
+W4 = tf.get_variable("W4", shape=[128 * 4 * 4, 625],initializer=tf.contrib.layers.xavier_initializer())
 L4 = tf.nn.relu(tf.matmul(L3_flat, W4))
 L4 = tf.nn.dropout(L4, p_keep_hidden)
 W_o = tf.get_variable("W_o", shape=[625,10],initializer=tf.contrib.layers.xavier_initializer())
-logits = tf.matmul(L4, W_o) 
+b = tf.Variable(tf.random_normal([10]))
+logits = tf.matmul(L4, W_o) + b
 
 # define cost/loss & optimizer
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits,labels= Y_onehot))
-#optimizer = tf.train.RMSPropOptimizer(0.001, 0.9).minimize(cost)
-optimizer = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost) # 아담버젼
+optimizer = tf.train.RMSPropOptimizer(0.001, 0.9).minimize(cost)
+#optimizer = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost) # 아담버젼
 predict_op = tf.argmax(logits, 1)
 
 # initialize
@@ -87,24 +92,3 @@ for epoch in range(training_epochs):
                 X: validateData, Y: validateLabel.reshape(-1, 1), p_keep_conv: 1, p_keep_hidden: 1}))       
 print('Finished!')
  
-    # or
-    
-# Launch the graph in a session
-with tf.Session() as sess:
-    # you need to initialize all variables
-    tf.initialize_all_variables().run()
-
-    for i in range(100):
-        training_batch = zip(range(0, len(trainData), batch_size),
-                             range(batch_size, len(trainData)+1, batch_size))
-        for start, end in training_batch:
-            sess.run(optimizer, feed_dict={X: trainData[start:end], Y: trainLabel[start:end],
-                                          p_keep_conv: 0.8})
-
-        test_indices = np.arange(len(validateData)) # Get A Test Batch
-        np.random.shuffle(test_indices)
-        
-        print(i, np.mean(np.argmax(validateLabel[test_indices], axis=1) ==
-                         sess.run(predict_op, feed_dict={X: validateData[test_indices],
-                                                         Y: validateLabel[test_indices],
-                                                         p_keep_conv: 1.0})))

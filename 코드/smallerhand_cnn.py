@@ -43,6 +43,14 @@ L1 = tf.nn.max_pool(L1, ksize=[1, 2, 2, 1],
                     strides=[1, 2, 2, 1], padding='SAME')
 L1 = tf.nn.dropout(L1, keep_prob=keep_prob)
 
+# add L1_2
+W1_2 = tf.Variable(tf.random_normal([5, 5, 1, 32], stddev=0.01))
+L1_2 = tf.nn.conv2d(X_img, W1_2, strides=[1, 1, 1, 1], padding='SAME')
+L1_2 = tf.nn.elu(L1_2)
+L1_2 = tf.nn.max_pool(L1_2, ksize=[1, 2, 2, 1],
+                    strides=[1, 2, 2, 1], padding='SAME')
+L1_2 = tf.nn.dropout(L1_2, keep_prob=keep_prob)
+
 # L2 ImgIn shape=(?, 14, 14, 10)
 W2 = tf.Variable(tf.random_normal([3, 3, 32, 64], stddev=0.01))
 L2 = tf.nn.conv2d(L1, W2, strides=[1, 1, 1, 1], padding='SAME')
@@ -51,9 +59,18 @@ L2 = tf.nn.max_pool(L2, ksize=[1, 2, 2, 1],
                     strides=[1, 2, 2, 1], padding='SAME')
 L2 = tf.nn.dropout(L2, keep_prob=keep_prob)
 
+# add L2_2
+W2_2 = tf.Variable(tf.random_normal([2, 2, 32, 64], stddev=0.01))
+L2_2 = tf.nn.conv2d(L1_2, W2_2, strides=[1, 1, 1, 1], padding='SAME')
+L2_2 = tf.nn.elu(L2_2)
+L2_2 = tf.nn.max_pool(L2_2, ksize=[1, 2, 2, 1],
+                    strides=[1, 2, 2, 1], padding='SAME')
+L2_sum = L2+L2_2
+L2_2 = tf.nn.dropout(L2_sum, keep_prob=keep_prob)
+
 # L3
 W3 = tf.Variable(tf.random_normal([3, 3, 64, 128], stddev=0.01))
-L3 = tf.nn.conv2d(L2, W3, strides=[1, 1, 1, 1], padding='SAME')
+L3 = tf.nn.conv2d(L2_2, W3, strides=[1, 1, 1, 1], padding='SAME')
 L3 = tf.nn.elu(L3)
 L3 = tf.nn.max_pool(L3, ksize=[1, 2, 2, 1],
                     strides=[1, 2, 2, 1], padding='SAME')
@@ -106,4 +123,10 @@ batch_size = 100
 98.77%(epoch 5)
 98.94%(epoch 20)
 99.10%(epoch 20)
+3. epoch 늘림(100~200)
+99.1%~99.2%
+4. relu -> elu 로 바꿈.
+Adam -> RMSPropOptimizer
+99.3%대(epoch 100~300)
+
 """

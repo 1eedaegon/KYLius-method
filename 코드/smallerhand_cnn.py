@@ -85,8 +85,8 @@ b = tf.Variable(tf.random_normal([10]))
 logits = tf.matmul(L3_flat, W4) + b
 
 # define cost/loss & optimizer
-cost = tf.log(tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
-    logits=logits, labels=Y_onehot)))
+cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
+    logits=logits, labels=Y_onehot))
 optimizer = tf.train.RMSPropOptimizer(learning_rate=learning_rate).minimize(cost)
 
 # initialize

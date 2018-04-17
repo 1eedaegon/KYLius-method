@@ -11,7 +11,7 @@ import numpy as np
 path="/home/paperspace/Downloads/"
 
 #데이터 가져오기
-train = pd.read_csv(path+"train.csv')
+train = pd.read_csv(path+"train.csv")
 #train = pd.read_csv('/home/itwill03/다운로드/train.csv')
 
 #훈련세트, validation세트 나누기(여기서는 validate만 필요)

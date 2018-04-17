@@ -1,14 +1,14 @@
 # KYLius-method
-새로운 마음으로.
+<p align="center">새로운 마음으로 </p>
 <p align="center"> <img src="승혁/KYLius_logo.png" > </p>
 
 ### 현재의 역할 분담
 ##### (4월 18일 수요일/ 19일 목요일/ 20일 금요일 3일간. 금요일 회의 때 다시 조정)
 (금요일에 할 발표 준비)
-<p>대곤: 알고리즘 설명(cnn, max_pool, dropout, leaky_relu, AdamOptimizer) / 피피티 정리 </p>
-<p>수원: 이미지 디스플레이</p>
-<p>상욱: 손글씨 테스트</p>
-<p>승혁: 손글씨 테스트</p>
+<p>대곤: 알고리즘 설명(cnn, max_pool, dropout, leaky_relu, AdamOptimizer) / 피피티 정리 <br>
+수원: 이미지 디스플레이<br>
+상욱: 손글씨 테스트<br>
+승혁: 손글씨 테스트</p>
 
 ### 폴더 설명
 ##### 우리 KYLius 의 깃허브 repository 는 세 가지 공간으로 나눠서 관리하고 있습니다(아래).

@@ -1,5 +1,5 @@
 # KYLius-method
-<p align="center">새로운 마음으로 </p>
+<p align="center">** 새로운 마음으로 **</p>
 <p align="center"> <img src="승혁/KYLius_logo.png" > </p>
 
 ## 현재의 역할 분담

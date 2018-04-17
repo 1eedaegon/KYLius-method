@@ -87,7 +87,7 @@ logits = tf.matmul(L3_flat, W4) + b
 # define cost/loss & optimizer
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
     logits=logits, labels=Y_onehot))
-optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
+optimizer = tf.train.RMSPropOptimizer(learning_rate=learning_rate).minimize(cost)
 
 # initialize
 sess = tf.Session()

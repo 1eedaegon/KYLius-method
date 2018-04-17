@@ -21,3 +21,4 @@ https://www.kaggle.com/c/digit-recognizer
  
 <img width="853" alt="2018-04-03 11 58 44" src="https://user-images.githubusercontent.com/33567817/38257379-1355b1b0-379b-11e8-9bea-f34a7d30d7f7.png">
 
+화이팅 ㅋ 

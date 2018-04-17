@@ -22,9 +22,9 @@ trainLabel=train_set.values[:,0]
 validateLabel=validate_set.values[:,0]
 
 # hyper parameters
-learning_rate = 0.001
+learning_rate = 0.005
 training_epochs = 5
-#gpu로 돌릴때는 20~30으로
+#gpu로 돌릴때는 100까지 돌림
 batch_size = 100
 steps_for_validate = 5
 keep_prob = tf.placeholder(tf.float32)
@@ -38,7 +38,7 @@ Y_onehot=tf.reshape(tf.one_hot(Y, 10), [-1, 10])
 # L1 ImgIn shape=(?, 28, 28, 1)
 W1 = tf.Variable(tf.random_normal([3, 3, 1, 32], stddev=0.01))
 L1 = tf.nn.conv2d(X_img, W1, strides=[1, 1, 1, 1], padding='SAME')
-L1 = tf.nn.relu(L1)
+L1 = tf.nn.elu(L1)
 L1 = tf.nn.max_pool(L1, ksize=[1, 2, 2, 1],
                     strides=[1, 2, 2, 1], padding='SAME')
 L1 = tf.nn.dropout(L1, keep_prob=keep_prob)
@@ -46,7 +46,7 @@ L1 = tf.nn.dropout(L1, keep_prob=keep_prob)
 # L2 ImgIn shape=(?, 14, 14, 10)
 W2 = tf.Variable(tf.random_normal([3, 3, 32, 64], stddev=0.01))
 L2 = tf.nn.conv2d(L1, W2, strides=[1, 1, 1, 1], padding='SAME')
-L2 = tf.nn.relu(L2)
+L2 = tf.nn.elu(L2)
 L2 = tf.nn.max_pool(L2, ksize=[1, 2, 2, 1],
                     strides=[1, 2, 2, 1], padding='SAME')
 L2 = tf.nn.dropout(L2, keep_prob=keep_prob)
@@ -54,17 +54,18 @@ L2 = tf.nn.dropout(L2, keep_prob=keep_prob)
 # L3
 W3 = tf.Variable(tf.random_normal([3, 3, 64, 128], stddev=0.01))
 L3 = tf.nn.conv2d(L2, W3, strides=[1, 1, 1, 1], padding='SAME')
-L3 = tf.nn.relu(L3)
+L3 = tf.nn.elu(L3)
 L3 = tf.nn.max_pool(L3, ksize=[1, 2, 2, 1],
                     strides=[1, 2, 2, 1], padding='SAME')
 L3 = tf.nn.dropout(L3, keep_prob=keep_prob)
 L3_flat = tf.reshape(L3, [-1, 4 * 4 * 128])
 
 # Final FC 7x7x64 inputs -> 10 outputs
-W4_1 = tf.get_variable("W4_1", shape=[4 * 4 * 128, 10],
+W4 = tf.get_variable("W4", shape=[4 * 4 * 128, 625],
                      initializer=tf.contrib.layers.xavier_initializer())
+
 b = tf.Variable(tf.random_normal([10]))
-logits = tf.matmul(L3_flat, W4_1) + b
+logits = tf.matmul(L3_flat, W4) + b
 
 # define cost/loss & optimizer
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(

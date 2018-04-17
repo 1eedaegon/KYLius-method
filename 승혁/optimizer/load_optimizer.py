@@ -9,8 +9,8 @@ Created on Wed Apr 18 01:33:49 2018
 import tensorflow as tf
 import numpy as np
 import pandas as pd
-path="/home/paperspace/Downloads/"
-
+#path="/home/paperspace/Downloads/"
+path="desktop/git/daegon/KYLius-method/승혁/optimizer/"
 #데이터 가져오기
 train = pd.read_csv(path+"train.csv")
 #train = pd.read_csv('/home/itwill03/다운로드/train.csv')
@@ -34,7 +34,7 @@ print(validateData.shape)
 #train 한 옵티마이저와서 맞추기
 with tf.Session() as sess:
     saver=tf.train.import_meta_graph(path+"opt.ckpt.meta")
-    saver.restore(sess, path+"opt.ckpt")
+    saver.restore(sess, tf.train.latest_checkpoint(path))
     print("Model restored.")
     print(sess.run(tf.argmax(logits,1), feed_dict={
             X: validateData}))  

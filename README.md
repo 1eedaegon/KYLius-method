@@ -1,23 +1,30 @@
 # KYLius-method
-이제 진짜 시작해볼까아~~
+<p align="center"><i>새로운 마음으로</i></p>
+<p align="center"> <img src="승혁/KYLius_logo.png" > </p>
 
-### 2018/ 4/ 2 회의 결론
+## 현재의 역할 분담
+##### (4월 18일 수요일/ 19일 목요일/ 20일 금요일 3일간. 금요일 회의 때 다시 조정)
+(금요일에 할 발표 준비)
+<p>대곤: 알고리즘 설명(cnn, max_pool, dropout, leaky_relu, AdamOptimizer) / 피피티 정리 <br>
+수원: 이미지 디스플레이<br>
+상욱: 손글씨 테스트<br>
+승혁: 손글씨 테스트</p>
+<br>
 
-<p> 우리팀은 숫자인식 먼저. 빨리 되면 심혈관까지. <br> 
-다음 회의 4월 9일 월요일 5시 <br>
-다음회의때까지 김성훈 교수 수업 다 듣고 tensorflow로 cnn코드 짜서 오기. <br>
-캐글 상위권에 있는 풀이 1개 이상 읽고 이해한 뒤 다음 회의 때 돌아가면서 설명해주기. (이거 못하는 사람이 밥 or 음료수 사기) </p>
+## 폴더 설명
+##### 우리 KYLius 의 깃허브 repository 는 세 가지 공간으로 나눠서 관리하고 있습니다(아래).
+1. 각자의 개인 폴더 <br>
+<pre> 각자 개인적인 작업, 또는 팀프로젝트 관련 작업이지만 아직 공유하기엔 정리가 덜 된 것들을 모아놓는 공간입니다. <br> 개인적인 공간이긴 하지만 누가 보더라도 대략 뭘 하고 있는지 알아볼 수 있게끔 적절한 주석은 필수! </pre>
+2. PAPERS - 논문 및 공부할 자료 <br>
+<pre> 우리가 함께 공부하면 좋을 논문이나 자료들을 올리는 공간입니다. </pre>
+3. PROJECT - 치열한 공개의 장 <br>
+<pre> 엄선된 자료, 혹은 모듈식 개발에 끼워넣을 수 있는 완성된 코드만 올리는 공간입니다. </pre>
+<br>
 
-
-### 참고
-
+## 우리가 주로 참고했거나, 참고하고 있는 자료들
 1. 김성훈교수 강의 <br>
 https://www.youtube.com/watch?v=BS6O0zOGX4E&list=PLlMkM4tgfjnLSOjrEJN31gZATbcj_MpUm
 
-<img width="837" alt="2018-04-03 11 58 13" src="https://user-images.githubusercontent.com/33567817/38257355-07cc400c-379b-11e8-9f8d-dc39bde8d498.png">
-
-2. 캐글 데이터셋 <br>
+2. 캐글 MNIST 데이터셋 <br>
 https://www.kaggle.com/c/digit-recognizer
- 
-<img width="853" alt="2018-04-03 11 58 44" src="https://user-images.githubusercontent.com/33567817/38257379-1355b1b0-379b-11e8-9bea-f34a7d30d7f7.png">
 

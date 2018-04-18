@@ -3,9 +3,9 @@ import numpy as np
 tf.reset_default_graph()     #그래프 초기화
 tf.set_random_seed(777) 
 import pandas as pd
-path="/home/paperspace/Downloads/"
+#path="/home/paperspace/Downloads/"
 #train = pd.read_csv('c:/python/train.csv')
-train = pd.read_csv(path+"train.csv')
+train = pd.read_csv("/home/paperspace/Downloads/train.csv")
 #train = pd.read_csv('/home/itwill03/다운로드/train.csv')
 
 #훈련세트, validation세트 나누기
@@ -100,5 +100,5 @@ for epoch in range(training_epochs):
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
         print('Accuracy:', sess.run(accuracy, feed_dict={
                 X: validateData, Y: validateLabel.reshape(-1, 1), p_keep_conv: 1, p_keep_hidden: 1}))
-        save_path = saver.save(sess, path+'opt.ckpt')
+        save_path = saver.save(sess, "/home/paperspace/Downloads/opt.ckpt")
 print('Finished!')

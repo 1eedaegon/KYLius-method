@@ -5,9 +5,12 @@ tf.set_random_seed(777)
 import pandas as pd
 #path="/home/paperspace/Downloads/"
 #train = pd.read_csv('c:/python/train.csv')
-train = pd.read_csv("/home/paperspace/Downloads/train.csv")
+#train = pd.read_csv("/home/paperspace/Downloads/train.csv")
 #train = pd.read_csv('/home/itwill03/다운로드/train.csv')
+train = pd.read_csv("/Users/kimseunghyuck/desktop/git/daegon/KYLius-method/승혁/train.csv")
 
+import sys
+sys.path
 #훈련세트, validation세트 나누기
 from sklearn.model_selection import train_test_split
 train_set, validate_set = train_test_split(train, test_size = 0.3)
@@ -16,18 +19,23 @@ validateData = validate_set.values[:,1:]
 trainLabel=train_set.values[:,0]
 validateLabel=validate_set.values[:,0]
 
-X = tf.placeholder(tf.float32, [None, 784])
+X = tf.placeholder(tf.float32, [None, 784], name="X")
 X_img = tf.reshape(X, [-1, 28, 28, 1])          # img 28x28x1 (black/white)
-Y = tf.placeholder(tf.int32, [None, 1])
+Y = tf.placeholder(tf.int32, [None, 1], name="Y")
 Y_onehot=tf.reshape(tf.one_hot(Y, 10), [-1, 10])
-p_keep_conv = tf.placeholder(tf.float32)
-p_keep_hidden = tf.placeholder(tf.float32)
+p_keep_conv = tf.placeholder(tf.float32, name="p_keep_conv")
+p_keep_hidden = tf.placeholder(tf.float32, name="p_keep_hidden")
 
 # hyper parameters
-learning_rate = 0.00008
-training_epochs = 300
+#learning_rate = 0.00008
+#training_epochs = 300
+#batch_size = 100
+#steps_for_validate = 5
+
+learning_rate = 0.001
+training_epochs = 2
 batch_size = 100
-steps_for_validate = 5
+steps_for_validate = 2
 keep_prob = tf.placeholder(tf.float32)
 
 # L1 ImgIn shape=(?, 28, 28, 1)
@@ -77,7 +85,7 @@ logits = tf.matmul(L4, W_o) + b
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits,labels= Y_onehot))
 #optimizer = tf.train.RMSPropOptimizer(0.001, 0.9).minimize(cost)
 optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost) # 아담버젼
-predict_op = tf.argmax(logits, 1)
+predict_op = tf.argmax(logits, 1, name="pred")
 
 # initialize
 sess = tf.Session()
@@ -100,5 +108,5 @@ for epoch in range(training_epochs):
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
         print('Accuracy:', sess.run(accuracy, feed_dict={
                 X: validateData, Y: validateLabel.reshape(-1, 1), p_keep_conv: 1, p_keep_hidden: 1}))
-        save_path = saver.save(sess, "/home/paperspace/Downloads/opt.ckpt")
+        save_path = saver.save(sess, "/Users/kimseunghyuck/desktop/git/daegon/KYLius-method/승혁/opt2/opt2")
 print('Finished!')

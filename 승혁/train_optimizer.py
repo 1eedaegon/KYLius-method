@@ -82,7 +82,7 @@ predict_op = tf.argmax(logits, 1)
 # initialize
 sess = tf.Session()
 sess.run(tf.global_variables_initializer())
-
+saver = tf.train.Saver()
 # train my model
 print('Learning started. It takes sometime.')
 for epoch in range(training_epochs):
@@ -100,6 +100,5 @@ for epoch in range(training_epochs):
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
         print('Accuracy:', sess.run(accuracy, feed_dict={
                 X: validateData, Y: validateLabel.reshape(-1, 1), p_keep_conv: 1, p_keep_hidden: 1}))
-        saver = tf.train.Saver()
         save_path = saver.save(sess, path+'opt.ckpt')
 print('Finished!')

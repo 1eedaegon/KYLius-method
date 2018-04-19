@@ -4,6 +4,8 @@ tf.reset_default_graph()     #그래프 초기화
 tf.set_random_seed(777) 
 import pandas as pd
 import matplotlib.pyplot as plt
+from PIL import Image
+import sys
 %matplotlib inline
 
 #train = pd.read_csv('c:/python/train.csv')
@@ -98,7 +100,7 @@ print('reload has been done')
 result_show = []
 fig = plt.figure(figsize=(15,5))
 for i in range(0, 9):
-    im=Image.open("/home/itwill03/다운로드/Number_data/number_{}.jpeg".format(i+1))
+    im=Image.open("/home/itwill03/다운로드/numbers_image/number{}.jpeg".format(i+1))
     img = np.array(im.resize((28, 28), Image.ANTIALIAS).convert("L"))
     data = img.reshape([1, 784])
     data = 1-(data/255)
@@ -112,7 +114,7 @@ print(result_show)
 
 # one image test 
 
-im=Image.open("/home/itwill03/다운로드/Number_data/number_5.jpeg")
+im=Image.open("/home/itwill03/다운로드/numbers_image/number5.jpeg")
 img = np.array(im.resize((28, 28), Image.ANTIALIAS).convert("L"))
 data = img.reshape([1, 784])
 data = 1-(data/255)

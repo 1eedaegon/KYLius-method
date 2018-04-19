@@ -26,7 +26,7 @@ validateLabel1 = validate_set.values[:,0]
 saver = tf.train.import_meta_graph("/home/itwill03/다운로드/opt2.meta")
 #saver = tf.train.import_meta_graph("/home/itwill03/다운로드/cnn_session.meta")
 sess = tf.InteractiveSession()
-saver.restore(sess, tf.train.get_checkpoint_state("/home/itwill03/다운로드/opt2/").model_checkpoint_path)
+saver.restore(sess, tf.train.get_checkpoint_state("/home/itwill03/다운로드/").model_checkpoint_path)
 print("Parameters Restored")
 
 graph=tf.get_default_graph()

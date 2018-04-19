@@ -50,7 +50,7 @@ for i in range(0, 9):
     ax = fig.add_subplot(1,10,i+1)
     ax.imshow(img.reshape(28, 28), cmap='gray', interpolation='nearest', aspect='auto')
 
-    result = sess.run(logits, feed_dict={X:data, training:False})
+    result = sess.run(pred, feed_dict={X:data, training:False})
     result_show.append(sess.run(tf.argmax(result, 1)))
 print("MNIST predicted Number")
 print(result_show)  
@@ -62,9 +62,8 @@ img = np.array(im.resize((28, 28), Image.ANTIALIAS).convert("L"))
 data = img.reshape([1, 784])
 data = 1-(data/255)
 plt.imshow(img.reshape(28, 28), cmap='gray', interpolation='nearest')
-result = sess.run(logits, feed_dict={X:data, training:False})
+result = sess.run(pred, feed_dict={X:data, training:False})
 print("MNIST predicted Number : ", sess.run(tf.argmax(result, 1)))
 
 sess.close()
 
-sess.close()

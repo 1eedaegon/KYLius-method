@@ -34,6 +34,7 @@ class img_pred:
         data = img.reshape([1, 784])
         data = 255 - data
         plt.imshow(img.reshape(28, 28), cmap='gray', interpolation='nearest')
+        plt.show()
         print("MNIST predicted Number : ",self.sess.run(self.pred, feed_dict={self.X: data, self.p_keep_conv: 1.0, self.p_keep_hidden: 1.0}))
         
     

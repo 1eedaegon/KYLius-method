@@ -5,7 +5,7 @@ Created on Wed Apr 18 01:33:49 2018
 
 @author: kimseunghyuck
 """
-def load_optimizer(opt_addr):
+def load_optimizer(opt_addr, opt_addr2, data):
     import tensorflow as tf
     import pandas as pd
     """
@@ -26,7 +26,8 @@ def load_optimizer(opt_addr):
     # initialize/ load
     saver=tf.train.import_meta_graph(opt_addr+".meta")
     sess = tf.InteractiveSession()
-    saver.restore(sess, tf.train.get_checkpoint_state(opt_addr).model_checkpoint_path)
+    print("Meta_Graph Imported")
+    saver.restore(sess, tf.train.get_checkpoint_state(opt_addr2).model_checkpoint_path)
     print("Parameters Restored")
     
     graph=tf.get_default_graph()
@@ -35,9 +36,7 @@ def load_optimizer(opt_addr):
     p_keep_conv=graph.get_tensor_by_name('p_keep_conv:0')
     p_keep_hidden=graph.get_tensor_by_name('p_keep_hidden:0')
     print("Variables Saved")
-
-def test(data):
     # test the data
-    print(sess.run(pred, feed_dict={X: x, 
+    print(sess.run(pred, feed_dict={X: data, 
                     p_keep_conv: 1.0, p_keep_hidden: 1.0}))
     sess.close()

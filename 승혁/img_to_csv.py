@@ -17,5 +17,6 @@ def img_to_csv(imgaddr):
     im2=im2.resize(size)
     #csv로 변환
     imgarray=numpy.array(im2)
+    imgarray=255-imgarray.reshape(1, 784)
     return imgarray
     

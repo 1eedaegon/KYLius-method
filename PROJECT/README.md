@@ -11,7 +11,7 @@
 
 ### 2. img_pred.py 로 저장된 모델을 읽어들인다.
 <p>
-from img_pred import img_pred
+from img_pred import img_pred <br>
 A=img_pred("opt3/opt3", "opt3")
 </p>
 
@@ -24,3 +24,5 @@ A.number("numbers_set2/number_a.jpeg")
 <p>
 A.file_rename()
 </p>
+
+### ++ image_print.py 로 csv 파일을 이미지로 출력해볼 수 있습니다.

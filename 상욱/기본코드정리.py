@@ -32,23 +32,23 @@ steps_for_validate = 5 # 스텝 입력값
 
 # L1 ImgIn shape=(?, 28, 28, 1)
 W1 = tf.Variable(tf.random_normal([3, 3, 1, 32], stddev=0.01)) # 3*3 크기의 1(흑백)의 필터를 32개 만듬
-L1 = tf.nn.conv2d(X_img, W1, strides=[1, 1, 1, 1], padding='SAME') # 필터를 1,1 크기로 움직임
+L1 = tf.nn.conv2d(X_img, W1, strides=[1, 1, 1, 1], padding='SAME') # 필터를 1,1 크기로 움직임 이미지 크기를 유지하기 위해서 padding='SAME'
 L1 = tf.nn.relu(L1) # 활성화 함수로 값 출력
-L1 = tf.nn.max_pool(L1, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='SAME') # maxpool 을 이용한 샘플링 l1 shape=(?, 14, 14, 32)
+L1 = tf.nn.max_pool(L1, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='SAME') # maxpool 을 이용한 샘플링, padding='SAME'을 유지하지만 strides가 2,2 때문에 l1 shape=(?, 14, 14, 32)
 
 
 # L2 ImgIn shape=(?, 14, 14, 10)
 W2 = tf.Variable(tf.random_normal([3, 3, 32, 64], stddev=0.01)) # 3*3 크기의 32개의 필터를 받아 64개로 만듬
-L2 = tf.nn.conv2d(L1, W2, strides=[1, 1, 1, 1], padding='SAME') # 필터를 1,1 크기로 움직임
+L2 = tf.nn.conv2d(L1, W2, strides=[1, 1, 1, 1], padding='SAME') # 필터를 1,1 크기로 움직임 이미지 크기를 유지하기 위해서 padding='SAME'
 L2 = tf.nn.relu(L2) # 활성화 함수로 값 출력
-L2 = tf.nn.max_pool(L2, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='SAME') # maxpool 을 이용한 샘플링 l2 shape=(?, 7, 7, 64)
+L2 = tf.nn.max_pool(L2, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='SAME') # maxpool 을 이용한 샘플링, padding='SAME'을 유지하지만 strides가 2,2 때문에 l2 shape=(?, 7, 7, 64)
 
 
 # L3 ImgIn shape=(?, 7, 7, 128)
 W3 = tf.Variable(tf.random_normal([3, 3, 64, 128], stddev=0.01)) # 3*3 크기의 64개의 필터를 받아 128개로 만듬
-L3 = tf.nn.conv2d(L2, W3, strides=[1, 1, 1, 1], padding='SAME') # 필터를 1,1 크기로 움직임
+L3 = tf.nn.conv2d(L2, W3, strides=[1, 1, 1, 1], padding='SAME') # 필터를 1,1 크기로 움직임 이미지 크기를 유지하기 위해서 padding='SAME'
 L3 = tf.nn.relu(L3) # 활성화 함수로 값 출력
-L3 = tf.nn.max_pool(L3, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='SAME') # maxpool 을 이용한 샘플링 l3 shape=(?, 4, 4, 128)
+L3 = tf.nn.max_pool(L3, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='SAME') # maxpool 을 이용한 샘플링, padding='SAME'을 유지하지만 strides가 2,2 때문에 l3 shape=(?, 4, 4, 128)
 L3_flat = tf.reshape(L3, shape=[-1, 128 * 4 * 4])  # FC로 가기위해 값을 펴줌 reshape to (?, 2048)
 
 

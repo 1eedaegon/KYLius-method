@@ -15,8 +15,13 @@ validateData = validate_set.values[:,1:]
 trainLabel=train_set.values[:,0]
 validateLabel=validate_set.values[:,0]
 
+<<<<<<< HEAD
 learning_rate = 0.00008
 training_epochs = 400
+=======
+learning_rate = 0.00007
+training_epochs = 500
+>>>>>>> 3ae9a78d1a3ae1be9bd6f69abb533c9860db54f5
 batch_size = 100
 steps_for_validate = 10
 
@@ -146,6 +151,7 @@ test_size = len(validateLabel)
 predictions = np.zeros([test_size, 10])
 best_models = []
 
+<<<<<<< HEAD
 def one_hot(x):
     lst=[]
     for i in x:
@@ -158,11 +164,19 @@ np.array(one_hot(validateLabel))
 
 for m_idx, m in enumerate(models):
     best_models.append(m.get_accuracy(validateData, validateLabel.reshape(-1, 1)))
+=======
+for m_idx, m in enumerate(models):
+    best_models.append(m.get_accuracy(validateData, validateLabel))
+>>>>>>> 3ae9a78d1a3ae1be9bd6f69abb533c9860db54f5
     print(m_idx, 'Accuracy: ', best_models[m_idx] )
     p = m.predict(validateData)
     predictions += p
     
+<<<<<<< HEAD
 ensemble_correct_prediction = tf.equal(tf.argmax(predictions, 1), tf.argmax(np.array(one_hot(validateLabel)), 1))
+=======
+ensemble_correct_prediction = tf.equal(tf.argmax(predictions, 1), tf.argmax(validateLabel, 1))
+>>>>>>> 3ae9a78d1a3ae1be9bd6f69abb533c9860db54f5
 ensemble_accuracy = tf.reduce_mean(tf.cast(ensemble_correct_prediction, tf.float32))
 print('Ensemble accuracy:', sess.run(ensemble_accuracy))
 

@@ -21,7 +21,7 @@
 ## 지난 주제: 
 1. MNIST DIGITS RECOGNIZER
 <pre>
-2018. 4/6~4/20
+2018. 4/9~4/20
 캐글 MNIST 데이터셋을 가지고 99.5% 정확도로 숫자 이미지를 분류하는 모델, 프로그램을 만듬(Tensorflow, CNN 활용). <br>
 데이터셋: https://www.kaggle.com/c/digit-recognizer
 </pre>

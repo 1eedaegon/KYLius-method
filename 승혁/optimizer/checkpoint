@@ -1,2 +1,0 @@
-model_checkpoint_path: "/home/paperspace/Downloads/opt.ckpt"
-all_model_checkpoint_paths: "/home/paperspace/Downloads/opt.ckpt"

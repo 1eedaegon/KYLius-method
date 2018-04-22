@@ -1,14 +1,11 @@
-# KYLius-method
-<p align="center"><i>새로운 마음으로</i></p>
-<p align="center"> <img src="승혁/KYLius_logo.png" > </p>
+﻿# KYLius-method
+<p align="center"><i>2번째 도전</i></p>
+<p align="center"> <img src="PROJECT/logo/KYLius_logo4.png" > </p>
 
-## 현재의 역할 분담
-##### (4월 18일 수요일/ 19일 목요일/ 20일 금요일 3일간. 금요일 회의 때 다시 조정)
-(금요일에 할 발표 준비)
-<p>대곤: 알고리즘 설명(cnn, max_pool, dropout, leaky_relu, AdamOptimizer) / 피피티 정리 <br>
-수원: 이미지 디스플레이<br>
-상욱: 손글씨 테스트<br>
-승혁: 손글씨 테스트</p>
+## Second Challenge
+<p>
+기간: 4월 23일 (월요일) ~ 5월 3일 (목요일) 약 2주간
+</p>
 <br>
 
 ## 폴더 설명
@@ -21,10 +18,9 @@
 <pre> 엄선된 자료, 혹은 모듈식 개발에 끼워넣을 수 있는 완성된 코드만 올리는 공간입니다. </pre>
 <br>
 
-## 우리가 주로 참고했거나, 참고하고 있는 자료들
-1. 김성훈교수 강의 <br>
-https://www.youtube.com/watch?v=BS6O0zOGX4E&list=PLlMkM4tgfjnLSOjrEJN31gZATbcj_MpUm
-
-2. 캐글 MNIST 데이터셋 <br>
-https://www.kaggle.com/c/digit-recognizer
+## 지난 주제: 
+1. MNIST DIGITS RECOGNIZER
+2018. 4/6~4/20
+캐글 MNIST 데이터셋을 가지고 99.5% 정확도로 숫자 이미지를 분류하는 모델, 프로그램을 만듬(Tensorflow, CNN 활용). <br>
+데이터셋: https://www.kaggle.com/c/digit-recognizer
 

@@ -1,6 +1,6 @@
 ﻿# KYLius-method
 <p align="center"><i>2번째 도전</i></p>
-<p align="center"> <img src="PROJECT#1/logo/KYLius_logo4.png" > </p>
+<p align="center"> <img src="PROJECT1/logo/KYLius_logo4.png" > </p>
 
 ## Second Challenge
 <p>

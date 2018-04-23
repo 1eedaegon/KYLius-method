@@ -9,7 +9,7 @@
 ## 2차 프로젝트 진행
 
 1. 아이디어 회의후 프로젝트 주제 선정
- * 주변음성인식 프로젝트로 결정
+  * 주변음성인식 프로젝트로 결정
 <pre>
 <strong>Freesound General-Purpose Audio Tagging Challenge</strong>
 <br>

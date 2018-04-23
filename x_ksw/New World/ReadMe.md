@@ -10,7 +10,7 @@
 <br>
 Can you automatically recognize sounds from a wide range of real-world environments?
 <br>
-https://www.kaggle.com/c/freesound-audio-tagging
+<a href="https://www.kaggle.com/c/freesound-audio-tagging">https://www.kaggle.com/c/freesound-audio-tagging</a>
 <br>
 기간: 4월 23일 (월요일) ~ 5월 3일 (목요일) 약 2주간
 </p>

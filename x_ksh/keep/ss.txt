@@ -1,0 +1,498 @@
+Epoch: 0066 cost = 0.039275296
+Epoch: 0067 cost = 0.038212898
+Epoch: 0068 cost = 0.034714621
+Epoch: 0069 cost = 0.041017222
+Epoch: 0070 cost = 0.040948840
+Accuracy: 0.989841
+Epoch: 0071 cost = 0.040242334
+Epoch: 0072 cost = 0.040378358
+Epoch: 0073 cost = 0.039575161
+Epoch: 0074 cost = 0.031137099
+Epoch: 0075 cost = 0.035413858
+Accuracy: 0.99
+Epoch: 0076 cost = 0.038442876
+Epoch: 0077 cost = 0.035539018
+Epoch: 0078 cost = 0.038992726
+Epoch: 0079 cost = 0.042712771
+Epoch: 0080 cost = 0.038082473
+Accuracy: 0.989683
+Finished!
+
+import tensorflow as tf
+import numpy as np
+tf.reset_default_graph()     #그래프 초기화
+tf.set_random_seed(777) 
+import pandas as pd
+
+train = pd.read_csv('/home/itwill03/다운로드/train.csv')
+#훈련세트, validation세트 나누기
+from sklearn.model_selection import train_test_split
+train_set, validate_set = train_test_split(train, test_size = 0.3)
+trainData = train_set.values[:,1:]
+validateData = validate_set.values[:,1:]
+trainLabel=train_set.values[:,0]
+validateLabel=validate_set.values[:,0]
+
+X = tf.placeholder(tf.float32, [None, 784])
+X_img = tf.reshape(X, [-1, 28, 28, 1])          # img 28x28x1 (black/white)
+Y = tf.placeholder(tf.int32, [None, 1])
+Y_onehot=tf.reshape(tf.one_hot(Y, 10), [-1, 10])
+p_keep_conv = tf.placeholder(tf.float32)
+p_keep_hidden = tf.placeholder(tf.float32)
+
+# hyper parameters
+learning_rate = 0.001
+training_epochs = 80
+batch_size = 100
+steps_for_validate = 5
+keep_prob = tf.placeholder(tf.float32)
+
+# L1 ImgIn shape=(?, 28, 28, 1)
+W1 = tf.Variable(tf.random_normal([3, 3, 1, 32], stddev=0.01))
+L1 = tf.nn.conv2d(X_img, W1, strides=[1, 1, 1, 1], padding='SAME')
+L1 = tf.nn.relu(L1)
+L1 = tf.nn.max_pool(L1, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='SAME') # l1 shape=(?, 14, 14, 32)
+L1 = tf.nn.dropout(L1, p_keep_conv)
+
+# L2 ImgIn shape=(?, 14, 14, 10)
+W2 = tf.Variable(tf.random_normal([3, 3, 32, 64], stddev=0.01))
+L2 = tf.nn.conv2d(L1, W2, strides=[1, 1, 1, 1], padding='SAME')
+L2 = tf.nn.relu(L2)
+L2 = tf.nn.max_pool(L2, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='SAME') # l2 shape=(?, 7, 7, 64)
+L2 = tf.nn.dropout(L2, p_keep_conv)
+
+# L3 ImgIn shape=(?, 7, 7, 128)
+W3 = tf.Variable(tf.random_normal([3, 3, 64, 128], stddev=0.01))
+L3 = tf.nn.conv2d(L2, W3, strides=[1, 1, 1, 1], padding='SAME')
+L3 = tf.nn.relu(L3)
+L3 = tf.nn.max_pool(L3, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='SAME') # l3 shape=(?, 4, 4, 128)
+L3 = tf.nn.dropout(L3, p_keep_conv)
+L3_flat = tf.reshape(L3, shape=[-1, 128 * 4 * 4])    # reshape to (?, 2048)
+
+
+# Final FC 4x4x128 inputs -> 10 outputs
+W4 = tf.get_variable("W4", shape=[128 * 4 * 4, 10],initializer=tf.contrib.layers.xavier_initializer())
+b = tf.Variable(tf.random_normal([10]))
+logits = tf.matmul(L3_flat, W4)
+
+# define cost/loss & optimizer
+cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits,labels= Y_onehot))
+#optimizer = tf.train.RMSPropOptimizer(0.001, 0.9).minimize(cost)
+optimizer = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost) # 아담버젼
+predict_op = tf.argmax(logits, 1)
+
+# initialize
+sess = tf.Session()
+sess.run(tf.global_variables_initializer())
+
+# train my model
+print('Learning started. It takes sometime.')
+for epoch in range(training_epochs):
+    avg_cost = 0
+    total_batch = int(len(trainData) / batch_size)
+    for i in range(total_batch):
+        batch_xs = trainData[i*batch_size:(i+1)*batch_size]
+        batch_ys = trainLabel[i*batch_size:(i+1)*batch_size].reshape(-1, 1)
+        feed_dict = {X: batch_xs, Y: batch_ys, p_keep_conv: .5}
+        c, _ = sess.run([cost, optimizer], feed_dict=feed_dict)
+        avg_cost += c / total_batch
+    print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost))
+    if epoch % steps_for_validate == steps_for_validate-1:
+        correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(Y_onehot, 1))
+        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+        print('Accuracy:', sess.run(accuracy, feed_dict={
+                X: validateData, Y: validateLabel.reshape(-1, 1), p_keep_conv: 1}))       
+
+print('Finished!')
+
+Learning started. It takes sometime.
+Epoch: 0001 cost = 0.404643655
+Epoch: 0002 cost = 0.151666426
+Epoch: 0003 cost = 0.125846092
+Epoch: 0004 cost = 0.111672556
+Epoch: 0005 cost = 0.109356311
+Accuracy: 0.985159
+Epoch: 0006 cost = 0.102218424
+Epoch: 0007 cost = 0.106811498
+Epoch: 0008 cost = 0.101993004
+Epoch: 0009 cost = 0.097615858
+Epoch: 0010 cost = 0.095226141
+Accuracy: 0.986429
+Epoch: 0011 cost = 0.093024066
+Epoch: 0012 cost = 0.099344636
+Epoch: 0013 cost = 0.103023418
+Epoch: 0014 cost = 0.091645916
+Epoch: 0015 cost = 0.095350117
+Accuracy: 0.98754
+Epoch: 0016 cost = 0.098236610
+Epoch: 0017 cost = 0.095441590
+Epoch: 0018 cost = 0.089730919
+Epoch: 0019 cost = 0.093844160
+Epoch: 0020 cost = 0.093497395
+Accuracy: 0.987857
+Traceback (most recent call last):
+
+  File "<ipython-input-6-e0f3d79a5232>", line 77, in <module>
+    c, _ = sess.run([cost, optimizer], feed_dict=feed_dict)
+
+  File "/home/itwill03/anaconda3/lib/python3.6/site-packages/tensorflow/python/client/session.py", line 889, in run
+    run_metadata_ptr)
+
+  File "/home/itwill03/anaconda3/lib/python3.6/site-packages/tensorflow/python/client/session.py", line 1120, in _run
+    feed_dict_tensor, options, run_metadata)
+
+  File "/home/itwill03/anaconda3/lib/python3.6/site-packages/tensorflow/python/client/session.py", line 1317, in _do_run
+    options, run_metadata)
+
+  File "/home/itwill03/anaconda3/lib/python3.6/site-packages/tensorflow/python/client/session.py", line 1323, in _do_call
+    return fn(*args)
+
+  File "/home/itwill03/anaconda3/lib/python3.6/site-packages/tensorflow/python/client/session.py", line 1302, in _run_fn
+    status, run_metadata)
+
+KeyboardInterrupt
+
+
+
+
+import tensorflow as tf
+import numpy as np
+tf.reset_default_graph()     #그래프 초기화
+tf.set_random_seed(777) 
+import pandas as pd
+
+#train = pd.read_csv('c:/python/train.csv')
+train = pd.read_csv('/home/itwill03/다운로드/train.csv')
+#훈련세트, validation세트 나누기
+from sklearn.model_selection import train_test_split
+train_set, validate_set = train_test_split(train, test_size = 0.3)
+trainData = train_set.values[:,1:]
+validateData = validate_set.values[:,1:]
+trainLabel=train_set.values[:,0]
+validateLabel=validate_set.values[:,0]
+
+X = tf.placeholder(tf.float32, [None, 784])
+X_img = tf.reshape(X, [-1, 28, 28, 1])          # img 28x28x1 (black/white)
+Y = tf.placeholder(tf.int32, [None, 1])
+Y_onehot=tf.reshape(tf.one_hot(Y, 10), [-1, 10])
+p_keep_conv = tf.placeholder(tf.float32)
+p_keep_hidden = tf.placeholder(tf.float32)
+
+# hyper parameters
+learning_rate = 0.0005
+training_epochs = 100
+batch_size = 100
+steps_for_validate = 5
+keep_prob = tf.placeholder(tf.float32)
+
+# L1 ImgIn shape=(?, 28, 28, 1)
+W1 = tf.Variable(tf.random_normal([3, 3, 1, 32], stddev=0.01))
+L1 = tf.nn.conv2d(X_img, W1, strides=[1, 1, 1, 1], padding='SAME')
+L1 = tf.nn.relu(L1)
+L1 = tf.nn.max_pool(L1, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='SAME') # l1 shape=(?, 14, 14, 32)
+L1 = tf.nn.dropout(L1, p_keep_conv)
+
+# L2 ImgIn shape=(?, 14, 14, 10)
+W2 = tf.Variable(tf.random_normal([3, 3, 32, 64], stddev=0.01))
+L2 = tf.nn.conv2d(L1, W2, strides=[1, 1, 1, 1], padding='SAME')
+L2 = tf.nn.relu(L2)
+L2 = tf.nn.max_pool(L2, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='SAME') # l2 shape=(?, 7, 7, 64)
+L2 = tf.nn.dropout(L2, p_keep_conv)
+
+# L3 ImgIn shape=(?, 7, 7, 128)
+W3 = tf.Variable(tf.random_normal([3, 3, 64, 128], stddev=0.01))
+L3 = tf.nn.conv2d(L2, W3, strides=[1, 1, 1, 1], padding='SAME')
+L3 = tf.nn.relu(L3)
+L3 = tf.nn.max_pool(L3, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='SAME') # l3 shape=(?, 4, 4, 128)
+L3 = tf.nn.dropout(L3, p_keep_conv)
+L3_flat = tf.reshape(L3, shape=[-1, 128 * 4 * 4])    # reshape to (?, 2048)
+
+
+# Final FC 4x4x128 inputs -> 10 outputs
+W4 = tf.Variable(tf.random_normal([128 * 4 * 4, 625], stddev=0.01))
+L4 = tf.nn.relu(tf.matmul(L3_flat, W4))
+L4 = tf.nn.dropout(L4, p_keep_hidden)
+W_o = tf.get_variable("W_o", shape=[625,10],initializer=tf.contrib.layers.xavier_initializer())
+logits = tf.matmul(L4, W_o) 
+
+# define cost/loss & optimizer
+cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits,labels= Y_onehot))
+#optimizer = tf.train.RMSPropOptimizer(0.001, 0.9).minimize(cost)
+optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost) # 아담버젼
+predict_op = tf.argmax(logits, 1)
+
+# initialize
+sess = tf.Session()
+sess.run(tf.global_variables_initializer())
+
+# train my model
+print('Learning started. It takes sometime.')
+for epoch in range(training_epochs):
+    avg_cost = 0
+    total_batch = int(len(trainData) / batch_size)
+    for i in range(total_batch):
+        batch_xs = trainData[i*batch_size:(i+1)*batch_size]
+        batch_ys = trainLabel[i*batch_size:(i+1)*batch_size].reshape(-1, 1)
+        feed_dict = {X: batch_xs, Y: batch_ys, p_keep_conv: .8, p_keep_hidden: .5}
+        c, _ = sess.run([cost, optimizer], feed_dict=feed_dict)
+        avg_cost += c / total_batch
+    print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost))
+    if epoch % steps_for_validate == steps_for_validate-1:
+        correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(Y_onehot, 1))
+        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+        print('Accuracy:', sess.run(accuracy, feed_dict={
+                X: validateData, Y: validateLabel.reshape(-1, 1), p_keep_conv: 1, p_keep_hidden: 1}))       
+
+print('Finished!')
+
+Learning started. It takes sometime.
+Epoch: 0001 cost = 0.302578128
+Epoch: 0002 cost = 0.084286718
+Epoch: 0003 cost = 0.062571621
+Epoch: 0004 cost = 0.053833506
+Epoch: 0005 cost = 0.046857980
+Accuracy: 0.986429
+Epoch: 0006 cost = 0.038840128
+Epoch: 0007 cost = 0.036170072
+Epoch: 0008 cost = 0.029034180
+Epoch: 0009 cost = 0.030667011
+Epoch: 0010 cost = 0.026373983
+Accuracy: 0.989286
+Epoch: 0011 cost = 0.024982770
+Epoch: 0012 cost = 0.023479067
+Epoch: 0013 cost = 0.023461337
+Epoch: 0014 cost = 0.021067520
+Epoch: 0015 cost = 0.021247944
+Accuracy: 0.989127
+Epoch: 0016 cost = 0.019966738
+Epoch: 0017 cost = 0.020534620
+Epoch: 0018 cost = 0.016498968
+Epoch: 0019 cost = 0.019276682
+Epoch: 0020 cost = 0.017062753
+Accuracy: 0.990635
+Epoch: 0021 cost = 0.019495336
+Epoch: 0022 cost = 0.018662986
+Epoch: 0023 cost = 0.014406783
+Epoch: 0024 cost = 0.018129403
+Epoch: 0025 cost = 0.020086471
+Accuracy: 0.989206
+Epoch: 0026 cost = 0.014981579
+Epoch: 0027 cost = 0.016321892
+Epoch: 0028 cost = 0.013995023
+Epoch: 0029 cost = 0.011422007
+Epoch: 0030 cost = 0.013780578
+Accuracy: 0.990317
+Epoch: 0031 cost = 0.013360583
+Epoch: 0032 cost = 0.014409891
+Epoch: 0033 cost = 0.015064694
+Epoch: 0034 cost = 0.015199312
+Epoch: 0035 cost = 0.011062210
+Accuracy: 0.991746
+Epoch: 0036 cost = 0.013273971
+Epoch: 0037 cost = 0.016677661
+Epoch: 0038 cost = 0.012537487
+Epoch: 0039 cost = 0.015688419
+Epoch: 0040 cost = 0.013286199
+Accuracy: 0.990476
+Epoch: 0041 cost = 0.013135937
+Epoch: 0042 cost = 0.012971088
+Epoch: 0043 cost = 0.012483462
+Epoch: 0044 cost = 0.012821130
+Epoch: 0045 cost = 0.012527691
+Accuracy: 0.99119
+Epoch: 0046 cost = 0.013720527
+Epoch: 0047 cost = 0.012621697
+Epoch: 0048 cost = 0.013105294
+Epoch: 0049 cost = 0.014742211
+Epoch: 0050 cost = 0.012604524
+Accuracy: 0.991508
+Epoch: 0051 cost = 0.011820132
+Epoch: 0052 cost = 0.011810592
+Epoch: 0053 cost = 0.010543994
+Epoch: 0054 cost = 0.013222424
+Epoch: 0055 cost = 0.009876006
+Accuracy: 0.991746
+Epoch: 0056 cost = 0.008896917
+Epoch: 0057 cost = 0.014914372
+Epoch: 0058 cost = 0.013621883
+Epoch: 0059 cost = 0.013997547
+Epoch: 0060 cost = 0.011440976
+Accuracy: 0.991667
+Epoch: 0061 cost = 0.011873243
+Epoch: 0062 cost = 0.014939633
+Epoch: 0063 cost = 0.009914114
+Epoch: 0064 cost = 0.010646568
+Epoch: 0065 cost = 0.013158468
+Accuracy: 0.991905
+Epoch: 0066 cost = 0.009261577
+Epoch: 0067 cost = 0.014558114
+Epoch: 0068 cost = 0.010362811
+Epoch: 0069 cost = 0.009609889
+Epoch: 0070 cost = 0.012917161
+Accuracy: 0.990556
+Epoch: 0071 cost = 0.011346252
+Epoch: 0072 cost = 0.012943467
+Epoch: 0073 cost = 0.011532136
+Epoch: 0074 cost = 0.008426562
+Epoch: 0075 cost = 0.014098669
+Accuracy: 0.991905
+Epoch: 0076 cost = 0.009919876
+Epoch: 0077 cost = 0.009822772
+Epoch: 0078 cost = 0.015176271
+Epoch: 0079 cost = 0.010573874
+Epoch: 0080 cost = 0.014106117
+Accuracy: 0.990873
+Epoch: 0081 cost = 0.013014392
+Epoch: 0082 cost = 0.008344705
+Epoch: 0083 cost = 0.014584929
+Epoch: 0084 cost = 0.007830479
+Epoch: 0085 cost = 0.013987841
+Accuracy: 0.990476
+Epoch: 0086 cost = 0.012662921
+Epoch: 0087 cost = 0.009536005
+Epoch: 0088 cost = 0.012299541
+Epoch: 0089 cost = 0.012578435
+Epoch: 0090 cost = 0.013678876
+Accuracy: 0.991349
+Epoch: 0091 cost = 0.010634743
+Epoch: 0092 cost = 0.009233389
+Epoch: 0093 cost = 0.010058517
+Epoch: 0094 cost = 0.013097112
+Epoch: 0095 cost = 0.009606411
+Accuracy: 0.990952
+Epoch: 0096 cost = 0.012156968
+Epoch: 0097 cost = 0.008969207
+Epoch: 0098 cost = 0.013634316
+Epoch: 0099 cost = 0.011979523
+Epoch: 0100 cost = 0.015155724
+Accuracy: 0.991667
+Finished!
+
+import tensorflow as tf
+import numpy as np
+tf.reset_default_graph()     #그래프 초기화
+tf.set_random_seed(777) 
+import pandas as pd
+
+#train = pd.read_csv('c:/python/train.csv')
+train = pd.read_csv('/home/itwill03/다운로드/train.csv')
+#훈련세트, validation세트 나누기
+from sklearn.model_selection import train_test_split
+train_set, validate_set = train_test_split(train, test_size = 0.3)
+trainData = train_set.values[:,1:]
+validateData = validate_set.values[:,1:]
+trainLabel=train_set.values[:,0]
+validateLabel=validate_set.values[:,0]
+
+X = tf.placeholder(tf.float32, [None, 784])
+X_img = tf.reshape(X, [-1, 28, 28, 1])          # img 28x28x1 (black/white)
+Y = tf.placeholder(tf.int32, [None, 1])
+Y_onehot=tf.reshape(tf.one_hot(Y, 10), [-1, 10])
+p_keep_conv = tf.placeholder(tf.float32)
+p_keep_hidden = tf.placeholder(tf.float32)
+
+# hyper parameters
+learning_rate = 0.001
+training_epochs = 30
+batch_size = 100
+steps_for_validate = 5
+keep_prob = tf.placeholder(tf.float32)
+
+# L1 ImgIn shape=(?, 28, 28, 1)
+W1 = tf.Variable(tf.random_normal([3, 3, 1, 32], stddev=0.01))
+L1 = tf.nn.conv2d(X_img, W1, strides=[1, 1, 1, 1], padding='SAME')
+L1 = tf.nn.relu(L1)
+L1 = tf.nn.max_pool(L1, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='SAME') # l1 shape=(?, 14, 14, 32)
+L1 = tf.nn.dropout(L1, p_keep_conv)
+
+# L2 ImgIn shape=(?, 14, 14, 10)
+W2 = tf.Variable(tf.random_normal([3, 3, 32, 64], stddev=0.01))
+L2 = tf.nn.conv2d(L1, W2, strides=[1, 1, 1, 1], padding='SAME')
+L2 = tf.nn.relu(L2)
+L2 = tf.nn.max_pool(L2, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='SAME') # l2 shape=(?, 7, 7, 64)
+L2 = tf.nn.dropout(L2, p_keep_conv)
+
+# L3 ImgIn shape=(?, 7, 7, 128)
+W3 = tf.Variable(tf.random_normal([3, 3, 64, 128], stddev=0.01))
+L3 = tf.nn.conv2d(L2, W3, strides=[1, 1, 1, 1], padding='SAME')
+L3 = tf.nn.relu(L3)
+L3 = tf.nn.max_pool(L3, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='SAME') # l3 shape=(?, 4, 4, 128)
+L3 = tf.nn.dropout(L3, p_keep_conv)
+L3_flat = tf.reshape(L3, shape=[-1, 128 * 4 * 4])    # reshape to (?, 2048)
+
+
+# Final FC 4x4x128 inputs -> 10 outputs
+W4 = tf.Variable(tf.random_normal([128 * 4 * 4, 625], stddev=0.01))
+L4 = tf.nn.relu(tf.matmul(L3_flat, W4))
+L4 = tf.nn.dropout(L4, p_keep_hidden)
+W_o = tf.get_variable("W_o", shape=[625,10],initializer=tf.contrib.layers.xavier_initializer())
+logits = tf.matmul(L4, W_o) 
+
+# define cost/loss & optimizer
+cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits,labels= Y_onehot))
+#optimizer = tf.train.RMSPropOptimizer(0.001, 0.9).minimize(cost)
+optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost) # 아담버젼
+predict_op = tf.argmax(logits, 1)
+
+# initialize
+sess = tf.Session()
+sess.run(tf.global_variables_initializer())
+
+# train my model
+print('Learning started. It takes sometime.')
+for epoch in range(training_epochs):
+    avg_cost = 0
+    total_batch = int(len(trainData) / batch_size)
+    for i in range(total_batch):
+        batch_xs = trainData[i*batch_size:(i+1)*batch_size]
+        batch_ys = trainLabel[i*batch_size:(i+1)*batch_size].reshape(-1, 1)
+        feed_dict = {X: batch_xs, Y: batch_ys, p_keep_conv: .8, p_keep_hidden: .5}
+        c, _ = sess.run([cost, optimizer], feed_dict=feed_dict)
+        avg_cost += c / total_batch
+    print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost))
+    if epoch % steps_for_validate == steps_for_validate-1:
+        correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(Y_onehot, 1))
+        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+        print('Accuracy:', sess.run(accuracy, feed_dict={
+                X: validateData, Y: validateLabel.reshape(-1, 1), p_keep_conv: 1, p_keep_hidden: 1}))       
+
+print('Finished!')
+
+Learning started. It takes sometime.
+Epoch: 0001 cost = 0.246008663
+Epoch: 0002 cost = 0.083046235
+Epoch: 0003 cost = 0.069559793
+Epoch: 0004 cost = 0.059705781
+Epoch: 0005 cost = 0.051288217
+Accuracy: 0.987698
+Epoch: 0006 cost = 0.044707885
+Epoch: 0007 cost = 0.047068910
+Epoch: 0008 cost = 0.040873379
+Epoch: 0009 cost = 0.043844029
+Epoch: 0010 cost = 0.042001762
+Accuracy: 0.98873
+Epoch: 0011 cost = 0.040154006
+Epoch: 0012 cost = 0.035361290
+Epoch: 0013 cost = 0.039043808
+Epoch: 0014 cost = 0.036527430
+Epoch: 0015 cost = 0.036283882
+Accuracy: 0.988016
+Epoch: 0016 cost = 0.034136513
+Epoch: 0017 cost = 0.035183122
+Epoch: 0018 cost = 0.037281507
+Epoch: 0019 cost = 0.032990198
+Epoch: 0020 cost = 0.031351634
+Accuracy: 0.988968
+Epoch: 0021 cost = 0.033557365
+Epoch: 0022 cost = 0.032083608
+Epoch: 0023 cost = 0.035410540
+Epoch: 0024 cost = 0.037707060
+Epoch: 0025 cost = 0.032169243
+Accuracy: 0.989683
+Epoch: 0026 cost = 0.032483838
+Epoch: 0027 cost = 0.033202152
+Epoch: 0028 cost = 0.032845970
+Epoch: 0029 cost = 0.029050938
+Epoch: 0030 cost = 0.031440989
+Accuracy: 0.988889
+Finished!

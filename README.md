@@ -4,6 +4,13 @@
 
 ## Second Challenge
 <p>
+
+### Freesound General-Purpose Audio Tagging Challenge
+<br>
+Can you automatically recognize sounds from a wide range of real-world environments?
+<br>
+https://www.kaggle.com/c/freesound-audio-tagging
+<br>
 기간: 4월 23일 (월요일) ~ 5월 3일 (목요일) 약 2주간
 </p>
 <br>
@@ -19,28 +26,15 @@
 <pre> 엄선된 자료, 혹은 모듈식 개발에 끼워넣을 수 있는 완성된 코드만 올리는 공간입니다. </pre>
 <br>
 
-## 주제 의견
-#### 음성
-1. 오디오 데이터 주변환경인식
-<br>
-
-2. 아기울음소리 인식
-
-<br>
-
-3. 음성인식 영화추천 챗봇
-
-#### 텍스트
-1. 욕설 탐지
-<br>
-
-2. 메뉴 추천
-
-#### 이미지
-1. 외계인 형상 만들기
-<br>
-
-2. 인기 많은 연예인 예측
+## 스케쥴표
+<pre>
+4월 25일까지 각자 모델 돌려보고 오기.
+25일 5시 회의.
+25~27일 최적화.
+29일 회의.
+5월 2일부터 피피티.
+5월 4일 발표.
+</pre>
 
 ## 지난 주제: 
 1. MNIST DIGITS RECOGNIZER

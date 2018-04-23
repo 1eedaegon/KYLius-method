@@ -41,7 +41,11 @@ def parse_audio_files(filenames):
 
 #file_list 생성
 file = "C:/data/sound/audio_train/*.wav"
-file_list=glob.glob(file)
+train_list=glob.glob(file)
+
+file = "c:/data/sound/audio_test/*.wav"
+test_list=glob.glob(file)
 
 #extrect audio features
-feature_files = parse_audio_files(file_list)
+feature_train = parse_audio_files(train_list)
+feature_test = parse_audio_files(test_list)

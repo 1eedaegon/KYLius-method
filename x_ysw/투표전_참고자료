@@ -1,0 +1,56 @@
+1. 오디오 데이터를 이용한 주변환경 인식
+	캐글에 비슷한 competition이 진행됨..
+	https://www.kaggle.com/c/freesound-audio-tagging
+
+2. 아기 울음소리 인식 
+	- 아기 울음소리로 감정분석을 할수 있는것도 괜찮으나 
+	  아기울음소리만 구분하는 것도 좋은 아이디어 일듯 하다.. 청각 장애인용
+
+3. 음성인식 챗봇 만들기 (영화 추천)
+	영화와 관련된 csv 파일,리뷰를 토대로 학습
+
+4. 딥러닝으로 욕설 탐지하기 (리뷰)
+
+
+
+[ 참고 자료 ]
+
+초보자용 오디오 데이터 가이드
+-https://www.kaggle.com/fizzbuzz/beginner-s-guide-to-audio-data 
+
+최근우씨 블로그 (cs/음악/머신러닝)
+-음성/음악신호 + 머신러닝 초심자를 위한 가이드
+http://keunwoochoi.blogspot.kr/2016/01/blog-post.html
+
+한시간만에 만드는 음성인식 인공지능 챗봇
+https://www.slideshare.net/rockplace/1-sa
+
+아기울음소리 data 21개 label 없당..
+https://www.soundsnap.com/tags/baby_cry
+
+
+[pyAudioAnalysis]
+https://github.com/tyiannak/pyAudioAnalysis
+	- Extract audio features and representations (e.g. mfccs, spectrogram, chromagram)
+	- Classify unknown sounds
+	- Train, parameter tune and evaluate classifiers of audio segments
+	- Detect audio events and exclude silence periods from long recordings
+	- Perform supervised segmentation (joint segmentation - classification)
+	- Perform unsupervised segmentation (e.g. speaker diarization)
+	- Extract audio thumbnails
+	- Train and use audio regression models (example application: emotion recognition)
+	- Apply dimensionality reduction to visualize audio data and content similarities
+
+[scipy.io]
+
+
+[논문]
+1. 오디오 데이터를 이용한 주변환경 인식
+ Environmental sound classification with convolutional neural networks
+  - https://pdfs.semanticscholar.org/447a/7d1ed350f9dc65bd2
+  
+  
+30가지 딥러닝 사례 - 
+https://brunch.co.kr/@itschloe1/23
+
+

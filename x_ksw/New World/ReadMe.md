@@ -5,7 +5,7 @@
 ### 1. 아이디어 회의를 통한 주제 선정
 
 -  주변음성인식 프로젝트로 결정
-> <pre> <br>
+<pre> <br>
 Can you automatically recognize sounds from a wide range of real-world environments?
 <br>
 <https://www.kaggle.com/c/freesound-audio-tagging>

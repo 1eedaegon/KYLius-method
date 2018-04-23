@@ -1,5 +1,5 @@
 # KYLius-method
-<p align="center"><i>2번째 도전</i></p>
+<p><i>2번째 도전</i></p>
 <img src="PROJECT1/logo/KYLius_logo4.png">
 
 ## Second Challenge

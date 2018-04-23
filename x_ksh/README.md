@@ -1,7 +1,7 @@
 # Smallerhand; 김승혁 (KYLius-method)
-<p align="center"><i>잠시 쓸 말 생각중...</i></p>
+<p><i>내가 생각하는 주제...</i></p>
 <pre>
-내가 생각하는 주제
+
 1. DCGAN(Deep Convolutional Generative Adversarial Network) + OpenCV 이용,
 새로운 외계인 형상 만듬.
 

@@ -6,7 +6,7 @@
 
 -  주변음성인식 프로젝트로 결정
 <pre>
-Freesound General-Purpose Audio Tagging Challenge
+*Freesound General-Purpose Audio Tagging Challenge*
 <br>
 Can you automatically recognize sounds from a wide range of real-world environments?
 <br>

@@ -43,17 +43,18 @@ for i in range(len(labels)):
     for n in range(len(l)):
         if labels[i]==l[n]:
             Y_onehot[i,n] = 1
-"""
-labels.values['Hi-hat']
-labels1 = labels
-labels1.dtype = 'str'
-data = np.arange(24).reshape(1,24)
-data
-name = np.array(['홍길동','박찬호','손흥민','윤건','홍길동','윤건','나얼','김건모'])
 
-data[name=='홍길동']
-"""
 
+#
+df_label = pd.DataFrame(labels)
+
+    for i in range(len(l)):
+            df_label[df_label==l[i]] = i
+df_label=np.array(df_label)        
+
+df_label=df_label.reshape(-1,)
+
+df_label.shape
 #
 p_keep_conv = tf.placeholder(tf.float32)
 p_keep_hidden = tf.placeholder(tf.float32)
@@ -118,7 +119,7 @@ for epoch in range(training_epochs):
     total_batch = int(len(trainData) / batch_size)
     for i in range(total_batch):
         batch_xs = train_set[i*batch_size:(i+1)*batch_size]
-        batch_ys = trainLabel[i*batch_size:(i+1)*batch_size].reshape(-1, 1)
+        batch_ys = df_label[i*batch_size:(i+1)*batch_size].reshape(-1, 1)
         feed_dict = {X: batch_xs, Y: batch_ys, p_keep_conv: .7, p_keep_hidden: .5}
         c, _ = sess.run([cost, optimizer], feed_dict=feed_dict)
         avg_cost += c / total_batch
@@ -129,5 +130,9 @@ for epoch in range(training_epochs):
         print('Accuracy:', sess.run(accuracy, feed_dict={
                 X: validateData, Y: validateLabel.reshape(-1, 1), p_keep_conv: 1, p_keep_hidden: 1}))       
 print('Finished!')
+
+
+
+
 
 

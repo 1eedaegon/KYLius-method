@@ -71,7 +71,7 @@ keep_prob = tf.placeholder(tf.float32)
 
 X = tf.placeholder(tf.float32,[None, 193])
 X_sound = tf.reshape(X,[-1, 1, 193, 1])
-Y = tf.placeholder(tf.float32,[None, 41])
+Y = tf.placeholder(tf.int32,[None, 41])
 
 # L1 sound shape=(?, 1, 193, 1)        
 W1 = tf.Variable(tf.random_normal([3, 3, 1, 32], stddev=0.01))

@@ -1,0 +1,138 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Apr 24 22:44:43 2018
+
+@author: modes
+"""
+
+import numpy as np
+import os
+import glob
+import tensorflow as tf
+import pandas as pd
+
+tf.set_random_seed(777)
+
+train_info = pd.read_csv("c:/data/sound/train.csv",delimiter=',')
+train_data = np.genfromtxt("c:/data/sound/feature_train.csv", delimiter=',')
+
+
+#data exploring
+train_info.shape #Out[70]: (9473, 3)
+train_info[:5]
+train_info.groupby(['label']).count().sort_values(by='fname')
+train_info['label'].unique()
+len(train_info['label'].unique()) #Out[68]: 41  : Y열수 =  41개
+train_data[0].shape #Out[155]: (193,)           : X열수 =193개
+
+#훈련세트, validation세트 나누기
+from sklearn.model_selection import train_test_split
+train_set, validate_set = train_test_split(train_data, test_size = 0.3)
+
+
+# validation set exploring
+train_set.shape
+validate_set.shape
+
+#labels into one_hot encoding form
+labels = train_info['label']
+l = train_info['label'].unique()
+Y_onehot = np.zeros([len(labels),41])
+
+for i in range(len(labels)):
+    for n in range(len(l)):
+        if labels[i]==l[n]:
+            Y_onehot[i,n] = 1
+
+
+#
+df_label = pd.DataFrame(labels)
+
+    for i in range(len(l)):
+            df_label[df_label==l[i]] = i
+df_label=np.array(df_label)        
+
+df_label=df_label.reshape(-1,)
+
+df_label.shape
+#
+p_keep_conv = tf.placeholder(tf.float32)
+p_keep_hidden = tf.placeholder(tf.float32)
+           
+# hyper parameters
+learning_rate = 0.00008
+training_epochs = 100
+batch_size = 100
+steps_for_validate = 5
+keep_prob = tf.placeholder(tf.float32)
+
+            
+#modeling
+
+X = tf.placeholder(tf.float32,[None, 193])
+X_sound = tf.reshape(X,[-1, 1, 193, 1])
+Y = tf.placeholder(tf.int32,[None, 41])
+
+# L1 sound shape=(?, 1, 193, 1)        
+W1 = tf.Variable(tf.random_normal([3, 3, 1, 32], stddev=0.01))
+L1 = tf.nn.conv2d(X_sound, W1, strides=[1, 1, 1, 1], padding='SAME')
+L1 = tf.nn.relu(L1)
+L1 = tf.nn.max_pool(L1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
+L1 = tf.nn.dropout(L1, p_keep_conv)
+
+# L2 sound shape=(?, 1, 96, 1)
+W2 = tf.Variable(tf.random_normal([3, 3, 32, 64], stddev=0.01))
+L2 = tf.nn.conv2d(L1, W2, strides=[1, 1, 1, 1], padding='SAME')
+L2 = tf.nn.relu(L2)
+L2 = tf.nn.max_pool(L2, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
+L2 = tf.nn.dropout(L2, p_keep_conv)
+
+# L3 sound shape=(?, 1, 48, 1)
+W3 = tf.Variable(tf.random_normal([3, 3, 64, 128], stddev=0.01))
+L3 = tf.nn.conv2d(L2, W3, strides=[1, 1, 1, 1], padding='SAME')
+L3 = tf.nn.relu(L3)
+L3 = tf.nn.max_pool(L3, ksize=[1,2,2,1], strides=[1,2,2,1], padding='SAME') # sound shape=(?, 1, 24, 1)
+L3 = tf.nn.dropout(L3, p_keep_conv)
+L3_flat = tf.reshape(L3, shape=[-1, 128*1*24]) # sound shape=[?, 3072]
+
+# Final FC 128*1*24 inputs -> 41 outputs
+W4 = tf.get_variable("W4", shape=[128*1*24, 555], initializer=tf.contrib.layers.xavier_initializer())
+L4 = tf.nn.relu(tf.matmul(L3_flat, W4))
+L4 = tf.nn.dropout(L4, p_keep_hidden)
+W_hat = tf.get_variable("W_hat", shape=[555,41], initializer=tf.contrib.layers.xavier_initializer())
+b = tf.Variable(tf.random_normal([41]))
+
+# logits, cost, optimizer
+logits = tf.matmul(L4,W_hat)+b
+cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=Y_onehot))
+optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
+predict_op = tf.argmax(logits, 1)
+
+# initialize
+sess = tf.Session()
+sess.run(tf.global_variables_initializer())
+
+# train my model
+print('Learning started. It takes sometime.')
+for epoch in range(training_epochs):
+    avg_cost = 0
+    total_batch = int(len(trainData) / batch_size)
+    for i in range(total_batch):
+        batch_xs = train_set[i*batch_size:(i+1)*batch_size]
+        batch_ys = df_label[i*batch_size:(i+1)*batch_size].reshape(-1, 1)
+        feed_dict = {X: batch_xs, Y: batch_ys, p_keep_conv: .7, p_keep_hidden: .5}
+        c, _ = sess.run([cost, optimizer], feed_dict=feed_dict)
+        avg_cost += c / total_batch
+    print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost))
+    if epoch % steps_for_validate == steps_for_validate-1:
+        correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(Y_onehot, 1))
+        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+        print('Accuracy:', sess.run(accuracy, feed_dict={
+                X: validateData, Y: validateLabel.reshape(-1, 1), p_keep_conv: 1, p_keep_hidden: 1}))       
+print('Finished!')
+
+
+
+
+
+

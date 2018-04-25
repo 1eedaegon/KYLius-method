@@ -18,3 +18,5 @@ https://m.blog.naver.com/PostView.nhn?blogId=atelierjpro&logNo=220984758512&prox
 http://solarisailab.com/deep-learning
 <br>
 http://daddynkidsmakers.blogspot.kr/2017/07/gan-image-to-image.html
+<br>
+https://stackoverflow.com/questions/10357992/how-to-generate-audio-from-a-numpy-array?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa

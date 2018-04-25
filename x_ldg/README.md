@@ -1,5 +1,6 @@
 ## 1eedaegon - 이대곤(KYLius-method)
-
+- Project: 프로젝트 진행 자료
+- Research: project 연구
 ### 1. 30분만에 개발하는 이미지 인식 프로그램 feat.99.5% 정확도 달성하기(완료)
 - MNIST DIGITS RECOGNIZER 
 <pre>

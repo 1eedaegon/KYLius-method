@@ -25,8 +25,9 @@ http://www.cs.tut.fi/~sgn14006/PDF2015/S04-MFCC.pdf
 
 
 ### - FEATURE EXTRACTION USING MFCC ☆
+<pre>
 MFCC를 이미지 분석에 적용. 말레이시아 논문. 흥미롭지만 일단 패스.
-
+</pre>
 
 
 ### - Voice Recognition Algorithms using MFCC and DTW ★★★★

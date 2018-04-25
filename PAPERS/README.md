@@ -24,14 +24,14 @@ http://www.cs.tut.fi/~sgn14006/PDF2015/S04-MFCC.pdf
 
 
 
-### - FEATURE EXTRACTION USING MFCC
+### - FEATURE EXTRACTION USING MFCC ☆
 MFCC를 이미지 분석에 적용. 말레이시아 논문. 흥미롭지만 일단 패스.
 
 
 
-### - Voice Recognition Algorithms using MFCC and DTW
+### - Voice Recognition Algorithms using MFCC and DTW ★★★★
 <pre>
-MFCC, DTW 를 이용한 목소리 인식 알고리즘. ★★★★
+MFCC, DTW 를 이용한 목소리 인식 알고리즘. 
 관련 알고리즘을 나름 잘 설명했고, 길이도 짧은 편인 것 같아 잘 읽어보려고 함.
 </pre>
 
@@ -55,5 +55,5 @@ https://www.youtube.com/watch?v=3e28CW0rqWs
 
 ## 아래는 현재 주제랑은 관련 없는 링크
 
-### - Fujitsu, 교토대의대 공동연구 (small image data 로 악성, 약성 판별)
+### - Fujitsu, 교토대의대 공동연구 (small image data 로 악성, 약성 판별) 
 http://www.fujitsu.com/global/about/resources/news/press-releases/2018/0416-01.html#1

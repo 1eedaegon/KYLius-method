@@ -1,4 +1,4 @@
-﻿# 읽어볼 논문들
+# 참고자료
 위에 pdf 파일 안 올린 건 링크 적음
 
 
@@ -6,10 +6,9 @@
 http://www.speech.cs.cmu.edu/15-492/slides/03_mfcc.pdf
 <pre>
 <b>요약</b>
-- 짧은 윈도우를 통해 음향을 분석한다. 
-각각의 윈도우로부터 하나의 스펙트럼이 얻어진다.(FFT 이용)
+- 짧은 시간 간격으로 나뉜 윈도우들로부터 각각 하나의 스펙트럼이 얻어진다.(FFT 이용)
 - 위에서 얻어진 스펙트럼을 Mel-Filters에 통과시키면 MelSpectrum이 얻어진다.
-- Mel-Spectrum을 가지고 'Ceptral 분석'을 수행하면 MFCC (Mel-Frequency Cepstral Coefficients)가 얻어진다.
+- Mel-Spectrum을 가지고 'Cepstral 분석'을 수행하면 MFCC (Mel-Frequency Cepstral Coefficients)가 얻어진다.
 - 따라서 소리 데이터는 Cepstral 벡터의 시퀀스로 표현할 수 있다.
 </pre>
 

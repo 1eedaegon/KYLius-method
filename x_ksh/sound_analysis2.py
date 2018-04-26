@@ -81,55 +81,51 @@ print(trainData.shape, testData.shape, trainLabel.shape, testLabel.shape)
 # (6631, 20) (2842, 20) (6631,) (2842,)
 
 #how many kinds of label?
-len(np.unique(trainLabel))   #41
-len(np.unique(testLabel))    #41
+print(len(np.unique(trainLabel)))   #41
+print(len(np.unique(testLabel)))    #41
 
 #
 idx = np.unique(trainLabel)
-trainLabel=list(trainLabel)
-trainLabel=pd.Series(trainLabel)
 
-for i in range(len(idx)):
-    for j in trainLabel:
-        if idx[i]==j:
-            trainLabel.loc['Oboe']
-#여기서 실패
-            
-def one_hot(x):
-    lst=[]
-    for i in x:
-        lst.append(np.repeat(0,41))
-        lst[-1][i]+=1
-    return(lst)
-trainLabel=one_hot(trainLabel)
-validateLabel=one_hot(testLabel)
-#
+def Labeling(label):
+    r=pd.Series(label)
+    for i in range(len(idx)):
+        r[r.values==idx[i]]=i
+    return(r)
+
+trainLabel=Labeling(trainLabel)
+testLabel=Labeling(testLabel)
+print(min(trainLabel), max(trainLabel), min(testLabel), max(testLabel))
 
 #다시 돌릴때는 여기부터 
 tf.reset_default_graph()     #그래프 초기화
 
 # hyper parameters
-learning_rate = 0.01
-training_epochs = 20
+learning_rate = 0.001
+training_epochs = 1000
 batch_size = 100
 steps_for_validate = 5
 
 #placeholders
 X = tf.placeholder(tf.float32, [None, 20], name="X") 
-X1 = tf.reshape(X, [-1, 10, 10])
-Y = tf.placeholder(tf.string, [None, 1], name="Y")
+Y = tf.placeholder(tf.int32, [None, 1], name="Y")
+Y_onehot=tf.reshape(tf.one_hot(Y, 41), [-1, 41])
 keep_prob = tf.placeholder(tf.float32)
 
-#cells
-cells = tf.nn.rnn_cell.MultiRNNCell([DropoutWrapper(tf.nn.rnn_cell.BasicLSTMCell(num_units=256),
-                                                    output_keep_prob=keep_prob) for _ in range(3)])
-h0 = cells.zero_state(batch_size, dtype=tf.float32)
-output, hs = tf.nn.dynamic_rnn(cells, inputs=X1, initial_state=h0)
-L1 = output[:, -1, :]
+# weights & bias for nn layers
+W1 = tf.Variable(tf.random_normal([20, 128]))
+b1 = tf.Variable(tf.random_normal([128]))
+L1 = tf.nn.relu(tf.matmul(X, W1) + b1)
+L1 = tf.nn.dropout(L1, keep_prob=keep_prob)
 
-W2 = tf.Variable(tf.random_normal([256, 41]))
-b2 = tf.Variable(tf.random_normal([41]))
-hypothesis = tf.matmul(L1, W2) + b2
+W2 = tf.Variable(tf.random_normal([128, 256]))
+b2 = tf.Variable(tf.random_normal([256]))
+L2 = tf.nn.relu(tf.matmul(L1, W2) + b2)
+L2 = tf.nn.dropout(L2, keep_prob=keep_prob)
+
+W4 = tf.Variable(tf.random_normal([256, 41]))
+b4 = tf.Variable(tf.random_normal([41]))
+hypothesis = tf.matmul(L2, W4) + b4
 
 # define cost/loss & optimizer
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
@@ -149,7 +145,7 @@ for epoch in range(training_epochs):
     for i in range(total_batch):
         batch_xs = trainData[i*batch_size:(i+1)*batch_size]
         batch_ys = trainLabel[i*batch_size:(i+1)*batch_size].reshape(-1, 1)
-        feed_dict = {X: batch_xs, Y: batch_ys, keep_prob: .5}
+        feed_dict = {X: batch_xs, Y: batch_ys, keep_prob: 1}
         c, _ = sess.run([cost, optimizer], feed_dict=feed_dict)
         avg_cost += c / total_batch
     print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost))
@@ -158,5 +154,10 @@ for epoch in range(training_epochs):
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
         print('Accuracy:', sess.run(accuracy, feed_dict={
                 X: testData, Y: testLabel.reshape(-1, 1), keep_prob: 1}))
-        save_path = saver.save(sess, '/Users/kimseunghyuck/desktop/git/daegon/KYLius-method/승혁/optx/optx')
+        save_path = saver.save(sess, '/Users/kimseunghyuck/desktop/git/daegon/KYLius-method/x_ksh/optx/optx')
 print('Finished!')
+
+"""
+에폭 1000, lr 0.001, 정확도 32.6~32.9% 
+
+"""

@@ -12,14 +12,12 @@ import tensorflow as tf
 
 1. 데이터 전처리 1
 <pre>
-<code>
 y, sr = soundfile.read(path+filename, dtype='float32')
 mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=20)
 max_mfcc=np.max(mfcc, axis=1)
 mins, maxs=np.min(max_mfcc), np.max(max_mfcc)
 scaled_mfcc=(max_mfcc-mins)/(maxs-mins)
 dic[i] = scaled_mfcc
-</code>
 soundfile.read 로 y, sr 추출
 librosa.feature.mfcc 로 mfcc 변환 (n_mfcc=20)
 20개 속성들 각각의 max값을 뽑음
@@ -57,6 +55,9 @@ keep_prob = 1
 다른 조건 같음
 keep_prob = 0.8 (트레이닝때만)
 정확도 36.9~37.9%
+최고 39.0%
+
+특이사항: lr을 저거보다 높게 하거나 낮게 하면 정확도가 확 떨어짐.
 </pre>
 
 

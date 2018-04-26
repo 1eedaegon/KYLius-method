@@ -143,7 +143,7 @@ for epoch in range(training_epochs):
     for i in range(total_batch):
         batch_xs = trainData[i*batch_size:(i+1)*batch_size]
         batch_ys = trainLabel[i*batch_size:(i+1)*batch_size].reshape(-1, 1)
-        feed_dict = {X: batch_xs, Y: batch_ys, keep_prob: 1}
+        feed_dict = {X: batch_xs, Y: batch_ys, keep_prob: .8}
         c, _ = sess.run([cost, optimizer], feed_dict=feed_dict)
         avg_cost += c / total_batch
     print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost))
@@ -157,5 +157,5 @@ print('Finished!')
 
 """
 에폭 1000, lr 0.001, 정확도 32.6~32.9% 
-
+다른 조건 같고 keep_prop=0.8, 정확도 36.9~37.9%
 """

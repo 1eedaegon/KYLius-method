@@ -11,8 +11,6 @@ import soundfile as sf
 from matplotlib import pyplot as plt
 import numpy as np
 import os
-from sklearn.preprocessing import normalize
-from tensorflow.python.ops.rnn_cell_impl import DropoutWrapper
 path = '/Users/kimseunghyuck/desktop/audio_train/'
 files=os.listdir(path)
 

@@ -26,7 +26,7 @@ trainLabel = train_set.values[:,1]
 testLabel = test_set.values[:,1]
 
 #data load and extract mfcc (scaling indluded)
-path = '/home/paperspace/Downloads/audio_train/
+path = '/home/paperspace/Downloads/audio_train/'
 
 def data2array(file):
     dic = {}
@@ -121,7 +121,7 @@ for epoch in range(training_epochs):
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
         print('Accuracy:', sess.run(accuracy, feed_dict={
                 X: testData, Y: testLabel.reshape(-1, 1), keep_prob: 1}))
-        save_path = saver.save(sess, '/Users/kimseunghyuck/desktop/git/daegon/KYLius-method/x_ksh/optx/optx')
+        save_path = saver.save(sess, '/home/paperspace/Downloads/optx/optx')
 print('Finished!')
 
 """

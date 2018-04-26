@@ -82,7 +82,7 @@ print(trainData.shape, testData.shape, trainLabel.shape, testLabel.shape)
 print(len(np.unique(trainLabel)))   #41
 print(len(np.unique(testLabel)))    #41
 
-#
+#label string -> integer(0~40)
 idx = np.unique(trainLabel)
 
 def Labeling(label):

@@ -8,39 +8,8 @@ Created on Thu Apr 26 18:53:10 2018
 
 import librosa
 import soundfile as sf
-from matplotlib import pyplot as plt
 import numpy as np
-import os
-path = '/Users/kimseunghyuck/desktop/audio_train/'
-files=os.listdir(path)
-
-#show one sample file
-filename = files[0]
-y, sr = sf.read(path+filename, dtype='float32')
-mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=20)
-mfcc.shape    #20,161
-
-#show second sample file
-filename = files[1]
-y, sr = sf.read(path+filename, dtype='float32')
-mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=20)
-mfcc.shape    #20,109
-
-#show second sample file
-filename = files[3]
-y, sr = sf.read(path+filename, dtype='float32')
-mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=20)
-mfcc.shape    #20,143
-
-#show graph
-plt.figure(figsize=(mfcc.shape[1]/15, 5))
-plt.plot(mfcc)
-
-#scaling for each frequency
-max_mfcc=np.max(mfcc, axis=1)
-mins, maxs=np.min(max_mfcc), np.max(max_mfcc)
-scaled_mfcc=(max_mfcc-mins)/(maxs-mins)
-scaled_mfcc
+from sklearn.model_selection import train_test_split
 
 #import labels
 import tensorflow as tf
@@ -49,7 +18,6 @@ import pandas as pd
 train = pd.read_csv('/Users/kimseunghyuck/desktop/sound_train.csv')
 
 #train/test, Data/Label split
-from sklearn.model_selection import train_test_split
 train_set, test_set = train_test_split(train, test_size = 0.3)
 trainfile = train_set.values[:,0]
 testfile = test_set.values[:,0]

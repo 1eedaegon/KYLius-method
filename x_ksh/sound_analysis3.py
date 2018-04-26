@@ -63,8 +63,8 @@ trainLabel=Labeling(trainLabel)
 testLabel=Labeling(testLabel)
 print(min(trainLabel), max(trainLabel), min(testLabel), max(testLabel))
 
-#다시 돌릴때는 여기부터 
-tf.reset_default_graph()     #그래프 초기화
+#start here
+tf.reset_default_graph()     #reset graph
 
 # hyper parameters
 learning_rate = 0.0001

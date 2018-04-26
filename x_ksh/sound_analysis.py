@@ -19,7 +19,6 @@ plt.show()
 
 # 2번째 방법
 y, sr = librosa.load(filename, duration=10)
-S = np.abs(librosa.stft(y))
 p0 = librosa.feature.poly_features(y=y, sr=sr, order=0)
 p1 = librosa.feature.poly_features(y=y, sr=sr, order=1)
 p2 = librosa.feature.poly_features(y=y, sr=sr, order=2)
@@ -51,11 +50,12 @@ path='/Users/kimseunghyuck/desktop/audio_train'
 files=os.listdir(path)
 files[:10]
 
-for i in range(10):
-    y, sr = librosa.load(path+'/'+files[i], duration=10)
-    S = np.abs(librosa.stft(y))
-    p = librosa.feature.poly_features(y=y, sr=sr, order=0)
-    plt.figure(figsize=(8, 8))
-    ax = plt.subplot(11,1,1)
-    plt.plot(p, alpha=0.8)
+i=0
+y, sr = librosa.load(path+'/'+files[i], duration=10)
+p = librosa.feature.poly_features(y=y, sr=sr, order=0)
+p=p.reshape(-1,)
+plt.figure(figsize=(8, 2))
+plt.plot(p)
 plt.show()
+
+

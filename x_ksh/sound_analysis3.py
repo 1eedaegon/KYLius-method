@@ -15,7 +15,8 @@ from sklearn.model_selection import train_test_split
 import tensorflow as tf
 tf.set_random_seed(777) 
 import pandas as pd
-train = pd.read_csv('/Users/kimseunghyuck/desktop/sound_train.csv')
+#train = pd.read_csv('/Users/kimseunghyuck/desktop/sound_train.csv')
+train = pd.read_csv('/home/paperspace/Downloads/audio_train.csv')
 
 #train/test, Data/Label split
 train_set, test_set = train_test_split(train, test_size = 0.3)
@@ -25,7 +26,7 @@ trainLabel = train_set.values[:,1]
 testLabel = test_set.values[:,1]
 
 #data load and extract mfcc (scaling indluded)
-path = '/Users/kimseunghyuck/desktop/audio_train/'
+path = '/home/paperspace/Downloads/audio_train/
 
 def data2array(file):
     dic = {}

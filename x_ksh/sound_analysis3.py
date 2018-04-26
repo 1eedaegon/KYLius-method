@@ -44,6 +44,7 @@ def data2array(file):
 
 trainData=data2array(trainfile)
 testData=data2array(testfile)
+
 print(trainData.shape, testData.shape, trainLabel.shape, testLabel.shape)
 # (6631, 20) (2842, 20) (6631,) (2842,)
 
@@ -68,10 +69,11 @@ print(min(trainLabel), max(trainLabel), min(testLabel), max(testLabel))
 tf.reset_default_graph()     #reset graph
 
 # hyper parameters
-learning_rate = 0.0001
-training_epochs = 5000
+learning_rate = 0.01
+training_epochs = 1000
 batch_size = 100
-steps_for_validate = 5
+steps_for_print = 5
+steps_for_validate = 30
 
 #placeholders
 X = tf.placeholder(tf.float32, [None, 20], name="X") 
@@ -115,13 +117,14 @@ for epoch in range(training_epochs):
         feed_dict = {X: batch_xs, Y: batch_ys, keep_prob: .8}
         c, _ = sess.run([cost, optimizer], feed_dict=feed_dict)
         avg_cost += c / total_batch
-    print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost))
+    if epoch % steps_for_print == steps_for_print-1:
+        print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost))
     if epoch % steps_for_validate == steps_for_validate-1:
         correct_prediction = tf.equal(tf.argmax(hypothesis, 1), tf.argmax(Y_onehot, 1))
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
         print('Accuracy:', sess.run(accuracy, feed_dict={
                 X: testData, Y: testLabel.reshape(-1, 1), keep_prob: 1}))
-        save_path = saver.save(sess, '/home/paperspace/Downloads/optx/optx')
+        save_path = saver.save(sess, '/Users/kimseunghyuck/desktop/git/daegon/KYLius-method/x_ksh/optx/optx')
 print('Finished!')
 
 """

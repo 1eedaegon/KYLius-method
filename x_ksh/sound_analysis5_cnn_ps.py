@@ -146,6 +146,10 @@ for epoch in range(training_epochs):
         save_path = saver.save(sess, '/home/paperspace/Downloads/optx/optx')
 print('Finished!')
 
+A=np.array([1,2,3,4,9,1,2])
+
+
+
 #테스트 할 때 샘플 추출 하는 방법 바꾸기
 """
 에폭 1000, lr 0.001, 정확도 32.6~32.9% 

@@ -157,12 +157,16 @@ for epoch in range(training_epochs):
         save_path = saver.save(sess, '/home/paperspace/Downloads/optx/optx')
 print('Finished!')
 
-A=np.array([1,2,3,4,9,1,2])
-
-
-
 #테스트 할 때 샘플 추출 하는 방법 바꾸기
+#list(array1, array2, ...) 이런식으로 구성해야겠음. 안그러면 너무 커짐.
+#A=[np.array([1,2,3]), np.array([2,3,4,5,1])]
+#아래처럼 구성해볼 생각.
 """
+W1(20, 20)
+for i in range(length):
+    L[i]=tanh(matmul(X, W1))
+max(L)
+
 에폭 1000, lr 0.001, 정확도 32.6~32.9% 
 다른 조건 같고 keep_prop=0.8, 정확도 36.9~37.9%
 """

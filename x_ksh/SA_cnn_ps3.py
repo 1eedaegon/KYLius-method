@@ -166,6 +166,7 @@ W1(20, 20)
 for i in range(length):
     L[i]=tanh(matmul(X, W1))
 max(L)
+윈도우를 끝까지 이동시켜서 그 중에 맥스값을 찾아내서 반환한 다음에 FC 를 거쳐서 softmax
 
 에폭 1000, lr 0.001, 정확도 32.6~32.9% 
 다른 조건 같고 keep_prop=0.8, 정확도 36.9~37.9%

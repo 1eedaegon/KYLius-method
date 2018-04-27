@@ -8,7 +8,6 @@ Created on Thu Apr 26 18:53:10 2018
 
 import librosa
 import soundfile as sf
-from matplotlib import pyplot as plt
 import numpy as np
 
 #import labels
@@ -45,9 +44,6 @@ def see_how_long(file):
 #n2=see_how_long(testfile)
 #print(np.max(n2), np.min(n2))    #2584 26
 
-file=trainfile
-file.shape
-mfcc.shape
 #zero padding to 3000
 def data2array(file):
     #zero padding to file.shape[0] X 20 X 3000    

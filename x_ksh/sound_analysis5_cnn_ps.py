@@ -104,29 +104,12 @@ p_keep_hidden = tf.placeholder(tf.float32, name="p_keep_hidden")
 W1 = tf.get_variable("W1", shape=[2, 20, 1, 32],initializer=tf.contrib.layers.xavier_initializer())
 L1 = tf.nn.conv2d(X_sound, W1, strides=[1, 1, 1, 1], padding='SAME')
 L1 = tf.nn.elu(L1)
-L1 = tf.nn.max_pool(L1, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='SAME') # l1 shape=(?, 14, 14, 32)
+L1 = tf.nn.max_pool(L1, ksize=[1, 20, 20, 1],strides=[1, 20, 20, 1], padding='SAME') # l1 shape=(?, 14, 14, 32)
 L1 = tf.nn.dropout(L1, p_keep_conv)
-
-"""
-# L2 SoundIn shape=(?, 10, 1500, 32)
-W2 = tf.get_variable("W2", shape=[2, 15, 32, 64],initializer=tf.contrib.layers.xavier_initializer())
-L2 = tf.nn.conv2d(L1, W2, strides=[1, 1, 1, 1], padding='SAME')
-L2 = tf.nn.elu(L2)
-L2 = tf.nn.max_pool(L2, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='SAME') # l2 shape=(?, 7, 7, 64)
-L2 = tf.nn.dropout(L2, p_keep_conv)
-
-# L3 SoundIn shape=(?, 5, 750, 128)
-W3 = tf.get_variable("W3", shape=[5, 75, 64, 128],initializer=tf.contrib.layers.xavier_initializer())
-L3 = tf.nn.conv2d(L2, W3, strides=[1, 1, 1, 1], padding='SAME')
-L3 = tf.nn.elu(L3)
-L3 = tf.nn.max_pool(L3, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='SAME') # l3 shape=(?, 4, 4, 128)
-L3 = tf.nn.dropout(L3, p_keep_conv)
-L3_flat = tf.reshape(L3, shape=[-1, 128 * 75 * 64])    # reshape to (?, 2048)
-"""
-L1_flat= tf.reshape(L1, shape=[-1, 10*1500*32])
+L1_flat= tf.reshape(L1, shape=[-1, 150*32])
 
 # Final FC 4x4x128 inputs -> 10 outputs
-W4 = tf.get_variable("W4", shape=[10*1500*32, 625],initializer=tf.contrib.layers.xavier_initializer())
+W4 = tf.get_variable("W4", shape=[150*32, 625],initializer=tf.contrib.layers.xavier_initializer())
 L4 = tf.nn.elu(tf.matmul(L1_flat, W4))
 L4 = tf.nn.dropout(L4, p_keep_hidden)
 W_o = tf.get_variable("W_o", shape=[625,41],initializer=tf.contrib.layers.xavier_initializer())

@@ -142,11 +142,11 @@ for epoch in range(training_epochs):
         correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(Y_onehot, 1))
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
         print('Accuracy:', sess.run(accuracy, feed_dict={
-                X: testData, Y: testLabel.reshape(-1, 1), p_keep_conv: 1, p_keep_hidden: 1}))
+                X: testData[:100], Y: testLabel[:100].reshape(-1, 1), p_keep_conv: 1, p_keep_hidden: 1}))
         save_path = saver.save(sess, '/home/paperspace/Downloads/optx/optx')
 print('Finished!')
 
-
+#테스트 할 때 샘플 추출 하는 방법 바꾸기
 """
 에폭 1000, lr 0.001, 정확도 32.6~32.9% 
 다른 조건 같고 keep_prop=0.8, 정확도 36.9~37.9%

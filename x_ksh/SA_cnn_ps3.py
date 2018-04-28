@@ -25,7 +25,7 @@ print(trainData.shape, testData.shape, trainLabel.shape, testLabel.shape)
 tf.reset_default_graph()     #그래프 초기화
 
 # hyper parameters
-learning_rate = 0.001
+learning_rate = 0.0002
 training_epochs = 500
 batch_size = 100
 steps_for_validate = 5
@@ -51,7 +51,7 @@ L2 = tf.nn.conv2d(L1, W2, strides=[1, 1, 1, 1], padding='SAME')
 L2 = tf.nn.elu(L2)
 L2 = tf.nn.max_pool(L2, ksize=[1, 5, 5, 1],strides=[1, 5, 5, 1], padding='SAME') # l1 shape=(?, 5, 10, 64)
 L2 = tf.nn.dropout(L2, p_keep_conv)
-L2_flat= tf.reshape(L1, shape=[-1, 2*64])
+L2_flat= tf.reshape(L2, shape=[-1, 2*64])
 
 # Final FC 2*64 inputs -> 10 outputs
 W4 = tf.get_variable("W4", shape=[2*64, 256],initializer=tf.contrib.layers.xavier_initializer())
@@ -79,7 +79,7 @@ for epoch in range(training_epochs):
     for i in range(total_batch):
         batch_xs = trainData[i*batch_size:(i+1)*batch_size]
         batch_ys = trainLabel[i*batch_size:(i+1)*batch_size].reshape(-1, 1)
-        feed_dict = {X: batch_xs, Y: batch_ys, p_keep_conv: .7, p_keep_hidden: .5}
+        feed_dict = {X: batch_xs, Y: batch_ys, p_keep_conv: .9, p_keep_hidden: 1.0}
         c, _ = sess.run([cost, optimizer], feed_dict=feed_dict)
         avg_cost += c / total_batch
     print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost))
@@ -92,3 +92,20 @@ for epoch in range(training_epochs):
         save_path = saver.save(sess, '/home/paperspace/Downloads/optx/optx')
 print('Finished!')
 
+"""
+1) conv2d layer 2개 + FC 
+learning_rate = 0.001
+training_epochs = 500
+p_keep_conv, p_keep_hidden = 0.7, 0.5
+accuracy : 36~46% (epoch 50 이상부터 계속 왔다갔다 함)
+2) 위랑 같음
+lr=0.0002~5, epoch = 500
+accuracy : 43~53% 
+3) 위랑 같음
+lr=0.0002, epoch = 500
+p_keep_conv, p_keep_hidden = 0.9, 1.0
+accuracy : 
+
+
+
+"""

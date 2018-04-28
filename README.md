@@ -52,21 +52,38 @@ mfcc로 하면 41개 속성값이 나옴. 다른 특징 붙이니까 192개로 �
 승혁: librosa feature 뽑아내봄
 </pre>
 
+## 할거
+1. 각자 만들고 있는 모델 완성하기
 <pre>
-할거:
-1. 음향학 공부(파이썬 함수 각각의 feature 중 뭘 써야 할지, 왜 쓰는지) + 전처리를 어떻게 할지
-- 대곤(librosa, mfcc) <- librosa로 뽑아낼 수 있는 특징값 중에 mfcc는 다 뽑히는데 테스트셋에서 mfcc외의 특징은 잘 안뽑히는데 알아봐주세요.(수원 요청)
-2. conv1d - 승혁, 상욱
-3. conv2d - 수원, 상욱
+각자 전부(승혁, 상욱, 대곤, 수원)
+일요일 모이기 전까지 완성된 코드 올리기
+코드+csv파일+opt올리기
+(정확도 좋든 안좋든)
 </pre>
+
+2. 용어, 함수(메소드), 알고리즘 나눠서 공부
+<pre>
+stft(Short-time Fourier transform) :복소수 값을 갖는 행렬을 반환 - 승혁
+- core.stft
+- freature.chroma.stft
+mfcc(Mel-frequency cepstral coefficients), - 상욱
+melspectrogram(Mel-scaled power spectrogram), - 수원
+spectral_contrast(spectral contrast), - 수원
+tonnetz(tonal centroid features) - 대곤
+</pre>
+
 
 ## 스케쥴표
 <pre>
-25~27일 금요일 맡은거 해보고 오기.
-27일 금요일 5시 회의.
-29일 일요일 오후 회의.
+29일 일요일 오후 2시 사당역.
 5월 2일부터 피피티.
 5월 4일 발표.
+</pre>
+
+## 추가 정보
+연철이가 test.csv 중에 안되는 파일 목록 알려줌(3개)
+<pre>
+0b0427e2, 6ea0099f, b39975f5
 </pre>
 
 ## 지난 주제: 

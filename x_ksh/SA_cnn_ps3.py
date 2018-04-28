@@ -26,7 +26,7 @@ tf.reset_default_graph()     #그래프 초기화
 
 # hyper parameters
 learning_rate = 0.0002
-training_epochs = 500
+training_epochs = 300
 batch_size = 100
 steps_for_validate = 5
 
@@ -42,22 +42,29 @@ p_keep_hidden = tf.placeholder(tf.float32, name="p_keep_hidden")
 W1 = tf.get_variable("W1", shape=[2, 10, 1, 32],initializer=tf.contrib.layers.xavier_initializer())
 L1 = tf.nn.conv2d(X_sound, W1, strides=[1, 1, 1, 1], padding='SAME')
 L1 = tf.nn.elu(L1)
-L1 = tf.nn.max_pool(L1, ksize=[1, 4, 10, 1],strides=[1, 4, 10, 1], padding='SAME') # l1 shape=(?, 20, 100, 32)
+L1 = tf.nn.max_pool(L1, ksize=[1, 2, 5, 1],strides=[1, 2, 5, 1], padding='SAME') 
 L1 = tf.nn.dropout(L1, p_keep_conv)
 
-# L2 Input shape=(?,5,10,32)
-W2 = tf.get_variable("W2", shape=[2, 10, 32, 64],initializer=tf.contrib.layers.xavier_initializer())
+# L2 Input shape=(?,10,20,32)
+W2 = tf.get_variable("W2", shape=[2, 2, 32, 64],initializer=tf.contrib.layers.xavier_initializer())
 L2 = tf.nn.conv2d(L1, W2, strides=[1, 1, 1, 1], padding='SAME')
 L2 = tf.nn.elu(L2)
-L2 = tf.nn.max_pool(L2, ksize=[1, 5, 5, 1],strides=[1, 5, 5, 1], padding='SAME') # l1 shape=(?, 5, 10, 64)
+L2 = tf.nn.max_pool(L2, ksize=[1, 3, 3, 1],strides=[1, 3, 3, 1], padding='SAME') 
 L2 = tf.nn.dropout(L2, p_keep_conv)
-L2_flat= tf.reshape(L2, shape=[-1, 2*64])
+
+# L3 Input shape=(?,4,7,64)
+W3 = tf.get_variable("W3", shape=[2, 2, 64, 128],initializer=tf.contrib.layers.xavier_initializer())
+L3 = tf.nn.conv2d(L2, W3, strides=[1, 1, 1, 1], padding='SAME')
+L3 = tf.nn.elu(L2)
+L3 = tf.nn.max_pool(L3, ksize=[1, 3, 3, 1],strides=[1, 3, 3, 1], padding='SAME') 
+L3 = tf.nn.dropout(L3, p_keep_conv)
+L3_flat= tf.reshape(L2, shape=[-1, 2*3*64])
 
 # Final FC 2*64 inputs -> 10 outputs
-W4 = tf.get_variable("W4", shape=[2*64, 256],initializer=tf.contrib.layers.xavier_initializer())
-L4 = tf.nn.elu(tf.matmul(L2_flat, W4))
+W4 = tf.get_variable("W4", shape=[2*3*64, 512],initializer=tf.contrib.layers.xavier_initializer())
+L4 = tf.nn.elu(tf.matmul(L3_flat, W4))
 L4 = tf.nn.dropout(L4, p_keep_hidden)
-W_o = tf.get_variable("W_o", shape=[256,41],initializer=tf.contrib.layers.xavier_initializer())
+W_o = tf.get_variable("W_o", shape=[512,41],initializer=tf.contrib.layers.xavier_initializer())
 b = tf.Variable(tf.random_normal([41]))
 logits = tf.matmul(L4, W_o) + b
 
@@ -79,7 +86,7 @@ for epoch in range(training_epochs):
     for i in range(total_batch):
         batch_xs = trainData[i*batch_size:(i+1)*batch_size]
         batch_ys = trainLabel[i*batch_size:(i+1)*batch_size].reshape(-1, 1)
-        feed_dict = {X: batch_xs, Y: batch_ys, p_keep_conv: .9, p_keep_hidden: 1.0}
+        feed_dict = {X: batch_xs, Y: batch_ys, p_keep_conv: .8, p_keep_hidden: 0.7}
         c, _ = sess.run([cost, optimizer], feed_dict=feed_dict)
         avg_cost += c / total_batch
     print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost))
@@ -93,7 +100,7 @@ for epoch in range(training_epochs):
 print('Finished!')
 
 """
-1) conv2d layer 2개 + FC 
+1) conv2d layer * 2 + FC 
 learning_rate = 0.001
 training_epochs = 500
 p_keep_conv, p_keep_hidden = 0.7, 0.5
@@ -105,7 +112,8 @@ accuracy : 43~53%
 lr=0.0002, epoch = 500
 p_keep_conv, p_keep_hidden = 0.9, 1.0
 accuracy : 
-
+4) con2d layer * 3 + FC
+    
 
 
 """

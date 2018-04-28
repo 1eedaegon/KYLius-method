@@ -5,9 +5,61 @@
 아래로 갈수록 과거에 돌린 모델 (맨 위에 있는 게 현재 돌리고 있는 모델)
 </pre>
 
-## 현재 (구상중이거나 돌리고 있는) 모델
+## 현재 돌리고 있는 거 (잘 돌아감)
 <pre>
-SA_cnn_ps3.py  (코드 아직 짜고 있음. 아직 못 짬)
+preparing_data.py - 데이터 전처리
+SA_cnn_ps3.py - 모델
+</pre>
+
+preparing_data.py
+<pre>
+이 코드로 trainData.csv, trainLabel.csv, testData.csv, testLabel.csv 를 만들어 저장함. (전체 약 600MB)
+sklearn 모듈 이용, 7:3으로 train/test split.
+see_how_long 은 mfcc 뽑았을 때 파일별로 길이가 어느 정도인지 확인한 것. (이후 안쓰이니 신경 안써도 됨)
+
+n_mfcc=20으로 mfcc로 변환한 후, (길이가 26~2584로 들쭉날쭉한데) 100으로 통일함.
+어떻게 했냐면,
+(short_time_extrat 함수)
+- 길이가 (드물겠지만) 100이면 그대로 array에 넣음.
+- 길이가 100보다 작으면 나머지는 0으로 채운 뒤 array에 넣음.
+- 길이가 100보다 크면 (이 부분이 약간 복잡한데),
+20개 특성 주파수 각각 중 절대값의 최대값을 가지고 있는 구간(np.argmax 이용)을 뽑아서,
+i~i+100 구간을 정할 때 최대값이 가장 많이 포함되는 i 값 (0< i < 데이터 길이) 을 찾은 뒤,
+i~i+100 까지만 잘라서 넣음.
+<code>
+            argmax=np.argmax(abs_mfcc, axis=1)
+            sample=[]
+            for i in range(np.max(argmax)):
+                 sample.append(np.sum((argmax>=i) & (argmax <i+100)))
+            start=sample.index(max(sample))
+            array[k, :, :100]=abs_mfcc[:, start:start+100]
+</code>
+
+데이터 라벨링은 0~40의 숫자로 치환함.
+(결과물 낼 때는 이부분에서 영어: 숫자 저장한 csv도 있어야 할 것임. 여기서는 생략)
+
+이렇게 해서 (추후 모델 돌릴 때 편의를 위해) 저장함.
+</pre>
+
+SA_cnn_ps3.py
+<pre>
+preparing_data.py 로 저장시킨 데이터 일단 불러온 뒤 reshape.
+shape이 맞는지 확인.
+conv2d L1 : 20*100*1 로 입력 받아서 10*20*32 로 방출
+    (윈도우 사이즈 =  2 * 10, 맥스풀 사이즈 = 2 *5)
+conv2d L2 : 10*20*32 로 받아서 4*7*64 로 방출
+    (win = 2 * 2, max_pool = 3 * 3)
+conv2d L3 : 4* 7* 64 로 받아서 2*3*128 로 (flat하게) 방출
+    (win = 2 * 2, max_pool = 3 * 3)
+FC L4: 2*3*64 로 받아서 41 로 방출
+    (2*3*128 -> 615 -> 41)
+
+정확도: 51~60%
+</pre>
+
+## 일단 보류 중인 모델 (코드 짜는 데 오래 걸릴 것 같아서 시간상 보류)
+<pre>
+코드 아직 못 짬
 </pre>
 list안에 array를 담아서 가변적인 길이의 mfcc output을 담은 다음에 CNN모델(아마 파이썬으로 코드 짜야 할 듯)에 넣고,
 <br>

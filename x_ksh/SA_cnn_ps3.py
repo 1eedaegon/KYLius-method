@@ -60,7 +60,7 @@ L3 = tf.nn.max_pool(L3, ksize=[1, 3, 3, 1],strides=[1, 3, 3, 1], padding='SAME')
 L3 = tf.nn.dropout(L3, p_keep_conv)
 L3_flat= tf.reshape(L3, shape=[-1, 2*3*128])
 
-# Final FC 2*64 inputs -> 10 outputs
+# Final FC 2*3*128 inputs -> 41 outputs
 W4 = tf.get_variable("W4", shape=[2*3*128, 615],initializer=tf.contrib.layers.xavier_initializer())
 L4 = tf.nn.elu(tf.matmul(L3_flat, W4))
 L4 = tf.nn.dropout(L4, p_keep_hidden)

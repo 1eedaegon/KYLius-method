@@ -115,5 +115,9 @@ accuracy: 51~60%
 4) window를 정사각형 모양으로 바꿈
 lr=0.0002, epoch = 300    
 p_keep_conv, p_keep_hidden = 0.8, 0.7
-accuracy: 
+win : (2, 10), (2,4), (2,3)
+max_pool : (2,5), (3,3), (3,3)
+accuracy: 53~65%
+    
+    
 """

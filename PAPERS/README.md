@@ -1,6 +1,11 @@
 # 참고자료
 위에 pdf 파일 안 올린 건 링크 적음
 
+### - librosa: Audio and Music Signal Analysis in Python ★★★★
+http://conference.scipy.org/proceedings/scipy2015/pdfs/brian_mcfee.pdf
+<pre>
+python library librosa 0.4.0 에 대한 설명
+</pre>
 
 ### - Spectrogram, Cepstrum and Mel-Frequency Analysis ★★★★★
 http://www.speech.cs.cmu.edu/15-492/slides/03_mfcc.pdf

@@ -14,7 +14,7 @@ tf.set_random_seed(777)
 trainData = np.genfromtxt('/home/paperspace/Downloads/trainData.csv', delimiter=',')
 trainData = trainData.reshape(-1, 20, 100)
 testData = np.genfromtxt('/home/paperspace/Downloads/testData.csv', delimiter=',')
-testData = trainData.reshape(-1, 20, 100)
+testData = testData.reshape(-1, 20, 100)
 trainLabel = np.genfromtxt('/home/paperspace/Downloads/trainLabel.csv', delimiter=',')
 testLabel = np.genfromtxt('/home/paperspace/Downloads/testLabel.csv', delimiter=',')
 

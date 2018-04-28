@@ -10,14 +10,13 @@ Created on Thu Apr 26 18:53:10 2018
 import numpy as np
 import tensorflow as tf
 tf.set_random_seed(777) 
-import pandas as pd
 
-trainData = pd.read_csv('/home/paperspace/Downloads/trainData.csv')
+trainData = np.genfromtxt('/home/paperspace/Downloads/trainData.csv', delimiter=',')
 trainData = trainData.reshape(-1, 20, 100)
-testData = pd.read_csv('/home/paperspace/Downloads/testData.csv')
+testData = np.genfromtxt('/home/paperspace/Downloads/testData.csv', delimiter=',')
 testData = trainData.reshape(-1, 20, 100)
-trainLabel = pd.read_csv('/home/paperspace/Downloads/trainLabel.csv')
-testLabel = pd.read_csv('/home/paperspace/Downloads/testLabel.csv')
+trainLabel = np.genfromtxt('/home/paperspace/Downloads/trainLabel.csv', delimiter=',')
+testLabel = np.genfromtxt('/home/paperspace/Downloads/testLabel.csv', delimiter=',')
 
 print(trainData.shape, testData.shape, trainLabel.shape, testLabel.shape)
 # (6631, 20, 100) (2842, 20, 100) (6631,) (2842,)

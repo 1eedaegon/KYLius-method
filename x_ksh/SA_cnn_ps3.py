@@ -39,29 +39,29 @@ p_keep_conv = tf.placeholder(tf.float32, name="p_keep_conv")
 p_keep_hidden = tf.placeholder(tf.float32, name="p_keep_hidden")
 
 # L1 SoundIn shape=(?, 20, 100, 1)
-W1 = tf.get_variable("W1", shape=[2, 10, 1, 32],initializer=tf.contrib.layers.xavier_initializer())
+W1 = tf.get_variable("W1", shape=[2, 2, 1, 32],initializer=tf.contrib.layers.xavier_initializer())
 L1 = tf.nn.conv2d(X_sound, W1, strides=[1, 1, 1, 1], padding='SAME')
 L1 = tf.nn.elu(L1)
-L1 = tf.nn.max_pool(L1, ksize=[1, 2, 5, 1],strides=[1, 2, 5, 1], padding='SAME') 
+L1 = tf.nn.max_pool(L1, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='SAME') 
 L1 = tf.nn.dropout(L1, p_keep_conv)
 
-# L2 Input shape=(?,10,20,32)
+# L2 Input shape=(?,10,50,32)
 W2 = tf.get_variable("W2", shape=[2, 2, 32, 64],initializer=tf.contrib.layers.xavier_initializer())
 L2 = tf.nn.conv2d(L1, W2, strides=[1, 1, 1, 1], padding='SAME')
 L2 = tf.nn.elu(L2)
-L2 = tf.nn.max_pool(L2, ksize=[1, 3, 3, 1],strides=[1, 3, 3, 1], padding='SAME') 
+L2 = tf.nn.max_pool(L2, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='SAME') 
 L2 = tf.nn.dropout(L2, p_keep_conv)
 
-# L3 Input shape=(?,4,7,64)
+# L3 Input shape=(?,5,25,64)
 W3 = tf.get_variable("W3", shape=[2, 2, 64, 128],initializer=tf.contrib.layers.xavier_initializer())
 L3 = tf.nn.conv2d(L2, W3, strides=[1, 1, 1, 1], padding='SAME')
 L3 = tf.nn.elu(L3)
-L3 = tf.nn.max_pool(L3, ksize=[1, 3, 3, 1],strides=[1, 3, 3, 1], padding='SAME') 
+L3 = tf.nn.max_pool(L3, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='SAME') 
 L3 = tf.nn.dropout(L3, p_keep_conv)
-L3_flat= tf.reshape(L3, shape=[-1, 2*3*128])
+L3_flat= tf.reshape(L3, shape=[-1, 3*13*128])
 
 # Final FC 2*3*128 inputs -> 41 outputs
-W4 = tf.get_variable("W4", shape=[2*3*128, 615],initializer=tf.contrib.layers.xavier_initializer())
+W4 = tf.get_variable("W4", shape=[3*13*128, 615],initializer=tf.contrib.layers.xavier_initializer())
 L4 = tf.nn.elu(tf.matmul(L3_flat, W4))
 L4 = tf.nn.dropout(L4, p_keep_hidden)
 W_o = tf.get_variable("W_o", shape=[615,41],initializer=tf.contrib.layers.xavier_initializer())
@@ -112,4 +112,8 @@ accuracy : 43~53%
 lr=0.0002, epoch = 300    
 p_keep_conv, p_keep_hidden = 0.8, 0.7
 accuracy: 51~60%
+4) window를 정사각형 모양으로 바꿈
+lr=0.0002, epoch = 300    
+p_keep_conv, p_keep_hidden = 0.8, 0.7
+accuracy: 
 """

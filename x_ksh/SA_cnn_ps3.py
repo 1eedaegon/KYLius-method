@@ -44,7 +44,6 @@ L1 = tf.nn.conv2d(X_sound, W1, strides=[1, 1, 1, 1], padding='SAME')
 L1 = tf.nn.elu(L1)
 L1 = tf.nn.max_pool(L1, ksize=[1, 4, 10, 1],strides=[1, 4, 10, 1], padding='SAME') # l1 shape=(?, 20, 100, 32)
 L1 = tf.nn.dropout(L1, p_keep_conv)
-L1_flat= tf.reshape(L1, shape=[-1, 5*10*32])
 
 # L2 Input shape=(?,5,10,32)
 W2 = tf.get_variable("W2", shape=[2, 10, 32, 64],initializer=tf.contrib.layers.xavier_initializer())
@@ -56,7 +55,7 @@ L2_flat= tf.reshape(L1, shape=[-1, 2*64])
 
 # Final FC 2*64 inputs -> 10 outputs
 W4 = tf.get_variable("W4", shape=[2*64, 256],initializer=tf.contrib.layers.xavier_initializer())
-L4 = tf.nn.elu(tf.matmul(L1_flat, W4))
+L4 = tf.nn.elu(tf.matmul(L2_flat, W4))
 L4 = tf.nn.dropout(L4, p_keep_hidden)
 W_o = tf.get_variable("W_o", shape=[256,41],initializer=tf.contrib.layers.xavier_initializer())
 b = tf.Variable(tf.random_normal([41]))

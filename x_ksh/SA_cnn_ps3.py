@@ -55,16 +55,16 @@ L2 = tf.nn.dropout(L2, p_keep_conv)
 # L3 Input shape=(?,4,7,64)
 W3 = tf.get_variable("W3", shape=[2, 2, 64, 128],initializer=tf.contrib.layers.xavier_initializer())
 L3 = tf.nn.conv2d(L2, W3, strides=[1, 1, 1, 1], padding='SAME')
-L3 = tf.nn.elu(L2)
+L3 = tf.nn.elu(L3)
 L3 = tf.nn.max_pool(L3, ksize=[1, 3, 3, 1],strides=[1, 3, 3, 1], padding='SAME') 
 L3 = tf.nn.dropout(L3, p_keep_conv)
-L3_flat= tf.reshape(L2, shape=[-1, 2*3*64])
+L3_flat= tf.reshape(L3, shape=[-1, 2*3*128])
 
 # Final FC 2*64 inputs -> 10 outputs
-W4 = tf.get_variable("W4", shape=[2*3*64, 512],initializer=tf.contrib.layers.xavier_initializer())
+W4 = tf.get_variable("W4", shape=[2*3*128, 615],initializer=tf.contrib.layers.xavier_initializer())
 L4 = tf.nn.elu(tf.matmul(L3_flat, W4))
 L4 = tf.nn.dropout(L4, p_keep_hidden)
-W_o = tf.get_variable("W_o", shape=[512,41],initializer=tf.contrib.layers.xavier_initializer())
+W_o = tf.get_variable("W_o", shape=[615,41],initializer=tf.contrib.layers.xavier_initializer())
 b = tf.Variable(tf.random_normal([41]))
 logits = tf.matmul(L4, W_o) + b
 
@@ -108,12 +108,8 @@ accuracy : 36~46% (epoch 50 이상부터 계속 왔다갔다 함)
 2) 위랑 같음
 lr=0.0002~5, epoch = 500
 accuracy : 43~53% 
-3) 위랑 같음
-lr=0.0002, epoch = 500
-p_keep_conv, p_keep_hidden = 0.9, 1.0
-accuracy : 
-4) con2d layer * 3 + FC
-    
-
-
+3) con2d layer * 3 + FC
+lr=0.0002, epoch = 300    
+p_keep_conv, p_keep_hidden = 0.8, 0.7
+accuracy: 51~60%
 """

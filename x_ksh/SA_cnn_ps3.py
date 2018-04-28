@@ -99,6 +99,7 @@ for epoch in range(training_epochs):
         save_path = saver.save(sess, '/home/paperspace/Downloads/optx/optx')
 print('Finished!')
 
+#마지막에 정확도랑 코스트 그래프로 출력해주는 코드 넣기
 """
 1) conv2d layer * 2 + FC 
 learning_rate = 0.001
@@ -119,7 +120,11 @@ win : (2, 10), (2,4), (2,3)
 max_pool : (2,5), (3,3), (3,3)
 accuracy: 53~65%
 5) 3에서 윈도우 조절2
-win : (2, 10), (2,10), (2,10)
-max_pool : (3,3), (3,3), (3,3)
- 
+win : (2, 10), (2,6), (2,4)
+max_pool : (2,3), (2,3), (2,3)
+accuracy : 50~60%
+
+(현재까지 4가 제일 좋음) 
+
+
 """

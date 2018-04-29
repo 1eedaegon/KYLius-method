@@ -9,7 +9,6 @@ Created on Thu Apr 26 18:53:10 2018
 #import important modules
 import numpy as np
 import tensorflow as tf
-from matplotlib import pyplot as plt
 tf.set_random_seed(777) 
 
 trainData = np.genfromtxt('/home/paperspace/Downloads/trainData3.csv', delimiter=',')
@@ -81,33 +80,24 @@ saver = tf.train.Saver()
 
 # train my model
 print('Learning started. It takes sometime.')
-avg_cost = np.repeat(0, training_epochs)
-acc = np.repeat(0, training_epochs/steps_for_validate)
-
 for epoch in range(training_epochs):
-    avg_cost[epoch] = 0
+    avg_cost = 0
     total_batch = int(len(trainData) / batch_size)
     for i in range(total_batch):
         batch_xs = trainData[i*batch_size:(i+1)*batch_size]
         batch_ys = trainLabel[i*batch_size:(i+1)*batch_size].reshape(-1, 1)
         feed_dict = {X: batch_xs, Y: batch_ys, p_keep_conv: .8, p_keep_hidden: 0.7}
         c, _ = sess.run([cost, optimizer], feed_dict=feed_dict)
-        avg_cost[epoch] += c / total_batch
+        avg_cost += c / total_batch
     print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost))
     if epoch % steps_for_validate == steps_for_validate-1:
         correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(Y_onehot, 1))
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
         x=np.random.choice(testLabel.shape[0], 300, replace=False)
-        acc[epoch/steps_for_validate] = sess.run(accuracy, feed_dict={
-                X: testData[x], Y: testLabel[x].reshape(-1, 1), p_keep_conv: 1, p_keep_hidden: 1})
-        print('Accuracy:', acc[epoch/steps_for_validate])
+        print('Accuracy:', sess.run(accuracy, feed_dict={
+                X: testData[x], Y: testLabel[x].reshape(-1, 1), p_keep_conv: 1, p_keep_hidden: 1}))
         save_path = saver.save(sess, '/home/paperspace/Downloads/optx/optx')
 print('Finished!')
-
-plt.plot(avg_cost)
-plt.show()
-plt.plot(acc)
-plt.show()
 
 #마지막에 정확도랑 코스트 그래프로 출력해주는 코드 넣기
 #정규화/ stft

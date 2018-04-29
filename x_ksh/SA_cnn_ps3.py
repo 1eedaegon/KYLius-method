@@ -11,12 +11,12 @@ import numpy as np
 import tensorflow as tf
 tf.set_random_seed(777) 
 
-trainData = np.genfromtxt('/home/paperspace/Downloads/trainData.csv', delimiter=',')
-trainData = trainData.reshape(-1, 20, 100)
-testData = np.genfromtxt('/home/paperspace/Downloads/testData.csv', delimiter=',')
-testData = testData.reshape(-1, 20, 100)
-trainLabel = np.genfromtxt('/home/paperspace/Downloads/trainLabel.csv', delimiter=',')
-testLabel = np.genfromtxt('/home/paperspace/Downloads/testLabel.csv', delimiter=',')
+trainData = np.genfromtxt('/home/paperspace/Downloads/trainData3.csv', delimiter=',')
+trainData = trainData.reshape(-1, 40, 100)
+testData = np.genfromtxt('/home/paperspace/Downloads/testData3.csv', delimiter=',')
+testData = testData.reshape(-1, 40, 100)
+trainLabel = np.genfromtxt('/home/paperspace/Downloads/trainLabel3.csv', delimiter=',')
+testLabel = np.genfromtxt('/home/paperspace/Downloads/testLabel3.csv', delimiter=',')
 
 print(trainData.shape, testData.shape, trainLabel.shape, testLabel.shape)
 # (6631, 20, 100) (2842, 20, 100) (6631,) (2842,)
@@ -31,37 +31,37 @@ batch_size = 100
 steps_for_validate = 5
 
 #placeholder
-X = tf.placeholder(tf.float32, [None, 20, 100], name="X")
-X_sound = tf.reshape(X, [-1, 20, 100, 1])          # 20*100*1 (frequency, time, amplitude)
+X = tf.placeholder(tf.float32, [None, 40, 100], name="X")
+X_sound = tf.reshape(X, [-1, 40, 100, 1])          # 20*100*1 (frequency, time, amplitude)
 Y = tf.placeholder(tf.int32, [None, 1], name="Y")
 Y_onehot=tf.reshape(tf.one_hot(Y, 41), [-1, 41])
 p_keep_conv = tf.placeholder(tf.float32, name="p_keep_conv")
 p_keep_hidden = tf.placeholder(tf.float32, name="p_keep_hidden")
 
 # L1 SoundIn shape=(?, 20, 100, 1)
-W1 = tf.get_variable("W1", shape=[2, 10, 1, 32],initializer=tf.contrib.layers.xavier_initializer())
+W1 = tf.get_variable("W1", shape=[2, 5, 1, 32],initializer=tf.contrib.layers.xavier_initializer())
 L1 = tf.nn.conv2d(X_sound, W1, strides=[1, 1, 1, 1], padding='SAME')
 L1 = tf.nn.elu(L1)
-L1 = tf.nn.max_pool(L1, ksize=[1, 3, 3, 1],strides=[1, 3, 3, 1], padding='SAME') 
+L1 = tf.nn.max_pool(L1, ksize=[1, 2, 5, 1],strides=[1, 2, 5, 1], padding='SAME') 
 L1 = tf.nn.dropout(L1, p_keep_conv)
 
 # L2 Input shape=(?,7,34,32)
-W2 = tf.get_variable("W2", shape=[2, 10, 32, 64],initializer=tf.contrib.layers.xavier_initializer())
+W2 = tf.get_variable("W2", shape=[3, 3, 32, 64],initializer=tf.contrib.layers.xavier_initializer())
 L2 = tf.nn.conv2d(L1, W2, strides=[1, 1, 1, 1], padding='SAME')
 L2 = tf.nn.elu(L2)
 L2 = tf.nn.max_pool(L2, ksize=[1, 3, 3, 1],strides=[1, 3, 3, 1], padding='SAME') 
 L2 = tf.nn.dropout(L2, p_keep_conv)
 
 # L3 Input shape=(?,3,12,64)
-W3 = tf.get_variable("W3", shape=[2, 10, 64, 128],initializer=tf.contrib.layers.xavier_initializer())
+W3 = tf.get_variable("W3", shape=[3, 3, 64, 128],initializer=tf.contrib.layers.xavier_initializer())
 L3 = tf.nn.conv2d(L2, W3, strides=[1, 1, 1, 1], padding='SAME')
 L3 = tf.nn.elu(L3)
 L3 = tf.nn.max_pool(L3, ksize=[1, 3, 3, 1],strides=[1, 3, 3, 1], padding='SAME') 
 L3 = tf.nn.dropout(L3, p_keep_conv)
-L3_flat= tf.reshape(L3, shape=[-1, 4*128])
+L3_flat= tf.reshape(L3, shape=[-1, 3*3*128])
 
 # Final FC 2*3*128 inputs -> 41 outputs
-W4 = tf.get_variable("W4", shape=[4*128, 512],initializer=tf.contrib.layers.xavier_initializer())
+W4 = tf.get_variable("W4", shape=[3*3*128, 512],initializer=tf.contrib.layers.xavier_initializer())
 L4 = tf.nn.elu(tf.matmul(L3_flat, W4))
 L4 = tf.nn.dropout(L4, p_keep_hidden)
 W_o = tf.get_variable("W_o", shape=[512,41],initializer=tf.contrib.layers.xavier_initializer())
@@ -100,31 +100,25 @@ for epoch in range(training_epochs):
 print('Finished!')
 
 #마지막에 정확도랑 코스트 그래프로 출력해주는 코드 넣기
+#정규화/ stft
+#label 1이랑 0이랑 나누기
 """
-1) conv2d layer * 2 + FC 
-learning_rate = 0.001
-training_epochs = 500
-p_keep_conv, p_keep_hidden = 0.7, 0.5
-accuracy : 36~46% (epoch 50 이상부터 계속 왔다갔다 함)
-2) 위랑 같음
-lr=0.0002~5, epoch = 500
-accuracy : 43~53% 
-3) con2d layer * 3 + FC
+4) con2d layer * 3 + FC
 lr=0.0002, epoch = 300    
 p_keep_conv, p_keep_hidden = 0.8, 0.7
-win : (2, 10), (2,2), (2,2)
-max_pool : (2,5), (3,3), (3,3)
-accuracy: 51~60%
-4) 3에서 윈도우 조절
 win : (2, 10), (2,4), (2,3)
 max_pool : (2,5), (3,3), (3,3)
 accuracy: 53~65%
-5) 3에서 윈도우 조절2
-win : (2, 10), (2,6), (2,4)
-max_pool : (2,3), (2,3), (2,3)
-accuracy : 50~60%
 
-(현재까지 4가 제일 좋음) 
+6) 4에서 데이터 전처리 다르게 -> data2
+(절대값말고 원래값)
+accuracy : 62~74%
 
+7) 6에서 n_mfcc 40으로 -> data3
+accuracy : 60~70% 
+(6이랑 비슷한 듯. 6이 더 나은 것 같기도.)
+
+8) 7에서 창문 사이즈 조절
+accuracy : 66~72% 
 
 """

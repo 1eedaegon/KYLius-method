@@ -9,13 +9,13 @@ Created on Thu Apr 26 18:53:10 2018
 import librosa
 import soundfile as sf
 import numpy as np
-
+from matplotlib import pyplot as plt
 #import labels
 import tensorflow as tf
 tf.set_random_seed(777) 
 import pandas as pd
-#train = pd.read_csv('/Users/kimseunghyuck/desktop/sound_train.csv')
-train = pd.read_csv('/home/paperspace/Downloads/audio_train.csv')
+train = pd.read_csv('/Users/kimseunghyuck/desktop/sound_train.csv')
+#train = pd.read_csv('/home/paperspace/Downloads/audio_train.csv')
 
 #train/test, Data/Label split
 from sklearn.model_selection import train_test_split
@@ -26,8 +26,8 @@ trainLabel = train_set.values[:,1]
 testLabel = test_set.values[:,1]
 
 #data load and extract mfcc (scaling indluded)
-#path = '/Users/kimseunghyuck/desktop/audio_train/'
-path = '/home/paperspace/Downloads/audio_train/'
+path = '/Users/kimseunghyuck/desktop/audio_train/'
+#path = '/home/paperspace/Downloads/audio_train/'
 
 def see_how_long(file):
     c=[]
@@ -44,27 +44,39 @@ def see_how_long(file):
 #n2=see_how_long(testfile)
 #print(np.max(n2), np.min(n2))    #2584 26
 
+#show me approximate wave shape
+filename= trainfile[111]
+y, sr = sf.read(path+filename, dtype='float32')
+mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=20)
+length=mfcc.shape[1]
+plt.plot(mfcc[3,])
+plt.plot(np.abs(mfcc[3,]))
+plt.plot(mfcc[2,])
+plt.plot(np.abs(mfcc[3,]))
+
+#short time(100 segments) extract
 def short_time_extract(file):
-    #zero padding to file.shape[0] X 20 X 3000    
+    #zero padding to file.shape[0] X 40 X 3000    
     n=file.shape[0]
-    array = np.repeat(0, n * 20 * 100).reshape(n, 20, 100)
-    k=0
+    array = np.repeat(0, n * 40 * 100).reshape(n, 40, 100)
+    k=0    
+    filename= trainfile[111]
     for filename in file:    
         y, sr = sf.read(path+filename, dtype='float32')
-        mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=20)
+        mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=40)
         length=mfcc.shape[1]
         abs_mfcc=np.abs(mfcc)
         if length == 100:
-            array[k, :, :]=abs_mfcc
+            array[k, :, :]=mfcc
         elif length < 100:
-            array[k, :, :length]=abs_mfcc
+            array[k, :, :length]=mfcc
         elif length > 100:
             argmax=np.argmax(abs_mfcc, axis=1)
             sample=[]
             for i in range(np.max(argmax)):
                 sample.append(np.sum((argmax>=i) & (argmax <i+100)))
             start=sample.index(max(sample))
-            array[k, :, :100]=abs_mfcc[:, start:start+100]
+            array[k, :, :100]=mfcc[:, start:start+100]
         k+=1
     return(array)
 
@@ -92,16 +104,15 @@ testLabel=Labeling(testLabel)
 print(min(trainLabel), max(trainLabel), min(testLabel), max(testLabel))
 #0 40 0 40
 
-"""
 #csv downdload totally about 600MB
-trainData2D=trainData.reshape(-1, 20*100)
-testData2D=testData.reshape(-1, 20*100)
-np.savetxt('/Users/kimseunghyuck/desktop/trainData.csv', 
+trainData2D=trainData.reshape(-1, 40*100)
+testData2D=testData.reshape(-1, 40*100)
+np.savetxt('/Users/kimseunghyuck/desktop/trainData3.csv', 
            trainData2D, delimiter=",")
-np.savetxt('/Users/kimseunghyuck/desktop/testData.csv', 
+np.savetxt('/Users/kimseunghyuck/desktop/testData3.csv', 
            testData2D, delimiter=",")
-np.savetxt('/Users/kimseunghyuck/desktop/trainLabel.csv', 
+np.savetxt('/Users/kimseunghyuck/desktop/trainLabel3.csv', 
            trainLabel, delimiter=",")
-np.savetxt('/Users/kimseunghyuck/desktop/testLabel.csv', 
+np.savetxt('/Users/kimseunghyuck/desktop/testLabel3.csv', 
            testLabel, delimiter=",")
-"""
+

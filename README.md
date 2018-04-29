@@ -53,23 +53,17 @@ mfcc로 하면 41개 속성값이 나옴. 다른 특징 붙이니까 192개로 �
 </pre>
 
 ## 할거
-1. 각자 만들고 있는 모델 완성하기
+1. 각자 코드 완성/ 여러가지로 돌려보고 정확도랑 인수값 잘 기록해놓기
 <pre>
-각자 전부(승혁, 상욱, 대곤, 수원)
-일요일 모이기 전까지 완성된 코드 올리기
-코드+csv파일+opt올리기
-(정확도 좋든 안좋든)
+대곤: stft(core.stft)
+상욱: 캐글 버전
+승혁: mfcc 하던거
+수원: melspectogram
 </pre>
 
-2. 용어, 함수(메소드), 알고리즘 나눠서 공부
+2. 발표할 개요 생각해보기
 <pre>
-stft(Short-time Fourier transform) :복소수 값을 갖는 행렬을 반환 - 승혁
-- core.stft
-- freature.chroma.stft
-mfcc(Mel-frequency cepstral coefficients), - 상욱
-melspectrogram(Mel-scaled power spectrogram), - 수원
-spectral_contrast(spectral contrast), - 수원
-tonnetz(tonal centroid features) - 대곤
+시간날때
 </pre>
 
 

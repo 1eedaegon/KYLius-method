@@ -1,11 +1,18 @@
 # 참고자료
 위에 pdf 파일 안 올린 건 링크 적음
 
+### Tensor Flow를 이용한 음향인식기 제작 ★★★★
+http://cscp2.sogang.ac.kr/CSE5311/index.php/Tensor_Flow%EB%A5%BC_%EC%9D%B4%EC%9A%A9%ED%95%9C_%EC%9D%8C%ED%96%A5%EC%9D%B8%EC%8B%9D%EA%B8%B0_%EC%A0%9C%EC%9E%91#.ED.95.99.EC.8A.B5.EC.9D.84_.EC.9C.84.ED.95.9C_Data_set_.EA.B5.AC.EC.B6.95
+
+
+
 ### - librosa: Audio and Music Signal Analysis in Python ★★★★
 http://conference.scipy.org/proceedings/scipy2015/pdfs/brian_mcfee.pdf
 <pre>
 python library librosa 0.4.0 에 대한 설명
 </pre>
+
+
 
 ### - Spectrogram, Cepstrum and Mel-Frequency Analysis ★★★★★
 http://www.speech.cs.cmu.edu/15-492/slides/03_mfcc.pdf

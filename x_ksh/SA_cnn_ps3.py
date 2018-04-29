@@ -39,21 +39,21 @@ p_keep_conv = tf.placeholder(tf.float32, name="p_keep_conv")
 p_keep_hidden = tf.placeholder(tf.float32, name="p_keep_hidden")
 
 # L1 SoundIn shape=(?, 20, 100, 1)
-W1 = tf.get_variable("W1", shape=[2, 10, 1, 32],initializer=tf.contrib.layers.xavier_initializer())
+W1 = tf.get_variable("W1", shape=[2, 5, 1, 32],initializer=tf.contrib.layers.xavier_initializer())
 L1 = tf.nn.conv2d(X_sound, W1, strides=[1, 1, 1, 1], padding='SAME')
 L1 = tf.nn.elu(L1)
 L1 = tf.nn.max_pool(L1, ksize=[1, 2, 5, 1],strides=[1, 2, 5, 1], padding='SAME') 
 L1 = tf.nn.dropout(L1, p_keep_conv)
 
 # L2 Input shape=(?,7,34,32)
-W2 = tf.get_variable("W2", shape=[2, 4, 32, 64],initializer=tf.contrib.layers.xavier_initializer())
+W2 = tf.get_variable("W2", shape=[3, 3, 32, 64],initializer=tf.contrib.layers.xavier_initializer())
 L2 = tf.nn.conv2d(L1, W2, strides=[1, 1, 1, 1], padding='SAME')
 L2 = tf.nn.elu(L2)
 L2 = tf.nn.max_pool(L2, ksize=[1, 3, 3, 1],strides=[1, 3, 3, 1], padding='SAME') 
 L2 = tf.nn.dropout(L2, p_keep_conv)
 
 # L3 Input shape=(?,3,12,64)
-W3 = tf.get_variable("W3", shape=[2, 3, 64, 128],initializer=tf.contrib.layers.xavier_initializer())
+W3 = tf.get_variable("W3", shape=[3, 3, 64, 128],initializer=tf.contrib.layers.xavier_initializer())
 L3 = tf.nn.conv2d(L2, W3, strides=[1, 1, 1, 1], padding='SAME')
 L3 = tf.nn.elu(L3)
 L3 = tf.nn.max_pool(L3, ksize=[1, 3, 3, 1],strides=[1, 3, 3, 1], padding='SAME') 
@@ -107,7 +107,12 @@ p_keep_conv, p_keep_hidden = 0.8, 0.7
 win : (2, 10), (2,4), (2,3)
 max_pool : (2,5), (3,3), (3,3)
 accuracy: 53~65%
-6) 4에서 데이터 전처리 다르게
+6) 4에서 데이터 전처리 다르게 -> data2
 (절대값말고 원래값)
 accuracy : 62~74%
+7) 6에서 n_mfcc 40으로 -> data3
+accuracy : 60~70% 
+(6이랑 비슷한 듯. 6이 더 나은 것 같기도.)
+8) 7에서 창문 사이즈 조절
+
 """

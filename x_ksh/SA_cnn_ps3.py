@@ -11,12 +11,12 @@ import numpy as np
 import tensorflow as tf
 tf.set_random_seed(777) 
 
-trainData = np.genfromtxt('/home/paperspace/Downloads/trainData2.csv', delimiter=',')
-trainData = trainData.reshape(-1, 20, 100)
-testData = np.genfromtxt('/home/paperspace/Downloads/testData2.csv', delimiter=',')
-testData = testData.reshape(-1, 20, 100)
-trainLabel = np.genfromtxt('/home/paperspace/Downloads/trainLabel2.csv', delimiter=',')
-testLabel = np.genfromtxt('/home/paperspace/Downloads/testLabel2.csv', delimiter=',')
+trainData = np.genfromtxt('/home/paperspace/Downloads/trainData3.csv', delimiter=',')
+trainData = trainData.reshape(-1, 40, 100)
+testData = np.genfromtxt('/home/paperspace/Downloads/testData3.csv', delimiter=',')
+testData = testData.reshape(-1, 40, 100)
+trainLabel = np.genfromtxt('/home/paperspace/Downloads/trainLabel3.csv', delimiter=',')
+testLabel = np.genfromtxt('/home/paperspace/Downloads/testLabel3.csv', delimiter=',')
 
 print(trainData.shape, testData.shape, trainLabel.shape, testLabel.shape)
 # (6631, 20, 100) (2842, 20, 100) (6631,) (2842,)
@@ -31,8 +31,8 @@ batch_size = 100
 steps_for_validate = 5
 
 #placeholder
-X = tf.placeholder(tf.float32, [None, 20, 100], name="X")
-X_sound = tf.reshape(X, [-1, 20, 100, 1])          # 20*100*1 (frequency, time, amplitude)
+X = tf.placeholder(tf.float32, [None, 40, 100], name="X")
+X_sound = tf.reshape(X, [-1, 40, 100, 1])          # 20*100*1 (frequency, time, amplitude)
 Y = tf.placeholder(tf.int32, [None, 1], name="Y")
 Y_onehot=tf.reshape(tf.one_hot(Y, 41), [-1, 41])
 p_keep_conv = tf.placeholder(tf.float32, name="p_keep_conv")
@@ -58,10 +58,10 @@ L3 = tf.nn.conv2d(L2, W3, strides=[1, 1, 1, 1], padding='SAME')
 L3 = tf.nn.elu(L3)
 L3 = tf.nn.max_pool(L3, ksize=[1, 3, 3, 1],strides=[1, 3, 3, 1], padding='SAME') 
 L3 = tf.nn.dropout(L3, p_keep_conv)
-L3_flat= tf.reshape(L3, shape=[-1, 2*3*128])
+L3_flat= tf.reshape(L3, shape=[-1, 3*3*128])
 
 # Final FC 2*3*128 inputs -> 41 outputs
-W4 = tf.get_variable("W4", shape=[2*3*128, 512],initializer=tf.contrib.layers.xavier_initializer())
+W4 = tf.get_variable("W4", shape=[3*3*128, 512],initializer=tf.contrib.layers.xavier_initializer())
 L4 = tf.nn.elu(tf.matmul(L3_flat, W4))
 L4 = tf.nn.dropout(L4, p_keep_hidden)
 W_o = tf.get_variable("W_o", shape=[512,41],initializer=tf.contrib.layers.xavier_initializer())
@@ -108,5 +108,6 @@ win : (2, 10), (2,4), (2,3)
 max_pool : (2,5), (3,3), (3,3)
 accuracy: 53~65%
 6) 4에서 데이터 전처리 다르게
-
+(절대값말고 원래값)
+accuracy : 62~74%
 """

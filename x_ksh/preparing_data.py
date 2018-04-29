@@ -56,14 +56,14 @@ plt.plot(np.abs(mfcc[3,]))
 
 #short time(100 segments) extract
 def short_time_extract(file):
-    #zero padding to file.shape[0] X 20 X 3000    
+    #zero padding to file.shape[0] X 40 X 3000    
     n=file.shape[0]
-    array = np.repeat(0, n * 20 * 100).reshape(n, 20, 100)
+    array = np.repeat(0, n * 40 * 100).reshape(n, 40, 100)
     k=0    
     filename= trainfile[111]
     for filename in file:    
         y, sr = sf.read(path+filename, dtype='float32')
-        mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=20)
+        mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=40)
         length=mfcc.shape[1]
         abs_mfcc=np.abs(mfcc)
         if length == 100:
@@ -105,14 +105,14 @@ print(min(trainLabel), max(trainLabel), min(testLabel), max(testLabel))
 #0 40 0 40
 
 #csv downdload totally about 600MB
-trainData2D=trainData.reshape(-1, 20*100)
-testData2D=testData.reshape(-1, 20*100)
-np.savetxt('/Users/kimseunghyuck/desktop/trainData2.csv', 
+trainData2D=trainData.reshape(-1, 40*100)
+testData2D=testData.reshape(-1, 40*100)
+np.savetxt('/Users/kimseunghyuck/desktop/trainData3.csv', 
            trainData2D, delimiter=",")
-np.savetxt('/Users/kimseunghyuck/desktop/testData2.csv', 
+np.savetxt('/Users/kimseunghyuck/desktop/testData3.csv', 
            testData2D, delimiter=",")
-np.savetxt('/Users/kimseunghyuck/desktop/trainLabel2.csv', 
+np.savetxt('/Users/kimseunghyuck/desktop/trainLabel3.csv', 
            trainLabel, delimiter=",")
-np.savetxt('/Users/kimseunghyuck/desktop/testLabel2.csv', 
+np.savetxt('/Users/kimseunghyuck/desktop/testLabel3.csv', 
            testLabel, delimiter=",")
 

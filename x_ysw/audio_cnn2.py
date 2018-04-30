@@ -15,8 +15,8 @@ import pandas as pd
 
 tf.set_random_seed(777) 
 
-train_info = pd.read_csv("/home/itwill03/sound/train.csv",delimiter=',')
-train_data = np.genfromtxt("/home/itwill03/sound/yy/feature_train.csv", delimiter=',')
+train_info = pd.read_csv("C:/data/sound/train.csv",delimiter=',')
+train_data = np.genfromtxt("C:/data/sound/feature_train.csv", delimiter=',')
 
 
 #label set
@@ -45,7 +45,7 @@ validataLabel = validate_set.values[:,-1]
 # 텐서플로우 모델 생성
 n_dim = 193
 n_classes = 41
-training_epochs = 500
+training_epochs = 10
 learning_rate = 0.001
 batch_size = 100
 steps_for_validate = 5
@@ -58,18 +58,18 @@ p_keep_conv = tf.placeholder(tf.float32, name='p_keep_conv')
 p_keep_hidden = tf.placeholder(tf.float32, name='p_keep_hidden')
 
 
-c1 = tf.layers.conv2d(tf.reshape(X, [-1, 1, n_dim, 1]), 32, (1, 5), padding='same', 
+c1 = tf.layers.conv2d(tf.reshape(X, [-1, 1, n_dim, 1]), 32, kernel_size=[1, 5], strides=(1, 1), padding='same', 
                       activation=tf.nn.elu, name="c1")  
 p1 = tf.layers.max_pooling2d(inputs=c1, pool_size=[1, 2], strides=2) 
 p1 = tf.nn.dropout(p1, p_keep_conv)
 
 
-c2 = tf.layers.conv2d(tf.reshape(p1, [-1, 1, 96, 32]), 64, (1, 5), padding='same', 
+c2 = tf.layers.conv2d(tf.reshape(p1, [-1, 1, 96, 32]), 64, kernel_size=[1,5], strides=(1, 1), padding='same', 
                       activation=tf.nn.elu, name="c2")
 p2 = tf.layers.max_pooling2d(inputs=c2, pool_size=[1, 2], strides=2) #shape = [?, 1, 48, 100]
 p2 = tf.nn.dropout(p2, p_keep_conv)
 
-c3 = tf.layers.conv2d(tf.reshape(p1, [-1, 1, 48, 64]), 128, (1, 5), padding='same', 
+c3 = tf.layers.conv2d(tf.reshape(p1, [-1, 1, 48, 64]), 128, kernel_size=[1,5], strides=(1, 1), padding='same', 
                       activation=tf.nn.elu, name="c3")
 p3 = tf.layers.max_pooling2d(inputs=c2, pool_size=[1, 2], strides=2) #shape = [?, 1, 24, 200]
 p3 = tf.nn.dropout(p3, p_keep_conv)

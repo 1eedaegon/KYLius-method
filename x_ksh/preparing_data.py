@@ -45,7 +45,7 @@ def see_how_long(file):
 #print(np.max(n2), np.min(n2))    #2584 26
 
 #show me approximate wave shape
-filename= trainfile[111]
+filename= trainfile[11]
 y, sr = sf.read(path+filename, dtype='float32')
 mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=20)
 length=mfcc.shape[1]
@@ -54,46 +54,48 @@ plt.plot(np.abs(mfcc[3,]))
 plt.plot(mfcc[2,])
 plt.plot(np.abs(mfcc[3,]))
 
-#short time(100 segments) extract
-def short_time_extract(file):
+#5 seconds(430 segments) extract
+def five_sec_extract(file):
     #zero padding to file.shape[0] X 40 X 3000    
     n=file.shape[0]
-    array = np.repeat(0, n * 40 * 100).reshape(n, 40, 100)
+    array = np.repeat(0, n * 20 * 430).reshape(n, 20, 430)
     k=0    
-    filename= trainfile[111]
     for filename in file:    
         y, sr = sf.read(path+filename, dtype='float32')
-        mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=40)
+        mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=20)
         length=mfcc.shape[1]
         abs_mfcc=np.abs(mfcc)
-        if length == 100:
+        if length == 430:
             array[k, :, :]=mfcc
-        elif length < 100:
+        elif length < 430:
             array[k, :, :length]=mfcc
-        elif length > 100:
+        elif length > 430:
             argmax=np.argmax(abs_mfcc, axis=1)
             sample=[]
             for i in range(np.max(argmax)):
-                sample.append(np.sum((argmax>=i) & (argmax <i+100)))
+                sample.append(np.sum((argmax>=i) & (argmax <i+430)))
             start=sample.index(max(sample))
-            array[k, :, :100]=mfcc[:, start:start+100]
+            array[k, :, :]=mfcc[:, start:start+430]
         k+=1
+    array=array.reshape(-1,20*430)
+    array=((array-np.mean(array))/np.std(array)).reshape(-1,20,430)
     return(array)
 
-trainData=short_time_extract(trainfile)
-testData=short_time_extract(testfile)
+trainData=five_sec_extract(trainfile)
+testData=five_sec_extract(testfile)
+
 
 print(trainData.shape, testData.shape, trainLabel.shape, testLabel.shape)
-# (6631, 20, 100) (2842, 20, 100) (6631,) (2842,)
+# (6631, 20, 430) (2842, 20, 430) (6631,) (2842,)
 
 #how many kinds of label?
 print(len(np.unique(trainLabel)))   #41
 print(len(np.unique(testLabel)))    #41
 
 #label string -> integer(0~40)
-idx = np.unique(trainLabel)
 
 def Labeling(label):
+    idx = np.unique(train.values[:,1])
     r=pd.Series(label)
     for i in range(len(idx)):
         r[r.values==idx[i]]=i
@@ -104,15 +106,16 @@ testLabel=Labeling(testLabel)
 print(min(trainLabel), max(trainLabel), min(testLabel), max(testLabel))
 #0 40 0 40
 
+
 #csv downdload totally about 600MB
-trainData2D=trainData.reshape(-1, 40*100)
-testData2D=testData.reshape(-1, 40*100)
-np.savetxt('/Users/kimseunghyuck/desktop/trainData3.csv', 
+trainData2D=trainData.reshape(-1, 20*430)
+testData2D=testData.reshape(-1, 20*430)
+np.savetxt('/Users/kimseunghyuck/desktop/trainData4.csv', 
            trainData2D, delimiter=",")
-np.savetxt('/Users/kimseunghyuck/desktop/testData3.csv', 
+np.savetxt('/Users/kimseunghyuck/desktop/testData4.csv', 
            testData2D, delimiter=",")
-np.savetxt('/Users/kimseunghyuck/desktop/trainLabel3.csv', 
+np.savetxt('/Users/kimseunghyuck/desktop/trainLabel4.csv', 
            trainLabel, delimiter=",")
-np.savetxt('/Users/kimseunghyuck/desktop/testLabel3.csv', 
+np.savetxt('/Users/kimseunghyuck/desktop/testLabel4.csv', 
            testLabel, delimiter=",")
 

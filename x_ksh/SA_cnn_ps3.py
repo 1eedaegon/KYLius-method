@@ -12,27 +12,27 @@ import tensorflow as tf
 tf.set_random_seed(777) 
 
 trainData = np.genfromtxt('/home/paperspace/Downloads/trainData3.csv', delimiter=',')
-trainData = trainData.reshape(-1, 40, 100)
+trainData = trainData.reshape(-1, 20, 430)
 testData = np.genfromtxt('/home/paperspace/Downloads/testData3.csv', delimiter=',')
-testData = testData.reshape(-1, 40, 100)
+testData = testData.reshape(-1, 20, 430)
 trainLabel = np.genfromtxt('/home/paperspace/Downloads/trainLabel3.csv', delimiter=',')
 testLabel = np.genfromtxt('/home/paperspace/Downloads/testLabel3.csv', delimiter=',')
 
 print(trainData.shape, testData.shape, trainLabel.shape, testLabel.shape)
-# (6631, 20, 100) (2842, 20, 100) (6631,) (2842,)
+# (6631, 20, 430) (2842, 20, 430) (6631,) (2842,)
 
 #다시 돌릴때는 여기부터 
 tf.reset_default_graph()     #그래프 초기화
 
 # hyper parameters
 learning_rate = 0.0002
-training_epochs = 300
+training_epochs = 200
 batch_size = 100
 steps_for_validate = 5
 
 #placeholder
-X = tf.placeholder(tf.float32, [None, 40, 100], name="X")
-X_sound = tf.reshape(X, [-1, 40, 100, 1])          # 20*100*1 (frequency, time, amplitude)
+X = tf.placeholder(tf.float32, [None, 20, 430], name="X")
+X_sound = tf.reshape(X, [-1, 20, 430, 1])          # 20*100*1 (frequency, time, amplitude)
 Y = tf.placeholder(tf.int32, [None, 1], name="Y")
 Y_onehot=tf.reshape(tf.one_hot(Y, 41), [-1, 41])
 p_keep_conv = tf.placeholder(tf.float32, name="p_keep_conv")

@@ -25,8 +25,8 @@ print(trainData.shape, testData.shape, trainLabel.shape, testLabel.shape)
 tf.reset_default_graph()     #그래프 초기화
 
 # hyper parameters
-learning_rate = 0.0004
-training_epochs = 400
+learning_rate = 0.0002
+training_epochs = 700
 batch_size = 300
 steps_for_validate = 5
 

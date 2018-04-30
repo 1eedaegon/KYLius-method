@@ -118,9 +118,7 @@ p_keep_conv, p_keep_hidden = 0.8, 0.7
 accuracy : 66~74%
 
 11) 9와 같고
-lr=0.0002, epoch = 700    
-win : (2, 43), (3,3), (3,3)
-max_pool : (2,43), (3,3), (3,3)
+lr=0.0002, epoch = 700
 p_keep_conv, p_keep_hidden = 0.7, 0.5
-accuracy : 
+accuracy : 67~72%
 """

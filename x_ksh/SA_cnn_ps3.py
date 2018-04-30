@@ -86,7 +86,7 @@ for epoch in range(training_epochs):
     for i in range(total_batch):
         batch_xs = trainData[i*batch_size:(i+1)*batch_size]
         batch_ys = trainLabel[i*batch_size:(i+1)*batch_size].reshape(-1, 1)
-        feed_dict = {X: batch_xs, Y: batch_ys, p_keep_conv: .8, p_keep_hidden: 0.7}
+        feed_dict = {X: batch_xs, Y: batch_ys, p_keep_conv: .7, p_keep_hidden: 0.5}
         c, _ = sess.run([cost, optimizer], feed_dict=feed_dict)
         avg_cost += c / total_batch
     print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost))
@@ -111,10 +111,16 @@ p_keep_conv, p_keep_hidden = 0.8, 0.7
 accuracy : 63~70% 
 
 10) 9와 같고
-lr=0.0004, epoch = 400    
+lr=0.0002, epoch = 700    
 win : (2, 43), (3,3), (3,3)
 max_pool : (2,43), (3,3), (3,3)
-p_keep_conv, p_keep_hidden = 0.6, 0.5
-accuracy : 
+p_keep_conv, p_keep_hidden = 0.8, 0.7
+accuracy : 66~74%
 
+11) 9와 같고
+lr=0.0002, epoch = 700    
+win : (2, 43), (2,2), (2,2)
+max_pool : (2,43), (2,2), (2,2)
+p_keep_conv, p_keep_hidden = 0.7, 0.5
+accuracy : 
 """

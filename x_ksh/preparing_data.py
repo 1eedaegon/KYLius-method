@@ -84,7 +84,6 @@ def five_sec_extract(file):
 trainData=five_sec_extract(trainfile)
 testData=five_sec_extract(testfile)
 
-
 print(trainData.shape, testData.shape, trainLabel.shape, testLabel.shape)
 # (6631, 20, 430) (2842, 20, 430) (6631,) (2842,)
 
@@ -95,7 +94,8 @@ print(len(np.unique(testLabel)))    #41
 #label string -> integer(0~40)
 
 def Labeling(label):
-    idx = np.unique(train.values[:,1])
+    #idx = np.unique(train.values[:,1])     #이건 abc 순
+    idx = train.label.unique()
     r=pd.Series(label)
     for i in range(len(idx)):
         r[r.values==idx[i]]=i
@@ -106,16 +106,15 @@ testLabel=Labeling(testLabel)
 print(min(trainLabel), max(trainLabel), min(testLabel), max(testLabel))
 #0 40 0 40
 
-
 #csv downdload totally about 600MB
 trainData2D=trainData.reshape(-1, 20*430)
 testData2D=testData.reshape(-1, 20*430)
-np.savetxt('/Users/kimseunghyuck/desktop/trainData4.csv', 
+np.savetxt('/Users/kimseunghyuck/desktop/trainData5.csv', 
            trainData2D, delimiter=",")
-np.savetxt('/Users/kimseunghyuck/desktop/testData4.csv', 
+np.savetxt('/Users/kimseunghyuck/desktop/testData5.csv', 
            testData2D, delimiter=",")
-np.savetxt('/Users/kimseunghyuck/desktop/trainLabel4.csv', 
+np.savetxt('/Users/kimseunghyuck/desktop/trainLabel5.csv', 
            trainLabel, delimiter=",")
-np.savetxt('/Users/kimseunghyuck/desktop/testLabel4.csv', 
+np.savetxt('/Users/kimseunghyuck/desktop/testLabel5.csv', 
            testLabel, delimiter=",")
 

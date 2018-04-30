@@ -63,18 +63,19 @@ c1 = tf.layers.conv2d(tf.reshape(X, [-1, 1, n_dim, 1]), 32, kernel_size=[1, 5], 
 p1 = tf.layers.max_pooling2d(inputs=c1, pool_size=[1, 2], strides=2) 
 p1 = tf.nn.dropout(p1, p_keep_conv)
 
-
-c2 = tf.layers.conv2d(tf.reshape(p1, [-1, 1, 96, 32]), 64, kernel_size=[1,5], strides=(1, 1), padding='same', 
+# shape=(?, 1, 96, 32)
+c2 = tf.layers.conv2d(p1, 64, kernel_size=[1,5], strides=(1, 1), padding='same', 
                       activation=tf.nn.elu, name="c2")
 p2 = tf.layers.max_pooling2d(inputs=c2, pool_size=[1, 2], strides=2) #shape = [?, 1, 48, 100]
 p2 = tf.nn.dropout(p2, p_keep_conv)
 
-c3 = tf.layers.conv2d(tf.reshape(p1, [-1, 1, 48, 64]), 128, kernel_size=[1,5], strides=(1, 1), padding='same', 
+# shape=(?, 1, 48, 64)
+c3 = tf.layers.conv2d(p2, 128, kernel_size=[1,5], strides=(1, 1), padding='same', 
                       activation=tf.nn.elu, name="c3")
-p3 = tf.layers.max_pooling2d(inputs=c2, pool_size=[1, 2], strides=2) #shape = [?, 1, 24, 200]
+p3 = tf.layers.max_pooling2d(inputs=c3, pool_size=[1, 2], strides=2) #shape = [?, 1, 24, 200]
 p3 = tf.nn.dropout(p3, p_keep_conv)
 
-L4_flat = tf.reshape(p2, shape=[-1, 1*24*128]) 
+L4_flat = tf.reshape(p3, shape=[-1, 1*24*128]) 
 W1 = tf.get_variable("W1", shape=[1*24*128, 624], initializer=tf.contrib.layers.xavier_initializer())
 L5 = tf.nn.relu(tf.matmul(L4_flat, W1))
 L5 = tf.nn.dropout(L5, p_keep_hidden)

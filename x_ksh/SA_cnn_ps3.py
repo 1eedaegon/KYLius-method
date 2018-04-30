@@ -25,9 +25,9 @@ print(trainData.shape, testData.shape, trainLabel.shape, testLabel.shape)
 tf.reset_default_graph()     #그래프 초기화
 
 # hyper parameters
-learning_rate = 0.0002
-training_epochs = 200
-batch_size = 100
+learning_rate = 0.0004
+training_epochs = 400
+batch_size = 300
 steps_for_validate = 5
 
 #placeholder
@@ -39,17 +39,17 @@ p_keep_conv = tf.placeholder(tf.float32, name="p_keep_conv")
 p_keep_hidden = tf.placeholder(tf.float32, name="p_keep_hidden")
 
 # L1 SoundIn shape=(?, 20, 430, 1)
-W1 = tf.get_variable("W1", shape=[2, 21, 1, 32],initializer=tf.contrib.layers.xavier_initializer())
+W1 = tf.get_variable("W1", shape=[2, 43, 1, 32],initializer=tf.contrib.layers.xavier_initializer())
 L1 = tf.nn.conv2d(X_sound, W1, strides=[1, 1, 1, 1], padding='SAME')
 L1 = tf.nn.elu(L1)
-L1 = tf.nn.max_pool(L1, ksize=[1, 2, 21, 1],strides=[1, 2, 21, 1], padding='SAME') 
+L1 = tf.nn.max_pool(L1, ksize=[1, 2, 43, 1],strides=[1, 2, 43, 1], padding='SAME') 
 L1 = tf.nn.dropout(L1, p_keep_conv)
 
 # L2 Input shape=(?,10,21,32)
-W2 = tf.get_variable("W2", shape=[2, 4, 32, 64],initializer=tf.contrib.layers.xavier_initializer())
+W2 = tf.get_variable("W2", shape=[3, 3, 32, 64],initializer=tf.contrib.layers.xavier_initializer())
 L2 = tf.nn.conv2d(L1, W2, strides=[1, 1, 1, 1], padding='SAME')
 L2 = tf.nn.elu(L2)
-L2 = tf.nn.max_pool(L2, ksize=[1, 2, 4, 1],strides=[1, 2, 4, 1], padding='SAME') 
+L2 = tf.nn.max_pool(L2, ksize=[1, 3, 3, 1],strides=[1, 3, 3, 1], padding='SAME') 
 L2 = tf.nn.dropout(L2, p_keep_conv)
 
 # L3 Input shape=(?,3,12,64)
@@ -121,6 +121,18 @@ accuracy : 60~70%
 8) 7에서 창문 사이즈 조절
 accuracy : 66~72% 
 
-9) data5
+9) data5 (n_mfcc=20, length=430)
+lr=0.0002, epoch = 200    
+win : (2, 21), (2,4), (3,3)
+max_pool : (2,21), (2,4), (3,3)
+p_keep_conv, p_keep_hidden = 0.8, 0.7
+accuracy : 63~70% 
+
+10) 9와 같고
+lr=0.0004, epoch = 400    
+win : (2, 43), (3,3), (3,3)
+max_pool : (2,43), (3,3), (3,3)
+p_keep_conv, p_keep_hidden = 0.6, 0.5
+accuracy : 
 
 """

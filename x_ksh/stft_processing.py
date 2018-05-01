@@ -7,15 +7,14 @@ Created on Thu Apr 26 18:53:10 2018
 """
 
 import librosa
-import soundfile as sf
 import numpy as np
 from matplotlib import pyplot as plt
 #import labels
 import tensorflow as tf
 tf.set_random_seed(777) 
 import pandas as pd
-train = pd.read_csv('/Users/kimseunghyuck/desktop/sound_train.csv')
-#train = pd.read_csv('/home/paperspace/Downloads/audio_train.csv')
+#train = pd.read_csv('/Users/kimseunghyuck/desktop/sound_train.csv')
+train = pd.read_csv('/home/paperspace/Downloads/audio_train.csv')
 
 #train/test, Data/Label split
 from sklearn.model_selection import train_test_split
@@ -26,8 +25,8 @@ trainLabel = train_set.values[:,1]
 testLabel = test_set.values[:,1]
 
 #data load and extract mfcc (scaling indluded)
-path = '/Users/kimseunghyuck/desktop/audio_train/'
-#path = '/home/paperspace/Downloads/audio_train/'
+#path = '/Users/kimseunghyuck/desktop/audio_train/'
+path = '/home/paperspace/Downloads/audio_train/'
 
 def see_how_long(file):
     c=[]
@@ -39,10 +38,10 @@ def see_how_long(file):
         c.append(abs_stft.shape[1])
     return(c)
  
-n=see_how_long(trainfile)
-print(np.max(n), np.min(n))      #1292 14
-n2=see_how_long(testfile)
-print(np.max(n2), np.min(n2))    #1292 13
+#n=see_how_long(trainfile)
+#print(np.max(n), np.min(n))      #1292 14
+#n2=see_how_long(testfile)
+#print(np.max(n2), np.min(n2))    #1292 13
 
 #show me approximate wave shape
 filename= trainfile[1470]
@@ -68,25 +67,15 @@ def two_sec_extract(file):
         elif length < 100:
             array[k, :, :length]=stft
         elif length > 100:
-            sample = np.repeat(0., (length - 100)*513).reshape(length - 100, 513)
+            sample = np.repeat(0., (length - 100)*513).reshape(513,length - 100)
             for j in range(length - 100):
                 for i in range(513):
-                    sample[j,i]=np.var(stft[i,j:j+100])
-            A=np.argmax(sample, axis=0)
-np.mean(A)
-sample            
+                    sample[i,j]=np.var(stft[i,j:j+100])
+            A=np.argmax(sample, axis=1)
+            start=np.argmax(np.bincount(A))
             array[k, :, :]=stft[:, start:start+100]
         k+=1
     return(array)
-stft.shape
-stft[1]
-
-np.var(stft[0,:100])
-
-plt.plot(stft[7])
-np.max(stft[1,])-np.min(stft[1,])
-len(sample)
-
 
 trainData=two_sec_extract(trainfile)
 testData=two_sec_extract(testfile)
@@ -114,14 +103,14 @@ print(min(trainLabel), max(trainLabel), min(testLabel), max(testLabel))
 #0 40 0 40
 
 #csv downdload totally about 600MB
-trainData2D=trainData.reshape(-1, 20*430)
-testData2D=testData.reshape(-1, 20*430)
-np.savetxt('/Users/kimseunghyuck/desktop/trainData5.csv', 
+trainData2D=trainData.reshape(-1, 513*100)
+testData2D=testData.reshape(-1, 513*100)
+np.savetxt('/home/paperspace/Downloads/trainData6.csv', 
            trainData2D, delimiter=",")
-np.savetxt('/Users/kimseunghyuck/desktop/testData5.csv', 
+np.savetxt('/home/paperspace/Downloads/testData6.csv', 
            testData2D, delimiter=",")
-np.savetxt('/Users/kimseunghyuck/desktop/trainLabel5.csv', 
+np.savetxt('/home/paperspace/Downloads/trainLabel6.csv', 
            trainLabel, delimiter=",")
-np.savetxt('/Users/kimseunghyuck/desktop/testLabel5.csv', 
+np.savetxt('/home/paperspace/Downloads/testLabel6.csv', 
            testLabel, delimiter=",")
 

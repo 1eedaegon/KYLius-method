@@ -57,7 +57,7 @@ def batchnorm(Ylogits, is_test, iteration, offset, convolutional=False):
 
 # L1 SoundIn shape=(?, 20, 430, 1)
 W1 = tf.get_variable("W1", shape=[2, 43, 1, 32],initializer=tf.contrib.layers.xavier_initializer())
-B1 = tf.Variable(tf.constant(0.1, tf.float32, [32]))
+B1 = tf.Variable(tf.constant(0, tf.float32, [32]))
 L1 = tf.nn.conv2d(X_sound, W1, strides=[1, 1, 1, 1], padding='SAME')
 L1, _ = batchnorm(L1, tst, iter, B1, convolutional=True)
 L1 = tf.nn.elu(L1)
@@ -66,7 +66,7 @@ L1 = tf.nn.dropout(L1, p_keep_conv)
 
 # L2 Input shape=(?,10,21,32)
 W2 = tf.get_variable("W2", shape=[3, 3, 32, 64],initializer=tf.contrib.layers.xavier_initializer())
-B2 = tf.Variable(tf.constant(0.1, tf.float32, [64]))
+B2 = tf.Variable(tf.constant(0, tf.float32, [64]))
 L2 = tf.nn.conv2d(L1, W2, strides=[1, 1, 1, 1], padding='SAME')
 L2, _ = batchnorm(L2, tst, iter, B2, convolutional=True)
 L2 = tf.nn.elu(L2)
@@ -75,7 +75,7 @@ L2 = tf.nn.dropout(L2, p_keep_conv)
 
 # L3 Input shape=(?,3,12,64)
 W3 = tf.get_variable("W3", shape=[3, 3, 64, 128],initializer=tf.contrib.layers.xavier_initializer())
-B3 = tf.Variable(tf.constant(0.1, tf.float32, [128]))
+B3 = tf.Variable(tf.constant(0, tf.float32, [128]))
 L3 = tf.nn.conv2d(L2, W3, strides=[1, 1, 1, 1], padding='SAME')
 L3, _ = batchnorm(L3, tst, iter, B3, convolutional=True)
 L3 = tf.nn.elu(L3)
@@ -109,7 +109,8 @@ for epoch in range(training_epochs):
     for i in range(total_batch):
         batch_xs = trainData[i*batch_size:(i+1)*batch_size]
         batch_ys = trainLabel[i*batch_size:(i+1)*batch_size].reshape(-1, 1)
-        feed_dict = {X: batch_xs, Y: batch_ys, p_keep_conv: .8, p_keep_hidden: 0.7}
+        feed_dict = {X: batch_xs, Y: batch_ys, 
+                     p_keep_conv: .8, p_keep_hidden: 0.7, tst:False}
         c, _ = sess.run([cost, optimizer], feed_dict=feed_dict)
         avg_cost += c / total_batch
     print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost))
@@ -118,7 +119,8 @@ for epoch in range(training_epochs):
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
         x=np.random.choice(testLabel.shape[0], 500, replace=False)
         print('Accuracy:', sess.run(accuracy, feed_dict={
-                X: testData[x], Y: testLabel[x].reshape(-1, 1), p_keep_conv: 1, p_keep_hidden: 1}))
+                X: testData[x], Y: testLabel[x].reshape(-1, 1), 
+                p_keep_conv: 1, p_keep_hidden: 1, tst:True}))
         save_path = saver.save(sess, '/home/paperspace/Downloads/optx/optx')
 print('Finished!')
 

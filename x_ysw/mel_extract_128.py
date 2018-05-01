@@ -42,4 +42,6 @@ a = train_list[0:10]
 
 lists = Mk_mel(a)
 
+np.savetxt("/home/itwill03/sound/mel_train2.csv",lists, delimiter=",")
+a = np.genfromtxt("/home/itwill03/sound/mel_train.csv", delimiter=',')
 

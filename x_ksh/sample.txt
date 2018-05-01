@@ -1,956 +1,498 @@
-Python 3.6.2 |Anaconda custom (64-bit)| (default, Sep 22 2017, 02:03:08)
-Type "copyright", "credits" or "license" for more information.
-
-IPython 6.1.0 -- An enhanced Interactive Python.
-
-import numpy as np
-import tensorflow as tf
-tf.set_random_seed(777) 
-
-trainData = np.genfromtxt('/home/paperspace/Downloads/trainData3.csv', delimiter=',')
-trainData = trainData.reshape(-1, 40, 100)
-testData = np.genfromtxt('/home/paperspace/Downloads/testData3.csv', delimiter=',')
-testData = testData.reshape(-1, 40, 100)
-trainLabel = np.genfromtxt('/home/paperspace/Downloads/trainLabel3.csv', delimiter=',')
-testLabel = np.genfromtxt('/home/paperspace/Downloads/testLabel3.csv', delimiter=',')
-
-print(trainData.shape, testData.shape, trainLabel.shape, testLabel.shape)
-(6631, 40, 100) (2842, 40, 100) (6631,) (2842,)
-
-tf.reset_default_graph()     #그래프 초기화
-
-# hyper parameters
-learning_rate = 0.0002
-training_epochs = 300
-batch_size = 100
-steps_for_validate = 5
-
-#placeholder
-X = tf.placeholder(tf.float32, [None, 40, 100], name="X")
-X_sound = tf.reshape(X, [-1, 40, 100, 1])          # 20*100*1 (frequency, time, amplitude)
-Y = tf.placeholder(tf.int32, [None, 1], name="Y")
-Y_onehot=tf.reshape(tf.one_hot(Y, 41), [-1, 41])
-p_keep_conv = tf.placeholder(tf.float32, name="p_keep_conv")
-p_keep_hidden = tf.placeholder(tf.float32, name="p_keep_hidden")
-
-# L1 SoundIn shape=(?, 20, 100, 1)
-W1 = tf.get_variable("W1", shape=[2, 5, 1, 32],initializer=tf.contrib.layers.xavier_initializer())
-L1 = tf.nn.conv2d(X_sound, W1, strides=[1, 1, 1, 1], padding='SAME')
-L1 = tf.nn.elu(L1)
-L1 = tf.nn.max_pool(L1, ksize=[1, 2, 5, 1],strides=[1, 2, 5, 1], padding='SAME') 
-L1 = tf.nn.dropout(L1, p_keep_conv)
-
-# L2 Input shape=(?,7,34,32)
-W2 = tf.get_variable("W2", shape=[3, 3, 32, 64],initializer=tf.contrib.layers.xavier_initializer())
-L2 = tf.nn.conv2d(L1, W2, strides=[1, 1, 1, 1], padding='SAME')
-L2 = tf.nn.elu(L2)
-L2 = tf.nn.max_pool(L2, ksize=[1, 3, 3, 1],strides=[1, 3, 3, 1], padding='SAME') 
-L2 = tf.nn.dropout(L2, p_keep_conv)
-
-# L3 Input shape=(?,3,12,64)
-W3 = tf.get_variable("W3", shape=[3, 3, 64, 128],initializer=tf.contrib.layers.xavier_initializer())
-L3 = tf.nn.conv2d(L2, W3, strides=[1, 1, 1, 1], padding='SAME')
-L3 = tf.nn.elu(L3)
-L3 = tf.nn.max_pool(L3, ksize=[1, 3, 3, 1],strides=[1, 3, 3, 1], padding='SAME') 
-L3 = tf.nn.dropout(L3, p_keep_conv)
-L3_flat= tf.reshape(L3, shape=[-1, 3*3*128])
-
-# Final FC 2*3*128 inputs -> 41 outputs
-W4 = tf.get_variable("W4", shape=[3*3*128, 512],initializer=tf.contrib.layers.xavier_initializer())
-L4 = tf.nn.elu(tf.matmul(L3_flat, W4))
-L4 = tf.nn.dropout(L4, p_keep_hidden)
-W_o = tf.get_variable("W_o", shape=[512,41],initializer=tf.contrib.layers.xavier_initializer())
-b = tf.Variable(tf.random_normal([41]))
-logits = tf.matmul(L4, W_o) + b
-
-# define cost/loss & optimizer
-cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits,labels= Y_onehot))
-optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost) # 아담버젼
-predict_op = tf.argmax(logits, 1, name="pred")
-
-# initialize
-sess = tf.Session()
-sess.run(tf.global_variables_initializer())
-saver = tf.train.Saver()
-
-# train my model
-print('Learning started. It takes sometime.')
-for epoch in range(training_epochs):
-    avg_cost = 0
-    total_batch = int(len(trainData) / batch_size)
-    for i in range(total_batch):
-        batch_xs = trainData[i*batch_size:(i+1)*batch_size]
-        batch_ys = trainLabel[i*batch_size:(i+1)*batch_size].reshape(-1, 1)
-        feed_dict = {X: batch_xs, Y: batch_ys, p_keep_conv: .8, p_keep_hidden: 0.7}
-        c, _ = sess.run([cost, optimizer], feed_dict=feed_dict)
-        avg_cost += c / total_batch
-    print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost))
-    if epoch % steps_for_validate == steps_for_validate-1:
-        correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(Y_onehot, 1))
-        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-        x=np.random.choice(testLabel.shape[0], 300, replace=False)
-        print('Accuracy:', sess.run(accuracy, feed_dict={
-                X: testData[x], Y: testLabel[x].reshape(-1, 1), p_keep_conv: 1, p_keep_hidden: 1}))
-        save_path = saver.save(sess, '/home/paperspace/Downloads/optx/optx')
-
-print('Finished!')
-Learning started. It takes sometime.
-Epoch: 0001 cost = 10.839169965
-Epoch: 0002 cost = 4.158698346
-Epoch: 0003 cost = 3.492385561
-Epoch: 0004 cost = 3.125086308
-Epoch: 0005 cost = 2.902130676
-Accuracy: 0.326667
-Epoch: 0006 cost = 2.727620569
-Epoch: 0007 cost = 2.570711165
-Epoch: 0008 cost = 2.467056867
-Epoch: 0009 cost = 2.370058134
-Epoch: 0010 cost = 2.259820071
-Accuracy: 0.35
-Epoch: 0011 cost = 2.180016612
-Epoch: 0012 cost = 2.081592618
-Epoch: 0013 cost = 2.015181923
-Epoch: 0014 cost = 1.956879076
-Epoch: 0015 cost = 1.909205231
-Accuracy: 0.343333
-Epoch: 0016 cost = 1.849234166
-Epoch: 0017 cost = 1.795485554
-Epoch: 0018 cost = 1.761690837
-Epoch: 0019 cost = 1.702632440
-Epoch: 0020 cost = 1.648285844
-Accuracy: 0.42
-Epoch: 0021 cost = 1.627149271
-Epoch: 0022 cost = 1.574117868
-Epoch: 0023 cost = 1.534957183
-Epoch: 0024 cost = 1.504746726
-Epoch: 0025 cost = 1.462217259
-Accuracy: 0.55
-Epoch: 0026 cost = 1.425742798
-Epoch: 0027 cost = 1.397122929
-Epoch: 0028 cost = 1.355712025
-Epoch: 0029 cost = 1.337900197
-Epoch: 0030 cost = 1.274794998
-Accuracy: 0.5
-Epoch: 0031 cost = 1.269519340
-Epoch: 0032 cost = 1.257837858
-Epoch: 0033 cost = 1.201538669
-Epoch: 0034 cost = 1.155084873
-Epoch: 0035 cost = 1.173276653
-Accuracy: 0.57
-Epoch: 0036 cost = 1.124421569
-Epoch: 0037 cost = 1.116640804
-Epoch: 0038 cost = 1.072704167
-Epoch: 0039 cost = 1.040712355
-Epoch: 0040 cost = 1.041910085
-Accuracy: 0.573333
-Epoch: 0041 cost = 1.004838924
-Epoch: 0042 cost = 0.984590372
-Epoch: 0043 cost = 0.951775532
-Epoch: 0044 cost = 0.923413828
-Epoch: 0045 cost = 0.902142228
-Accuracy: 0.613333
-Epoch: 0046 cost = 0.891547399
-Epoch: 0047 cost = 0.870868998
-Epoch: 0048 cost = 0.836389074
-Epoch: 0049 cost = 0.829268470
-Epoch: 0050 cost = 0.785294941
-Accuracy: 0.6
-Epoch: 0051 cost = 0.789242570
-Epoch: 0052 cost = 0.781667988
-Epoch: 0053 cost = 0.731694327
-Epoch: 0054 cost = 0.727617528
-Epoch: 0055 cost = 0.698142961
-Accuracy: 0.663333
-Epoch: 0056 cost = 0.704103084
-Epoch: 0057 cost = 0.665936472
-Epoch: 0058 cost = 0.650674163
-Epoch: 0059 cost = 0.632019062
-Epoch: 0060 cost = 0.614764958
-Accuracy: 0.636667
-Epoch: 0061 cost = 0.607409172
-Epoch: 0062 cost = 0.592856446
-Epoch: 0063 cost = 0.577786586
-Epoch: 0064 cost = 0.569217458
-Epoch: 0065 cost = 0.542499971
-Accuracy: 0.616667
-Epoch: 0066 cost = 0.538787251
-Epoch: 0067 cost = 0.503007243
-Epoch: 0068 cost = 0.496479172
-Epoch: 0069 cost = 0.503584428
-Epoch: 0070 cost = 0.465277253
-Accuracy: 0.64
-Epoch: 0071 cost = 0.460683369
-Epoch: 0072 cost = 0.449046025
-Epoch: 0073 cost = 0.439508854
-Epoch: 0074 cost = 0.425342352
-Epoch: 0075 cost = 0.411436268
-Accuracy: 0.673333
-Epoch: 0076 cost = 0.402434534
-Epoch: 0077 cost = 0.399421723
-Epoch: 0078 cost = 0.393784927
-Epoch: 0079 cost = 0.364251928
-Epoch: 0080 cost = 0.354764175
-Accuracy: 0.68
-Epoch: 0081 cost = 0.360614518
-Epoch: 0082 cost = 0.338781597
-Epoch: 0083 cost = 0.332912359
-Epoch: 0084 cost = 0.327555595
-Epoch: 0085 cost = 0.312265232
-Accuracy: 0.696667
-Epoch: 0086 cost = 0.300813111
-Epoch: 0087 cost = 0.299173074
-Epoch: 0088 cost = 0.285237814
-Epoch: 0089 cost = 0.281388695
-Epoch: 0090 cost = 0.289533503
-Accuracy: 0.663333
-Epoch: 0091 cost = 0.266913511
-Epoch: 0092 cost = 0.265190341
-Epoch: 0093 cost = 0.259007582
-Epoch: 0094 cost = 0.261560794
-Epoch: 0095 cost = 0.245429970
-Accuracy: 0.646667
-Epoch: 0096 cost = 0.244171807
-Epoch: 0097 cost = 0.225638470
-Epoch: 0098 cost = 0.227573247
-Epoch: 0099 cost = 0.220041626
-Epoch: 0100 cost = 0.222249080
-Accuracy: 0.696667
-Epoch: 0101 cost = 0.207085714
-Epoch: 0102 cost = 0.209200259
-Epoch: 0103 cost = 0.206722062
-Epoch: 0104 cost = 0.203813269
-Epoch: 0105 cost = 0.202760978
-Accuracy: 0.636667
-Epoch: 0106 cost = 0.199301306
-Epoch: 0107 cost = 0.169996889
-Epoch: 0108 cost = 0.192004062
-Epoch: 0109 cost = 0.196118288
-Epoch: 0110 cost = 0.167377899
-Accuracy: 0.683333
-Epoch: 0111 cost = 0.179116516
-Epoch: 0112 cost = 0.175991702
-Epoch: 0113 cost = 0.169861025
-Epoch: 0114 cost = 0.166763722
-Epoch: 0115 cost = 0.156740557
-Accuracy: 0.653333
-Epoch: 0116 cost = 0.151771771
-Epoch: 0117 cost = 0.159898599
-Epoch: 0118 cost = 0.148608638
-Epoch: 0119 cost = 0.157541193
-Epoch: 0120 cost = 0.149377652
-Accuracy: 0.633333
-Epoch: 0121 cost = 0.149254663
-Epoch: 0122 cost = 0.140018338
-Epoch: 0123 cost = 0.149586219
-Epoch: 0124 cost = 0.144576213
-Epoch: 0125 cost = 0.149428101
-Accuracy: 0.67
-Epoch: 0126 cost = 0.138339156
-Epoch: 0127 cost = 0.131759611
-Epoch: 0128 cost = 0.139118172
-Epoch: 0129 cost = 0.129858092
-Epoch: 0130 cost = 0.125803592
-Accuracy: 0.663333
-Epoch: 0131 cost = 0.126265023
-Epoch: 0132 cost = 0.126428223
-Epoch: 0133 cost = 0.118436428
-Epoch: 0134 cost = 0.117406707
-Epoch: 0135 cost = 0.119546297
-Accuracy: 0.656667
-Epoch: 0136 cost = 0.116804236
-Epoch: 0137 cost = 0.113648397
-Epoch: 0138 cost = 0.109592282
-Epoch: 0139 cost = 0.110576706
-Epoch: 0140 cost = 0.101520924
-Accuracy: 0.656667
-Epoch: 0141 cost = 0.099723899
-Epoch: 0142 cost = 0.091209222
-Epoch: 0143 cost = 0.102249505
-Epoch: 0144 cost = 0.105202143
-Epoch: 0145 cost = 0.107343116
-Accuracy: 0.65
-Epoch: 0146 cost = 0.096912542
-Epoch: 0147 cost = 0.101714537
-Epoch: 0148 cost = 0.110210747
-Epoch: 0149 cost = 0.093498046
-Epoch: 0150 cost = 0.112295846
-Accuracy: 0.656667
-Epoch: 0151 cost = 0.103858119
-Epoch: 0152 cost = 0.092983506
-Epoch: 0153 cost = 0.078902759
-Epoch: 0154 cost = 0.088190508
-Epoch: 0155 cost = 0.089468411
-Accuracy: 0.696667
-Epoch: 0156 cost = 0.084992094
-Epoch: 0157 cost = 0.079344327
-Epoch: 0158 cost = 0.088891406
-Epoch: 0159 cost = 0.087104217
-Epoch: 0160 cost = 0.088272100
-Accuracy: 0.683333
-Epoch: 0161 cost = 0.089256758
-Epoch: 0162 cost = 0.088338345
-Epoch: 0163 cost = 0.088179211
-Epoch: 0164 cost = 0.081438942
-Epoch: 0165 cost = 0.079729875
-Accuracy: 0.693333
-Epoch: 0166 cost = 0.078053069
-Epoch: 0167 cost = 0.079173023
-Epoch: 0168 cost = 0.079146881
-Epoch: 0169 cost = 0.089587237
-Epoch: 0170 cost = 0.076661087
-Accuracy: 0.696667
-Epoch: 0171 cost = 0.083280620
-Epoch: 0172 cost = 0.085215880
-Epoch: 0173 cost = 0.076492711
-Epoch: 0174 cost = 0.066801328
-Epoch: 0175 cost = 0.077620084
-Accuracy: 0.676667
-Epoch: 0176 cost = 0.075268999
-Epoch: 0177 cost = 0.073847607
-Epoch: 0178 cost = 0.072778817
-Epoch: 0179 cost = 0.073016429
-Epoch: 0180 cost = 0.068299393
-Accuracy: 0.66
-Epoch: 0181 cost = 0.068226829
-Epoch: 0182 cost = 0.063260290
-Epoch: 0183 cost = 0.065222992
-Epoch: 0184 cost = 0.076922977
-Epoch: 0185 cost = 0.067400537
-Accuracy: 0.666667
-Epoch: 0186 cost = 0.064946257
-Epoch: 0187 cost = 0.067660394
-Epoch: 0188 cost = 0.062610101
-Epoch: 0189 cost = 0.067731926
-Epoch: 0190 cost = 0.069758997
-Accuracy: 0.663333
-Epoch: 0191 cost = 0.077309766
-Epoch: 0192 cost = 0.065442461
-Epoch: 0193 cost = 0.068977871
-Epoch: 0194 cost = 0.056969161
-Epoch: 0195 cost = 0.061639751
+Epoch: 0288 cost = 0.208524654
+Epoch: 0289 cost = 0.189347939
+Epoch: 0290 cost = 0.202346881
+Accuracy: 0.674
+Epoch: 0291 cost = 0.193577955
+Epoch: 0292 cost = 0.217119253
+Epoch: 0293 cost = 0.208007449
+Epoch: 0294 cost = 0.208467093
+Epoch: 0295 cost = 0.193879927
+Accuracy: 0.698
+Epoch: 0296 cost = 0.207532348
+Epoch: 0297 cost = 0.195312364
+Epoch: 0298 cost = 0.177824780
+Epoch: 0299 cost = 0.188083763
+Epoch: 0300 cost = 0.181974903
+Accuracy: 0.646
+Epoch: 0301 cost = 0.200342787
+Epoch: 0302 cost = 0.188453357
+Epoch: 0303 cost = 0.201256883
+Epoch: 0304 cost = 0.201790317
+Epoch: 0305 cost = 0.195877376
+Accuracy: 0.658
+Epoch: 0306 cost = 0.189740593
+Epoch: 0307 cost = 0.187292852
+Epoch: 0308 cost = 0.187891593
+Epoch: 0309 cost = 0.175115969
+Epoch: 0310 cost = 0.184124405
+Accuracy: 0.674
+Epoch: 0311 cost = 0.179196475
+Epoch: 0312 cost = 0.181954299
+Epoch: 0313 cost = 0.171970832
+Epoch: 0314 cost = 0.168458790
+Epoch: 0315 cost = 0.181318909
 Accuracy: 0.69
-Epoch: 0196 cost = 0.067526446
-Epoch: 0197 cost = 0.062937033
-Epoch: 0198 cost = 0.052894721
-Epoch: 0199 cost = 0.052302914
-Epoch: 0200 cost = 0.054910585
-Accuracy: 0.686667
-Epoch: 0201 cost = 0.060044422
-Epoch: 0202 cost = 0.053719332
-Epoch: 0203 cost = 0.053271609
-Epoch: 0204 cost = 0.050925825
-Epoch: 0205 cost = 0.067598445
-Accuracy: 0.66
-Epoch: 0206 cost = 0.053562484
-Epoch: 0207 cost = 0.062457826
-Epoch: 0208 cost = 0.056703079
-Epoch: 0209 cost = 0.066468177
-Epoch: 0210 cost = 0.063761026
-Accuracy: 0.653333
-Epoch: 0211 cost = 0.053548467
-Epoch: 0212 cost = 0.061190441
-Epoch: 0213 cost = 0.055096856
-Epoch: 0214 cost = 0.049730748
-Epoch: 0215 cost = 0.059034091
-Accuracy: 0.666667
-Epoch: 0216 cost = 0.061386129
-Epoch: 0217 cost = 0.054916683
-Epoch: 0218 cost = 0.057969455
-Epoch: 0219 cost = 0.050379628
-Epoch: 0220 cost = 0.055889314
-Accuracy: 0.673333
-Epoch: 0221 cost = 0.049351201
-Epoch: 0222 cost = 0.054253934
-Epoch: 0223 cost = 0.050877625
-Epoch: 0224 cost = 0.052079288
-Epoch: 0225 cost = 0.053139684
-Accuracy: 0.69
-Epoch: 0226 cost = 0.051044347
-Epoch: 0227 cost = 0.054406498
-Epoch: 0228 cost = 0.050303437
-Epoch: 0229 cost = 0.042744732
-Epoch: 0230 cost = 0.059139385
-Accuracy: 0.663333
-Epoch: 0231 cost = 0.054471319
-Epoch: 0232 cost = 0.046297964
-Epoch: 0233 cost = 0.051793731
-Epoch: 0234 cost = 0.049821062
-Epoch: 0235 cost = 0.046282609
-Accuracy: 0.663333
-Epoch: 0236 cost = 0.047856216
-Epoch: 0237 cost = 0.052730331
-Epoch: 0238 cost = 0.045519549
-Epoch: 0239 cost = 0.045199782
-Epoch: 0240 cost = 0.040625740
-Accuracy: 0.66
-Epoch: 0241 cost = 0.045409150
-Epoch: 0242 cost = 0.043279175
-Epoch: 0243 cost = 0.055128312
-Epoch: 0244 cost = 0.046324764
-Epoch: 0245 cost = 0.045515314
-Accuracy: 0.653333
-Epoch: 0246 cost = 0.047471659
-Epoch: 0247 cost = 0.040871633
-Epoch: 0248 cost = 0.046836463
-Epoch: 0249 cost = 0.042091155
-Epoch: 0250 cost = 0.045958846
+Epoch: 0316 cost = 0.170158450
+Epoch: 0317 cost = 0.178810128
+Epoch: 0318 cost = 0.173557231
+Epoch: 0319 cost = 0.171763150
+Epoch: 0320 cost = 0.176990497
+Accuracy: 0.682
+Epoch: 0321 cost = 0.168191432
+Epoch: 0322 cost = 0.177624416
+Epoch: 0323 cost = 0.173962723
+Epoch: 0324 cost = 0.165333744
+Epoch: 0325 cost = 0.183993734
+Accuracy: 0.704
+Epoch: 0326 cost = 0.182382465
+Epoch: 0327 cost = 0.166421612
+Epoch: 0328 cost = 0.171902532
+Epoch: 0329 cost = 0.159255681
+Epoch: 0330 cost = 0.158926720
+Accuracy: 0.698
+Epoch: 0331 cost = 0.161930311
+Epoch: 0332 cost = 0.164052966
+Epoch: 0333 cost = 0.162388876
+Epoch: 0334 cost = 0.159918311
+Epoch: 0335 cost = 0.164237844
+Accuracy: 0.686
+Epoch: 0336 cost = 0.169206282
+Epoch: 0337 cost = 0.160183274
+Epoch: 0338 cost = 0.146684959
+Epoch: 0339 cost = 0.158647120
+Epoch: 0340 cost = 0.144704580
+Accuracy: 0.682
+Epoch: 0341 cost = 0.152584301
+Epoch: 0342 cost = 0.152169802
+Epoch: 0343 cost = 0.155065432
+Epoch: 0344 cost = 0.158025604
+Epoch: 0345 cost = 0.148087940
+Accuracy: 0.692
+Epoch: 0346 cost = 0.147618784
+Epoch: 0347 cost = 0.151548640
+Epoch: 0348 cost = 0.144099430
+Epoch: 0349 cost = 0.145818583
+Epoch: 0350 cost = 0.143193354
+Accuracy: 0.712
+Epoch: 0351 cost = 0.142278598
+Epoch: 0352 cost = 0.147256077
+Epoch: 0353 cost = 0.146577778
+Epoch: 0354 cost = 0.152065272
+Epoch: 0355 cost = 0.155690018
+Accuracy: 0.7
+Epoch: 0356 cost = 0.147445475
+Epoch: 0357 cost = 0.139286468
+Epoch: 0358 cost = 0.142695360
+Epoch: 0359 cost = 0.130476934
+Epoch: 0360 cost = 0.143144532
+Accuracy: 0.676
+Epoch: 0361 cost = 0.145091254
+Epoch: 0362 cost = 0.143312194
+Epoch: 0363 cost = 0.141417281
+Epoch: 0364 cost = 0.139009522
+Epoch: 0365 cost = 0.140111981
+Accuracy: 0.686
+Epoch: 0366 cost = 0.140670846
+Epoch: 0367 cost = 0.137542833
+Epoch: 0368 cost = 0.136917190
+Epoch: 0369 cost = 0.139783495
+Epoch: 0370 cost = 0.138550615
+Accuracy: 0.658
+Epoch: 0371 cost = 0.133887005
+Epoch: 0372 cost = 0.139870919
+Epoch: 0373 cost = 0.138877699
+Epoch: 0374 cost = 0.127385353
+Epoch: 0375 cost = 0.131465573
+Accuracy: 0.684
+Epoch: 0376 cost = 0.138824100
+Epoch: 0377 cost = 0.138345353
+Epoch: 0378 cost = 0.121960020
+Epoch: 0379 cost = 0.126012006
+Epoch: 0380 cost = 0.132951543
+Accuracy: 0.692
+Epoch: 0381 cost = 0.130236401
+Epoch: 0382 cost = 0.118894364
+Epoch: 0383 cost = 0.132232952
+Epoch: 0384 cost = 0.121125753
+Epoch: 0385 cost = 0.120822303
 Accuracy: 0.67
-Epoch: 0251 cost = 0.044460236
-Epoch: 0252 cost = 0.041999832
-Epoch: 0253 cost = 0.043581154
-Epoch: 0254 cost = 0.044588306
-Epoch: 0255 cost = 0.043542168
-Accuracy: 0.666667
-Epoch: 0256 cost = 0.046455006
-Epoch: 0257 cost = 0.049625561
-Epoch: 0258 cost = 0.051558150
-Epoch: 0259 cost = 0.040062180
-Epoch: 0260 cost = 0.038324950
-Accuracy: 0.716667
-Epoch: 0261 cost = 0.038829127
-Epoch: 0262 cost = 0.041110371
-Epoch: 0263 cost = 0.036237360
-Epoch: 0264 cost = 0.040799467
-Epoch: 0265 cost = 0.038475586
-Accuracy: 0.666667
-Epoch: 0266 cost = 0.044141662
-Epoch: 0267 cost = 0.039839793
-Epoch: 0268 cost = 0.039102724
-Epoch: 0269 cost = 0.037493810
-Epoch: 0270 cost = 0.039554923
-Accuracy: 0.663333
-Epoch: 0271 cost = 0.043193698
-Epoch: 0272 cost = 0.035813505
-Epoch: 0273 cost = 0.049964099
-Epoch: 0274 cost = 0.045686791
-Epoch: 0275 cost = 0.036530929
-Accuracy: 0.663333
-Epoch: 0276 cost = 0.036181155
-Epoch: 0277 cost = 0.035574349
-Epoch: 0278 cost = 0.033334693
-Epoch: 0279 cost = 0.042004147
-Epoch: 0280 cost = 0.043077100
-Accuracy: 0.7
-Epoch: 0281 cost = 0.038363153
-Epoch: 0282 cost = 0.050476944
-Epoch: 0283 cost = 0.030717850
-Epoch: 0284 cost = 0.039054700
-Epoch: 0285 cost = 0.039496972
-Accuracy: 0.713333
-Epoch: 0286 cost = 0.039573736
-Epoch: 0287 cost = 0.037781777
-Epoch: 0288 cost = 0.038985245
-Epoch: 0289 cost = 0.038865341
-Epoch: 0290 cost = 0.040986261
-Accuracy: 0.7
-Epoch: 0291 cost = 0.045007095
-Epoch: 0292 cost = 0.038737760
-Epoch: 0293 cost = 0.043161766
-Epoch: 0294 cost = 0.037178286
-Epoch: 0295 cost = 0.030776755
-Accuracy: 0.66
-Epoch: 0296 cost = 0.033244620
-Epoch: 0297 cost = 0.032805619
-Epoch: 0298 cost = 0.043751288
-Epoch: 0299 cost = 0.042168759
-Epoch: 0300 cost = 0.035918225
-Accuracy: 0.696667
-Finished!
-    for i in range(total_batch):
-        batch_xs = trainData[i*batch_size:(i+1)*batch_size]
-        batch_ys = trainLabel[i*batch_size:(i+1)*batch_size].reshape(-1, 1)
-        feed_dict = {X: batch_xs, Y: batch_ys, p_keep_conv: .6, p_keep_hidden: 0.5}
-        c, _ = sess.run([cost, optimizer], feed_dict=feed_dict)
-        avg_cost += c / total_batch
-    print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost))
-    if epoch % steps_for_validate == steps_for_validate-1:
-        correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(Y_onehot, 1))
-        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-        x=np.random.choice(testLabel.shape[0], 300, replace=False)
-        print('Accuracy:', sess.run(accuracy, feed_dict={
-                X: testData[x], Y: testLabel[x].reshape(-1, 1), p_keep_conv: 1, p_keep_hidden: 1}))
-        save_path = saver.save(sess, '/home/paperspace/Downloads/optx/optx')
-
-print('Finished!')
-Learning started. It takes sometime.
-Epoch: 0001 cost = 3.715036602
-Epoch: 0002 cost = 3.362025572
-Epoch: 0003 cost = 3.036507863
-Epoch: 0004 cost = 2.833792759
-Epoch: 0005 cost = 2.683451465
-Accuracy: 0.26
-Epoch: 0006 cost = 2.572876952
-Epoch: 0007 cost = 2.466939377
-Epoch: 0008 cost = 2.375469620
-Epoch: 0009 cost = 2.335671587
-Epoch: 0010 cost = 2.260223741
-Accuracy: 0.323333
-Epoch: 0011 cost = 2.205737300
-Epoch: 0012 cost = 2.171631448
-Epoch: 0013 cost = 2.127839580
-Epoch: 0014 cost = 2.098801380
-Epoch: 0015 cost = 2.061508235
-Accuracy: 0.346667
-Epoch: 0016 cost = 2.014516216
-Epoch: 0017 cost = 1.999133979
-Epoch: 0018 cost = 1.961174130
-Epoch: 0019 cost = 1.926132352
-Epoch: 0020 cost = 1.911160139
-Accuracy: 0.36
-Epoch: 0021 cost = 1.882486992
-Epoch: 0022 cost = 1.860625561
-Epoch: 0023 cost = 1.845003939
-Epoch: 0024 cost = 1.838906481
-Epoch: 0025 cost = 1.810245093
-Accuracy: 0.476667
-Epoch: 0026 cost = 1.780624075
-Epoch: 0027 cost = 1.770949575
-Epoch: 0028 cost = 1.744639590
-Epoch: 0029 cost = 1.738497653
-Epoch: 0030 cost = 1.717024581
-Accuracy: 0.483333
-Epoch: 0031 cost = 1.694013588
-Epoch: 0032 cost = 1.699428840
-Epoch: 0033 cost = 1.674890146
-Epoch: 0034 cost = 1.657348356
-Epoch: 0035 cost = 1.638724085
-Accuracy: 0.43
-Epoch: 0036 cost = 1.647856682
-Epoch: 0037 cost = 1.632719007
-Epoch: 0038 cost = 1.615234393
-Epoch: 0039 cost = 1.601924194
-Epoch: 0040 cost = 1.593519637
-Accuracy: 0.52
-Epoch: 0041 cost = 1.584477114
-Epoch: 0042 cost = 1.547561597
-Epoch: 0043 cost = 1.561347783
-Epoch: 0044 cost = 1.544086725
-Epoch: 0045 cost = 1.531995011
-Accuracy: 0.526667
-Epoch: 0046 cost = 1.525640363
-Epoch: 0047 cost = 1.495727700
-Epoch: 0048 cost = 1.502995007
-Epoch: 0049 cost = 1.486495405
-Epoch: 0050 cost = 1.497584720
-Accuracy: 0.556667
-Epoch: 0051 cost = 1.459639623
-Epoch: 0052 cost = 1.462090350
-Epoch: 0053 cost = 1.454977146
-Epoch: 0054 cost = 1.452299654
-Epoch: 0055 cost = 1.452066944
-Accuracy: 0.55
-Epoch: 0056 cost = 1.451339079
-Epoch: 0057 cost = 1.413383052
-Epoch: 0058 cost = 1.429225727
-Epoch: 0059 cost = 1.413261090
-Epoch: 0060 cost = 1.406702827
-Accuracy: 0.566667
-Epoch: 0061 cost = 1.398351702
-Epoch: 0062 cost = 1.401068122
-Epoch: 0063 cost = 1.371286773
-Epoch: 0064 cost = 1.378472986
-Epoch: 0065 cost = 1.374833833
-Accuracy: 0.523333
-Epoch: 0066 cost = 1.357258883
-Epoch: 0067 cost = 1.380123734
-Epoch: 0068 cost = 1.352180628
-Epoch: 0069 cost = 1.342416534
-Epoch: 0070 cost = 1.334123691
-Accuracy: 0.536667
-Epoch: 0071 cost = 1.344832113
-Epoch: 0072 cost = 1.334483396
-Epoch: 0073 cost = 1.327588163
-Epoch: 0074 cost = 1.321879924
-Epoch: 0075 cost = 1.317960018
-Accuracy: 0.563333
-Epoch: 0076 cost = 1.311179956
-Epoch: 0077 cost = 1.300766165
-Epoch: 0078 cost = 1.287806965
-Epoch: 0079 cost = 1.303342357
-Epoch: 0080 cost = 1.307652952
-Accuracy: 0.546667
-Epoch: 0081 cost = 1.308076382
-Epoch: 0082 cost = 1.267430798
-Epoch: 0083 cost = 1.269113598
-Epoch: 0084 cost = 1.252076900
-Epoch: 0085 cost = 1.269609113
-Accuracy: 0.6
-Epoch: 0086 cost = 1.254104378
-Epoch: 0087 cost = 1.258596321
-Epoch: 0088 cost = 1.243640828
-Epoch: 0089 cost = 1.270074463
-Epoch: 0090 cost = 1.251068796
-Accuracy: 0.573333
-Epoch: 0091 cost = 1.216549126
-Epoch: 0092 cost = 1.226152332
-Epoch: 0093 cost = 1.221277566
-Epoch: 0094 cost = 1.216596668
-Epoch: 0095 cost = 1.209546290
-Accuracy: 0.583333
-Epoch: 0096 cost = 1.236483205
-Epoch: 0097 cost = 1.215228618
-Epoch: 0098 cost = 1.193949792
-Epoch: 0099 cost = 1.207740600
-Epoch: 0100 cost = 1.208503405
-Accuracy: 0.606667
-Epoch: 0101 cost = 1.176988546
-Epoch: 0102 cost = 1.180103690
-Epoch: 0103 cost = 1.178164711
-Epoch: 0104 cost = 1.196071413
-Epoch: 0105 cost = 1.172043006
-Accuracy: 0.616667
-Epoch: 0106 cost = 1.163406602
-Epoch: 0107 cost = 1.154866368
-Epoch: 0108 cost = 1.150071030
-Epoch: 0109 cost = 1.161679139
-Epoch: 0110 cost = 1.155943777
-Accuracy: 0.58
-Epoch: 0111 cost = 1.150797943
-Epoch: 0112 cost = 1.148302777
-Epoch: 0113 cost = 1.149857887
-Epoch: 0114 cost = 1.135557849
-Epoch: 0115 cost = 1.151399243
-Accuracy: 0.63
-Epoch: 0116 cost = 1.137404225
-Epoch: 0117 cost = 1.152145694
-Epoch: 0118 cost = 1.128099106
-Epoch: 0119 cost = 1.112510151
-Epoch: 0120 cost = 1.105380876
-Accuracy: 0.563333
-Epoch: 0121 cost = 1.121108098
-Epoch: 0122 cost = 1.124810062
-Epoch: 0123 cost = 1.124540468
-Epoch: 0124 cost = 1.098622163
-Epoch: 0125 cost = 1.104756456
-Accuracy: 0.633333
-Epoch: 0126 cost = 1.097506817
-Epoch: 0127 cost = 1.109687014
-Epoch: 0128 cost = 1.104188523
-Epoch: 0129 cost = 1.082040144
-Epoch: 0130 cost = 1.101327538
-Accuracy: 0.63
-Epoch: 0131 cost = 1.087149873
-Epoch: 0132 cost = 1.074551126
-Epoch: 0133 cost = 1.061653126
-Epoch: 0134 cost = 1.059846134
-Epoch: 0135 cost = 1.083124375
-Accuracy: 0.62
-Epoch: 0136 cost = 1.083064069
-Epoch: 0137 cost = 1.045546942
-Epoch: 0138 cost = 1.073099872
-Epoch: 0139 cost = 1.059798337
-Epoch: 0140 cost = 1.078936900
-Accuracy: 0.596667
-Epoch: 0141 cost = 1.068054573
-Epoch: 0142 cost = 1.058406310
-Epoch: 0143 cost = 1.074314301
-Epoch: 0144 cost = 1.044391619
-Epoch: 0145 cost = 1.052869683
-Accuracy: 0.643333
-Epoch: 0146 cost = 1.030772550
-Epoch: 0147 cost = 1.061145458
-Epoch: 0148 cost = 1.033140217
-Epoch: 0149 cost = 1.043146730
-Epoch: 0150 cost = 1.025157867
-Accuracy: 0.65
-Epoch: 0151 cost = 1.013217120
-Epoch: 0152 cost = 1.037983329
-Epoch: 0153 cost = 1.024018019
-Epoch: 0154 cost = 1.017374675
-Epoch: 0155 cost = 1.004669481
-Accuracy: 0.683333
-Epoch: 0156 cost = 1.013609375
-Epoch: 0157 cost = 1.033197795
-Epoch: 0158 cost = 1.005476431
-Epoch: 0159 cost = 0.998969069
-Epoch: 0160 cost = 1.010297834
-Accuracy: 0.64
-Epoch: 0161 cost = 0.998737659
-Epoch: 0162 cost = 1.016442814
-Epoch: 0163 cost = 0.981160956
-Epoch: 0164 cost = 1.012009824
-Epoch: 0165 cost = 1.017177502
-Accuracy: 0.656667
-Epoch: 0166 cost = 1.013490503
-Epoch: 0167 cost = 0.984490067
-Epoch: 0168 cost = 0.980872981
-Epoch: 0169 cost = 0.970794213
-Epoch: 0170 cost = 1.000357892
-Accuracy: 0.65
-Epoch: 0171 cost = 0.981059246
-Epoch: 0172 cost = 0.941928597
-Epoch: 0173 cost = 0.967579091
-Epoch: 0174 cost = 0.975714359
-Epoch: 0175 cost = 0.966472274
-Accuracy: 0.606667
-Epoch: 0176 cost = 0.972058398
-Epoch: 0177 cost = 0.975597317
-Epoch: 0178 cost = 0.968028972
-Epoch: 0179 cost = 0.968869561
-Epoch: 0180 cost = 0.951764968
-Accuracy: 0.686667
-Epoch: 0181 cost = 0.938282584
-Epoch: 0182 cost = 0.951333090
-Epoch: 0183 cost = 0.954975387
-Epoch: 0184 cost = 0.955529814
-Epoch: 0185 cost = 0.969274107
-Accuracy: 0.643333
-Epoch: 0186 cost = 0.939388775
-Epoch: 0187 cost = 0.946448221
-Epoch: 0188 cost = 0.943885015
-Epoch: 0189 cost = 0.947227324
-Epoch: 0190 cost = 0.929029896
-Accuracy: 0.65
-Epoch: 0191 cost = 0.918129377
-Epoch: 0192 cost = 0.927143143
-Epoch: 0193 cost = 0.922954261
-Epoch: 0194 cost = 0.934603850
-Epoch: 0195 cost = 0.949531846
-Accuracy: 0.653333
-Epoch: 0196 cost = 0.934672526
-Epoch: 0197 cost = 0.896089161
-Epoch: 0198 cost = 0.928139759
-Epoch: 0199 cost = 0.930001824
-Epoch: 0200 cost = 0.918059097
-Accuracy: 0.656667
-Epoch: 0201 cost = 0.909482663
-Epoch: 0202 cost = 0.906526255
-Epoch: 0203 cost = 0.941578073
-Epoch: 0204 cost = 0.932396658
-Epoch: 0205 cost = 0.900440550
-Accuracy: 0.63
-Epoch: 0206 cost = 0.907968929
-Epoch: 0207 cost = 0.918498099
-Epoch: 0208 cost = 0.891143673
-Epoch: 0209 cost = 0.884444217
-Epoch: 0210 cost = 0.910089506
-Accuracy: 0.633333
-Epoch: 0211 cost = 0.908435817
-Epoch: 0212 cost = 0.875722389
-Epoch: 0213 cost = 0.881473994
-Epoch: 0214 cost = 0.904535260
-Epoch: 0215 cost = 0.899195696
-Accuracy: 0.693333
-Epoch: 0216 cost = 0.901511071
-Epoch: 0217 cost = 0.895939675
-Epoch: 0218 cost = 0.871768868
-Epoch: 0219 cost = 0.880496580
-Epoch: 0220 cost = 0.876811545
-Accuracy: 0.686667
-Epoch: 0221 cost = 0.874703592
-Epoch: 0222 cost = 0.870224102
-Epoch: 0223 cost = 0.898424118
-Epoch: 0224 cost = 0.868970386
-Epoch: 0225 cost = 0.887768026
-Accuracy: 0.66
-Epoch: 0226 cost = 0.856307436
-Epoch: 0227 cost = 0.864744609
-Epoch: 0228 cost = 0.890351829
-Epoch: 0229 cost = 0.897687513
-Epoch: 0230 cost = 0.878158442
-Accuracy: 0.636667
-Epoch: 0231 cost = 0.889972288
-Epoch: 0232 cost = 0.875207743
-Epoch: 0233 cost = 0.863617473
-Epoch: 0234 cost = 0.859837119
-Epoch: 0235 cost = 0.872365467
-Accuracy: 0.593333
-Epoch: 0236 cost = 0.861706990
-Epoch: 0237 cost = 0.855450728
-Epoch: 0238 cost = 0.870313908
-Epoch: 0239 cost = 0.847815717
-Epoch: 0240 cost = 0.841822071
-Accuracy: 0.63
-Epoch: 0241 cost = 0.857042071
-Epoch: 0242 cost = 0.854221384
-Epoch: 0243 cost = 0.855262044
-Epoch: 0244 cost = 0.828315750
-Epoch: 0245 cost = 0.838099742
-Accuracy: 0.653333
-Epoch: 0246 cost = 0.855102725
-Epoch: 0247 cost = 0.840177918
-Epoch: 0248 cost = 0.845185500
-Epoch: 0249 cost = 0.844240861
-Epoch: 0250 cost = 0.830935279
-Accuracy: 0.636667
-Epoch: 0251 cost = 0.830298585
-Epoch: 0252 cost = 0.837797035
-Epoch: 0253 cost = 0.837204152
-Epoch: 0254 cost = 0.831325503
-Epoch: 0255 cost = 0.851417773
-Accuracy: 0.63
-Epoch: 0256 cost = 0.843927296
-Epoch: 0257 cost = 0.866110733
-Epoch: 0258 cost = 0.845779991
-Epoch: 0259 cost = 0.816264443
-Epoch: 0260 cost = 0.810449529
-Accuracy: 0.693333
-Epoch: 0261 cost = 0.815512436
-Epoch: 0262 cost = 0.849906550
-Epoch: 0263 cost = 0.811281999
-Epoch: 0264 cost = 0.840973617
-Epoch: 0265 cost = 0.837264549
-Accuracy: 0.633333
-Epoch: 0266 cost = 0.826375646
-Epoch: 0267 cost = 0.802117974
-Epoch: 0268 cost = 0.805826925
-Epoch: 0269 cost = 0.799384869
-Epoch: 0270 cost = 0.813753206
-Accuracy: 0.633333
-Epoch: 0271 cost = 0.832667662
-Epoch: 0272 cost = 0.814544552
-Epoch: 0273 cost = 0.810308631
-Epoch: 0274 cost = 0.809493651
-Epoch: 0275 cost = 0.800371834
-Accuracy: 0.643333
-Epoch: 0276 cost = 0.805364132
-Epoch: 0277 cost = 0.811829988
-Epoch: 0278 cost = 0.803253149
-Epoch: 0279 cost = 0.807656936
-Epoch: 0280 cost = 0.792036026
-Accuracy: 0.676667
-Epoch: 0281 cost = 0.811031596
-Epoch: 0282 cost = 0.780451218
-Epoch: 0283 cost = 0.811887637
-Epoch: 0284 cost = 0.794883808
-Epoch: 0285 cost = 0.790525903
-Accuracy: 0.7
-Epoch: 0286 cost = 0.782569079
-Epoch: 0287 cost = 0.795729653
-Epoch: 0288 cost = 0.801909045
-Epoch: 0289 cost = 0.770137610
-Epoch: 0290 cost = 0.787770391
-Accuracy: 0.66
-Epoch: 0291 cost = 0.798392396
-Epoch: 0292 cost = 0.787856002
-Epoch: 0293 cost = 0.789500046
-Epoch: 0294 cost = 0.801428066
-Epoch: 0295 cost = 0.767280583
-Accuracy: 0.66
-Epoch: 0296 cost = 0.767315828
-Epoch: 0297 cost = 0.798489925
-Epoch: 0298 cost = 0.771470815
-Epoch: 0299 cost = 0.769786028
-Epoch: 0300 cost = 0.780468911
-Accuracy: 0.683333
-Epoch: 0301 cost = 0.748990344
-Epoch: 0302 cost = 0.804611905
-Epoch: 0303 cost = 0.773394513
-Epoch: 0304 cost = 0.785149917
-Epoch: 0305 cost = 0.776948803
-Accuracy: 0.683333
-Epoch: 0306 cost = 0.761096960
-Epoch: 0307 cost = 0.774226191
-Epoch: 0308 cost = 0.778876644
-Epoch: 0309 cost = 0.765176037
-Epoch: 0310 cost = 0.756974838
-Accuracy: 0.686667
-Epoch: 0311 cost = 0.747301247
-Epoch: 0312 cost = 0.770311799
-Epoch: 0313 cost = 0.754528266
-Epoch: 0314 cost = 0.757100849
-Epoch: 0315 cost = 0.782902230
-Accuracy: 0.626667
-Epoch: 0316 cost = 0.767593315
-Epoch: 0317 cost = 0.759246658
-Epoch: 0318 cost = 0.747350905
-Epoch: 0319 cost = 0.781976629
-Epoch: 0320 cost = 0.758098920
-Accuracy: 0.666667
-Epoch: 0321 cost = 0.776570926
-Epoch: 0322 cost = 0.752643116
-Epoch: 0323 cost = 0.746025577
-Epoch: 0324 cost = 0.759654322
-Epoch: 0325 cost = 0.753935657
-Accuracy: 0.62
-Epoch: 0326 cost = 0.774575627
-Epoch: 0327 cost = 0.773602392
-Epoch: 0328 cost = 0.745162261
-Epoch: 0329 cost = 0.771562614
-Epoch: 0330 cost = 0.743417893
-Accuracy: 0.683333
-Epoch: 0331 cost = 0.741429634
-Epoch: 0332 cost = 0.754743140
-Epoch: 0333 cost = 0.746451029
-Epoch: 0334 cost = 0.754861217
-Epoch: 0335 cost = 0.756605922
-Accuracy: 0.636667
-Epoch: 0336 cost = 0.735526271
-Epoch: 0337 cost = 0.735806644
-Epoch: 0338 cost = 0.754694886
-Epoch: 0339 cost = 0.759735751
-Epoch: 0340 cost = 0.728567682
-Accuracy: 0.656667
-Epoch: 0341 cost = 0.749954588
-Epoch: 0342 cost = 0.740285901
-Epoch: 0343 cost = 0.745547359
-Epoch: 0344 cost = 0.729935652
-Epoch: 0345 cost = 0.754096791
-Accuracy: 0.6
-Epoch: 0346 cost = 0.726640725
-Epoch: 0347 cost = 0.732192307
-Epoch: 0348 cost = 0.711059685
-Epoch: 0349 cost = 0.737991932
-Epoch: 0350 cost = 0.739290363
-Accuracy: 0.666667
-Epoch: 0351 cost = 0.729900073
-Epoch: 0352 cost = 0.729953642
-Epoch: 0353 cost = 0.715325502
-Epoch: 0354 cost = 0.730103376
-Epoch: 0355 cost = 0.726031233
-Accuracy: 0.696667
-Epoch: 0356 cost = 0.741363093
-Epoch: 0357 cost = 0.723644994
-Epoch: 0358 cost = 0.726995145
-Epoch: 0359 cost = 0.747411849
-Epoch: 0360 cost = 0.729623400
+Epoch: 0386 cost = 0.121437317
+Epoch: 0387 cost = 0.120374837
+Epoch: 0388 cost = 0.125013598
+Epoch: 0389 cost = 0.125752942
+Epoch: 0390 cost = 0.121344876
+Accuracy: 0.646
+Epoch: 0391 cost = 0.129671833
+Epoch: 0392 cost = 0.124679725
+Epoch: 0393 cost = 0.116743313
+Epoch: 0394 cost = 0.117508006
+Epoch: 0395 cost = 0.123441409
+Accuracy: 0.704
+Epoch: 0396 cost = 0.117150421
+Epoch: 0397 cost = 0.121750419
+Epoch: 0398 cost = 0.119541690
+Epoch: 0399 cost = 0.117073561
+Epoch: 0400 cost = 0.115258883
+Accuracy: 0.676
+Epoch: 0401 cost = 0.115418623
+Epoch: 0402 cost = 0.114674588
+Epoch: 0403 cost = 0.124775051
+Epoch: 0404 cost = 0.123790300
+Epoch: 0405 cost = 0.114192073
+Accuracy: 0.722
+Epoch: 0406 cost = 0.121756520
+Epoch: 0407 cost = 0.108724652
+Epoch: 0408 cost = 0.104631309
+Epoch: 0409 cost = 0.108242579
+Epoch: 0410 cost = 0.110814022
+Accuracy: 0.736
+Epoch: 0411 cost = 0.108535172
+Epoch: 0412 cost = 0.105365605
+Epoch: 0413 cost = 0.110570262
+Epoch: 0414 cost = 0.123771836
+Epoch: 0415 cost = 0.107642760
+Accuracy: 0.668
+Epoch: 0416 cost = 0.110376359
+Epoch: 0417 cost = 0.112206541
+Epoch: 0418 cost = 0.109693166
+Epoch: 0419 cost = 0.113708952
+Epoch: 0420 cost = 0.104978930
+Accuracy: 0.686
+Epoch: 0421 cost = 0.107645262
+Epoch: 0422 cost = 0.105464140
+Epoch: 0423 cost = 0.114400616
+Epoch: 0424 cost = 0.112145791
+Epoch: 0425 cost = 0.119566376
+Accuracy: 0.664
+Epoch: 0426 cost = 0.104825094
+Epoch: 0427 cost = 0.108384092
+Epoch: 0428 cost = 0.109740001
+Epoch: 0429 cost = 0.100707257
+Epoch: 0430 cost = 0.102619070
+Accuracy: 0.662
+Epoch: 0431 cost = 0.098183115
+Epoch: 0432 cost = 0.108463831
+Epoch: 0433 cost = 0.100965668
+Epoch: 0434 cost = 0.103503827
+Epoch: 0435 cost = 0.103409275
+Accuracy: 0.672
+Epoch: 0436 cost = 0.110427527
+Epoch: 0437 cost = 0.099728981
+Epoch: 0438 cost = 0.104076649
+Epoch: 0439 cost = 0.088306066
+Epoch: 0440 cost = 0.097068101
+Accuracy: 0.698
+Epoch: 0441 cost = 0.099594999
+Epoch: 0442 cost = 0.097458495
+Epoch: 0443 cost = 0.098881092
+Epoch: 0444 cost = 0.100691583
+Epoch: 0445 cost = 0.096198725
+Accuracy: 0.648
+Epoch: 0446 cost = 0.088666075
+Epoch: 0447 cost = 0.094812336
+Epoch: 0448 cost = 0.094443779
+Epoch: 0449 cost = 0.092835562
+Epoch: 0450 cost = 0.085569579
+Accuracy: 0.69
+Epoch: 0451 cost = 0.104187733
+Epoch: 0452 cost = 0.090711200
+Epoch: 0453 cost = 0.092231300
+Epoch: 0454 cost = 0.093845266
+Epoch: 0455 cost = 0.095721759
+Accuracy: 0.69
+Epoch: 0456 cost = 0.089287774
+Epoch: 0457 cost = 0.082753352
+Epoch: 0458 cost = 0.094513458
+Epoch: 0459 cost = 0.096048896
+Epoch: 0460 cost = 0.092998643
+Accuracy: 0.704
+Epoch: 0461 cost = 0.100456652
+Epoch: 0462 cost = 0.088285049
+Epoch: 0463 cost = 0.095274256
+Epoch: 0464 cost = 0.092481631
+Epoch: 0465 cost = 0.093727250
+Accuracy: 0.682
+Epoch: 0466 cost = 0.092273732
+Epoch: 0467 cost = 0.092993474
+Epoch: 0468 cost = 0.098149405
+Epoch: 0469 cost = 0.092842954
+Epoch: 0470 cost = 0.092795983
+Accuracy: 0.652
+Epoch: 0471 cost = 0.087841002
+Epoch: 0472 cost = 0.091099940
+Epoch: 0473 cost = 0.084489412
+Epoch: 0474 cost = 0.090249555
+Epoch: 0475 cost = 0.088538364
+Accuracy: 0.634
+Epoch: 0476 cost = 0.098813208
+Epoch: 0477 cost = 0.090878914
+Epoch: 0478 cost = 0.090631220
+Epoch: 0479 cost = 0.081986326
+Epoch: 0480 cost = 0.091490479
+Accuracy: 0.668
+Epoch: 0481 cost = 0.089289207
+Epoch: 0482 cost = 0.091088564
+Epoch: 0483 cost = 0.082973128
+Epoch: 0484 cost = 0.082656463
+Epoch: 0485 cost = 0.084007710
+Accuracy: 0.656
+Epoch: 0486 cost = 0.083851892
+Epoch: 0487 cost = 0.084173576
+Epoch: 0488 cost = 0.080871655
+Epoch: 0489 cost = 0.093059263
+Epoch: 0490 cost = 0.086428211
+Accuracy: 0.684
+Epoch: 0491 cost = 0.082998318
+Epoch: 0492 cost = 0.077075451
+Epoch: 0493 cost = 0.082501093
+Epoch: 0494 cost = 0.077714321
+Epoch: 0495 cost = 0.084485505
+Accuracy: 0.684
+Epoch: 0496 cost = 0.077726235
+Epoch: 0497 cost = 0.081725398
+Epoch: 0498 cost = 0.077627569
+Epoch: 0499 cost = 0.073534842
+Epoch: 0500 cost = 0.079301288
+Accuracy: 0.688
+Epoch: 0501 cost = 0.085614167
+Epoch: 0502 cost = 0.076546287
+Epoch: 0503 cost = 0.078428817
+Epoch: 0504 cost = 0.079854097
+Epoch: 0505 cost = 0.073594795
+Accuracy: 0.672
+Epoch: 0506 cost = 0.084767702
+Epoch: 0507 cost = 0.082602362
+Epoch: 0508 cost = 0.084868135
+Epoch: 0509 cost = 0.081975326
+Epoch: 0510 cost = 0.080898829
+Accuracy: 0.694
+Epoch: 0511 cost = 0.080439630
+Epoch: 0512 cost = 0.079157391
+Epoch: 0513 cost = 0.070505928
+Epoch: 0514 cost = 0.082198612
+Epoch: 0515 cost = 0.073734272
+Accuracy: 0.694
+Epoch: 0516 cost = 0.078817625
+Epoch: 0517 cost = 0.083742234
+Epoch: 0518 cost = 0.070385108
+Epoch: 0519 cost = 0.076170405
+Epoch: 0520 cost = 0.069586544
+Accuracy: 0.69
+Epoch: 0521 cost = 0.076646934
+Epoch: 0522 cost = 0.066745946
+Epoch: 0523 cost = 0.070204606
+Epoch: 0524 cost = 0.075837098
+Epoch: 0525 cost = 0.070756833
 Accuracy: 0.68
-Epoch: 0361 cost = 0.751925051
-Epoch: 0362 cost = 0.718783522
-Epoch: 0363 cost = 0.713239020
-Epoch: 0364 cost = 0.731046628
-Epoch: 0365 cost = 0.746742789
-Accuracy: 0.63
-Epoch: 0366 cost = 0.704184150
-Epoch: 0367 cost = 0.727739575
-Epoch: 0368 cost = 0.716317757
-Epoch: 0369 cost = 0.707465393
-Epoch: 0370 cost = 0.698885029
-Accuracy: 0.706667
-Epoch: 0371 cost = 0.705390312
-Epoch: 0372 cost = 0.714474811
-Epoch: 0373 cost = 0.713137439
-Epoch: 0374 cost = 0.724224046
-Epoch: 0375 cost = 0.686671104
+Epoch: 0526 cost = 0.080132137
+Epoch: 0527 cost = 0.075720873
+Epoch: 0528 cost = 0.081173879
+Epoch: 0529 cost = 0.080321923
+Epoch: 0530 cost = 0.080343942
+Accuracy: 0.666
+Epoch: 0531 cost = 0.070019272
+Epoch: 0532 cost = 0.071198296
+Epoch: 0533 cost = 0.067625429
+Epoch: 0534 cost = 0.070865684
+Epoch: 0535 cost = 0.072966499
+Accuracy: 0.662
+Epoch: 0536 cost = 0.072265319
+Epoch: 0537 cost = 0.067212401
+Epoch: 0538 cost = 0.082092181
+Epoch: 0539 cost = 0.070265792
+Epoch: 0540 cost = 0.067760456
+Accuracy: 0.656
+Epoch: 0541 cost = 0.069231608
+Epoch: 0542 cost = 0.060511391
+Epoch: 0543 cost = 0.061854246
+Epoch: 0544 cost = 0.065151446
+Epoch: 0545 cost = 0.065705004
+Accuracy: 0.678
+Epoch: 0546 cost = 0.072479896
+Epoch: 0547 cost = 0.065524118
+Epoch: 0548 cost = 0.063442402
+Epoch: 0549 cost = 0.068894447
+Epoch: 0550 cost = 0.068971091
+Accuracy: 0.672
+Epoch: 0551 cost = 0.067538062
+Epoch: 0552 cost = 0.062418102
+Epoch: 0553 cost = 0.068736978
+Epoch: 0554 cost = 0.056161060
+Epoch: 0555 cost = 0.073247312
+Accuracy: 0.664
+Epoch: 0556 cost = 0.073996993
+Epoch: 0557 cost = 0.071416234
+Epoch: 0558 cost = 0.068308531
+Epoch: 0559 cost = 0.057465338
+Epoch: 0560 cost = 0.064353319
+Accuracy: 0.692
+Epoch: 0561 cost = 0.060391057
+Epoch: 0562 cost = 0.058765004
+Epoch: 0563 cost = 0.061932487
+Epoch: 0564 cost = 0.062956043
+Epoch: 0565 cost = 0.065893011
+Accuracy: 0.664
+Epoch: 0566 cost = 0.068777146
+Epoch: 0567 cost = 0.074046623
+Epoch: 0568 cost = 0.073273619
+Epoch: 0569 cost = 0.062365477
+Epoch: 0570 cost = 0.060675035
+Accuracy: 0.676
+Epoch: 0571 cost = 0.064057277
+Epoch: 0572 cost = 0.074385645
+Epoch: 0573 cost = 0.070157795
+Epoch: 0574 cost = 0.073181057
+Epoch: 0575 cost = 0.060791633
+Accuracy: 0.692
+Epoch: 0576 cost = 0.062692893
+Epoch: 0577 cost = 0.064864261
+Epoch: 0578 cost = 0.061046095
+Epoch: 0579 cost = 0.069534725
+Epoch: 0580 cost = 0.071717415
 Accuracy: 0.68
-Epoch: 0376 cost = 0.712015498
-Epoch: 0377 cost = 0.722693052
-Epoch: 0378 cost = 0.701916974
-Epoch: 0379 cost = 0.679406686
-Epoch: 0380 cost = 0.692517375
-Accuracy: 0.663333
-Epoch: 0381 cost = 0.709639613
-Epoch: 0382 cost = 0.714004720
-Epoch: 0383 cost = 0.708278234
-Epoch: 0384 cost = 0.712143727
-Epoch: 0385 cost = 0.711478894
-Accuracy: 0.656667
-Epoch: 0386 cost = 0.727548564
-Epoch: 0387 cost = 0.713622433
-Epoch: 0388 cost = 0.703651091
-Epoch: 0389 cost = 0.711390899
-Epoch: 0390 cost = 0.727887478
-Accuracy: 0.71
-Epoch: 0391 cost = 0.693460645
-Epoch: 0392 cost = 0.681127575
-Epoch: 0393 cost = 0.707247940
-Epoch: 0394 cost = 0.703591632
-Epoch: 0395 cost = 0.715712769
-Accuracy: 0.666667
-Epoch: 0396 cost = 0.703737154
-Epoch: 0397 cost = 0.684397181
-Epoch: 0398 cost = 0.664346658
-Epoch: 0399 cost = 0.711568538
-Epoch: 0400 cost = 0.701861945
-Accuracy: 0.66
+Epoch: 0581 cost = 0.061808382
+Epoch: 0582 cost = 0.062836597
+Epoch: 0583 cost = 0.063492643
+Epoch: 0584 cost = 0.067609849
+Epoch: 0585 cost = 0.060992296
+Accuracy: 0.658
+Epoch: 0586 cost = 0.067809301
+Epoch: 0587 cost = 0.060394807
+Epoch: 0588 cost = 0.067361560
+Epoch: 0589 cost = 0.065536044
+Epoch: 0590 cost = 0.061374272
+Accuracy: 0.642
+Epoch: 0591 cost = 0.059078618
+Epoch: 0592 cost = 0.063829750
+Epoch: 0593 cost = 0.062298429
+Epoch: 0594 cost = 0.071287302
+Epoch: 0595 cost = 0.065749961
+Accuracy: 0.672
+Epoch: 0596 cost = 0.058481170
+Epoch: 0597 cost = 0.057969925
+Epoch: 0598 cost = 0.066291787
+Epoch: 0599 cost = 0.065026434
+Epoch: 0600 cost = 0.059985628
+Accuracy: 0.668
+Epoch: 0601 cost = 0.053423943
+Epoch: 0602 cost = 0.061045629
+Epoch: 0603 cost = 0.062207677
+Epoch: 0604 cost = 0.060407002
+Epoch: 0605 cost = 0.057189315
+Accuracy: 0.67
+Epoch: 0606 cost = 0.067511549
+Epoch: 0607 cost = 0.061297516
+Epoch: 0608 cost = 0.060596582
+Epoch: 0609 cost = 0.054317859
+Epoch: 0610 cost = 0.052343796
+Accuracy: 0.686
+Epoch: 0611 cost = 0.056506160
+Epoch: 0612 cost = 0.063030073
+Epoch: 0613 cost = 0.055784433
+Epoch: 0614 cost = 0.054427361
+Epoch: 0615 cost = 0.063970151
+Accuracy: 0.676
+Epoch: 0616 cost = 0.061050765
+Epoch: 0617 cost = 0.058202983
+Epoch: 0618 cost = 0.050584137
+Epoch: 0619 cost = 0.052944181
+Epoch: 0620 cost = 0.065120760
+Accuracy: 0.714
+Epoch: 0621 cost = 0.055821122
+Epoch: 0622 cost = 0.051986205
+Epoch: 0623 cost = 0.054332403
+Epoch: 0624 cost = 0.056823151
+Epoch: 0625 cost = 0.060887135
+Accuracy: 0.656
+Epoch: 0626 cost = 0.056574404
+Epoch: 0627 cost = 0.058406405
+Epoch: 0628 cost = 0.056019465
+Epoch: 0629 cost = 0.061377016
+Epoch: 0630 cost = 0.056286315
+Accuracy: 0.67
+Epoch: 0631 cost = 0.064294403
+Epoch: 0632 cost = 0.057684548
+Epoch: 0633 cost = 0.055395138
+Epoch: 0634 cost = 0.061279936
+Epoch: 0635 cost = 0.055086769
+Accuracy: 0.694
+Epoch: 0636 cost = 0.056932196
+Epoch: 0637 cost = 0.053274036
+Epoch: 0638 cost = 0.057776112
+Epoch: 0639 cost = 0.060285001
+Epoch: 0640 cost = 0.052538915
+Accuracy: 0.698
+Epoch: 0641 cost = 0.057047363
+Epoch: 0642 cost = 0.044306908
+Epoch: 0643 cost = 0.053264385
+Epoch: 0644 cost = 0.048877948
+Epoch: 0645 cost = 0.050039820
+Accuracy: 0.686
+Epoch: 0646 cost = 0.056626274
+Epoch: 0647 cost = 0.055075806
+Epoch: 0648 cost = 0.046829629
+Epoch: 0649 cost = 0.051321841
+Epoch: 0650 cost = 0.053735480
+Accuracy: 0.672
+Epoch: 0651 cost = 0.056439840
+Epoch: 0652 cost = 0.054284734
+Epoch: 0653 cost = 0.049454561
+Epoch: 0654 cost = 0.046565355
+Epoch: 0655 cost = 0.048603004
+Accuracy: 0.662
+Epoch: 0656 cost = 0.048294246
+Epoch: 0657 cost = 0.054303624
+Epoch: 0658 cost = 0.052814844
+Epoch: 0659 cost = 0.048079909
+Epoch: 0660 cost = 0.056449527
+Accuracy: 0.662
+Epoch: 0661 cost = 0.056652258
+Epoch: 0662 cost = 0.056827327
+Epoch: 0663 cost = 0.052064014
+Epoch: 0664 cost = 0.045687309
+Epoch: 0665 cost = 0.047456508
+Accuracy: 0.686
+Epoch: 0666 cost = 0.046594262
+Epoch: 0667 cost = 0.046810585
+Epoch: 0668 cost = 0.049053001
+Epoch: 0669 cost = 0.051781630
+Epoch: 0670 cost = 0.045175623
+Accuracy: 0.704
+Epoch: 0671 cost = 0.054489744
+Epoch: 0672 cost = 0.047346830
+Epoch: 0673 cost = 0.046898829
+Epoch: 0674 cost = 0.045713064
+Epoch: 0675 cost = 0.046557224
+Accuracy: 0.652
+Epoch: 0676 cost = 0.041371434
+Epoch: 0677 cost = 0.045871089
+Epoch: 0678 cost = 0.052855518
+Epoch: 0679 cost = 0.044986555
+Epoch: 0680 cost = 0.048014041
+Accuracy: 0.686
+Epoch: 0681 cost = 0.051755832
+Epoch: 0682 cost = 0.045360965
+Epoch: 0683 cost = 0.046882404
+Epoch: 0684 cost = 0.052340601
+Epoch: 0685 cost = 0.053695479
+Accuracy: 0.682
+Epoch: 0686 cost = 0.046186527
+Epoch: 0687 cost = 0.045612034
+Epoch: 0688 cost = 0.047017278
+Epoch: 0689 cost = 0.046109841
+Epoch: 0690 cost = 0.044169408
+Accuracy: 0.684
+Epoch: 0691 cost = 0.041358152
+Epoch: 0692 cost = 0.049221673
+Epoch: 0693 cost = 0.047056143
+Epoch: 0694 cost = 0.045664821
+Epoch: 0695 cost = 0.047862345
+Accuracy: 0.632
+Epoch: 0696 cost = 0.045854133
+Epoch: 0697 cost = 0.047327583
+Epoch: 0698 cost = 0.053963129
+Epoch: 0699 cost = 0.041466869
+Epoch: 0700 cost = 0.039984456
+Accuracy: 0.712
 Finished!
+Out[13]: '\n9) data5 (n_mfcc=20, length=430)\nlr=0.0002, epoch = 200    \nwin : (2, 21), (2,4), (3,3)\nmax_pool : (2,21), (2,4), (3,3)\np_keep_conv, p_keep_hidden = 0.8, 0.7\naccuracy : 63~70% \n\n10) 9와 같고\nlr=0.0002, epoch = 700    \nwin : (2, 43), (3,3), (3,3)\nmax_pool : (2,43), (3,3), (3,3)\np_keep_conv, p_keep_hidden = 0.8, 0.7\naccuracy : 66~74%\n\n11) 9와 같고\nlr=0.0002, epoch = 700\np_keep_conv, p_keep_hidden = 0.7, 0.5\naccuracy : 67~72%\n'

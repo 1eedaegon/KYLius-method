@@ -27,7 +27,7 @@ tf.reset_default_graph()     #그래프 초기화
 # hyper parameters
 learning_rate = 0.0002
 training_epochs = 700
-batch_size = 300
+batch_size = 50
 steps_for_validate = 5
 
 #placeholder
@@ -38,23 +38,45 @@ Y_onehot=tf.reshape(tf.one_hot(Y, 41), [-1, 41])
 p_keep_conv = tf.placeholder(tf.float32, name="p_keep_conv")
 p_keep_hidden = tf.placeholder(tf.float32, name="p_keep_hidden")
 
+# test flag for batch normalization
+tst = tf.placeholder(tf.bool)
+iter = tf.placeholder(tf.int32)
+
+def batchnorm(Ylogits, is_test, iteration, offset, convolutional=False):
+    exp_moving_avg = tf.train.ExponentialMovingAverage(0.999, iteration) # adding the iteration prevents from averaging across non-existing iterations
+    bnepsilon = 1e-5
+    if convolutional:
+        mean, variance = tf.nn.moments(Ylogits, [0, 1, 2])
+    else:
+        mean, variance = tf.nn.moments(Ylogits, [0])
+    m = tf.cond(is_test, lambda: exp_moving_avg.average(mean), lambda: mean)
+    v = tf.cond(is_test, lambda: exp_moving_avg.average(variance), lambda: variance)
+    Ybn = tf.nn.batch_normalization(Ylogits, m, v, offset, None, bnepsilon)
+    return(Ybn)
+
 # L1 SoundIn shape=(?, 20, 430, 1)
 W1 = tf.get_variable("W1", shape=[2, 43, 1, 32],initializer=tf.contrib.layers.xavier_initializer())
+B1 = tf.Variable(tf.constant(0.1, tf.float32, [32]))
 L1 = tf.nn.conv2d(X_sound, W1, strides=[1, 1, 1, 1], padding='SAME')
+L1 = batchnorm(L1, tst, iter, B1, convolutional=True)
 L1 = tf.nn.elu(L1)
 L1 = tf.nn.max_pool(L1, ksize=[1, 2, 43, 1],strides=[1, 2, 43, 1], padding='SAME') 
 L1 = tf.nn.dropout(L1, p_keep_conv)
 
 # L2 Input shape=(?,10,21,32)
 W2 = tf.get_variable("W2", shape=[3, 3, 32, 64],initializer=tf.contrib.layers.xavier_initializer())
+B2 = tf.Variable(tf.constant(0.1, tf.float32, [64]))
 L2 = tf.nn.conv2d(L1, W2, strides=[1, 1, 1, 1], padding='SAME')
+L2 = batchnorm(L2, tst, iter, B2, convolutional=True)
 L2 = tf.nn.elu(L2)
 L2 = tf.nn.max_pool(L2, ksize=[1, 3, 3, 1],strides=[1, 3, 3, 1], padding='SAME') 
 L2 = tf.nn.dropout(L2, p_keep_conv)
 
 # L3 Input shape=(?,3,12,64)
 W3 = tf.get_variable("W3", shape=[3, 3, 64, 128],initializer=tf.contrib.layers.xavier_initializer())
+B3 = tf.Variable(tf.constant(0.1, tf.float32, [128]))
 L3 = tf.nn.conv2d(L2, W3, strides=[1, 1, 1, 1], padding='SAME')
+L3 = batchnorm(L3, tst, iter, B3, convolutional=True)
 L3 = tf.nn.elu(L3)
 L3 = tf.nn.max_pool(L3, ksize=[1, 3, 3, 1],strides=[1, 3, 3, 1], padding='SAME') 
 L3 = tf.nn.dropout(L3, p_keep_conv)

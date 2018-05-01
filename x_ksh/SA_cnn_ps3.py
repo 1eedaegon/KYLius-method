@@ -42,26 +42,26 @@ p_keep_hidden = tf.placeholder(tf.float32, name="p_keep_hidden")
 W1 = tf.get_variable("W1", shape=[2, 43, 1, 32],initializer=tf.contrib.layers.xavier_initializer())
 L1 = tf.nn.conv2d(X_sound, W1, strides=[1, 1, 1, 1], padding='SAME')
 L1 = tf.nn.elu(L1)
-L1 = tf.nn.max_pool(L1, ksize=[1, 2, 43, 1],strides=[1, 2, 43, 1], padding='SAME') 
+L1 = tf.nn.max_pool(L1, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='SAME') 
 L1 = tf.nn.dropout(L1, p_keep_conv)
 
 # L2 Input shape=(?,10,21,32)
-W2 = tf.get_variable("W2", shape=[3, 3, 32, 64],initializer=tf.contrib.layers.xavier_initializer())
+W2 = tf.get_variable("W2", shape=[3, 60, 32, 64],initializer=tf.contrib.layers.xavier_initializer())
 L2 = tf.nn.conv2d(L1, W2, strides=[1, 1, 1, 1], padding='SAME')
 L2 = tf.nn.elu(L2)
 L2 = tf.nn.max_pool(L2, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='SAME') 
 L2 = tf.nn.dropout(L2, p_keep_conv)
 
 # L3 Input shape=(?,3,12,64)
-W3 = tf.get_variable("W3", shape=[3, 3, 64, 128],initializer=tf.contrib.layers.xavier_initializer())
+W3 = tf.get_variable("W3", shape=[3, 60, 64, 128],initializer=tf.contrib.layers.xavier_initializer())
 L3 = tf.nn.conv2d(L2, W3, strides=[1, 1, 1, 1], padding='SAME')
 L3 = tf.nn.elu(L3)
 L3 = tf.nn.max_pool(L3, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='SAME') 
 L3 = tf.nn.dropout(L3, p_keep_conv)
-L3_flat= tf.reshape(L3, shape=[-1, 3*3*128])
+L3_flat= tf.reshape(L3, shape=[-1, 3*54*128])
 
 # Final FC 2*3*128 inputs -> 41 outputs
-W4 = tf.get_variable("W4", shape=[3*3*128, 625],initializer=tf.contrib.layers.xavier_initializer())
+W4 = tf.get_variable("W4", shape=[3*54*128, 625],initializer=tf.contrib.layers.xavier_initializer())
 L4 = tf.nn.elu(tf.matmul(L3_flat, W4))
 L4 = tf.nn.dropout(L4, p_keep_hidden)
 W_o = tf.get_variable("W_o", shape=[625,41],initializer=tf.contrib.layers.xavier_initializer())
@@ -124,8 +124,5 @@ accuracy : 67~72%
 
 *다른 시도: batch_norm 해본거 SA_batch_norm_ps3.py - 인자값이 잘못됐는지 정확도가 엄청 떨어짐
 
-12) 9와 같고
-win : (2, 43), (3,3), (3,3)
-max_pool : (2,43), (2,2), (2,2)
-accuracy : 
+
 """

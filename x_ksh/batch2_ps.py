@@ -38,10 +38,6 @@ Y_onehot=tf.reshape(tf.one_hot(Y, 41), [-1, 41])
 p_keep_conv = tf.placeholder(tf.float32, name="p_keep_conv")
 p_keep_hidden = tf.placeholder(tf.float32, name="p_keep_hidden")
 
-# test flag for batch normalization
-tst = tf.placeholder(tf.bool)
-iter = tf.placeholder(tf.int32)
-
 # L1 SoundIn shape=(?, 20, 430, 1)
 W1 = tf.get_variable("W1", shape=[2, 43, 1, 32],initializer=tf.contrib.layers.xavier_initializer())
 L1 = tf.nn.conv2d(X_sound, W1, strides=[1, 1, 1, 1], padding='SAME')

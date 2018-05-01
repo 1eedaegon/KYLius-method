@@ -55,15 +55,31 @@ mfcc로 하면 41개 속성값이 나옴. 다른 특징 붙이니까 192개로 �
 ## 할거
 1. 각자 코드 완성/ 여러가지로 돌려보고 정확도랑 인수값 잘 기록해놓기
 <pre>
-대곤: stft(core.stft)
-상욱: 캐글 버전
-승혁: mfcc 하던거
-수원: melspectogram
+대곤: chroma.stft 3*3/ mfcc(?)
+상욱: mfcc 300 등으로 길이 바꿔가면서
+승혁: mfcc 하던거 + core.stft
+수원: melspectogram / 1d
 </pre>
 
 2. 발표할 개요 생각해보기
 <pre>
-시간날때
+개요
+1. data set 설명 (with graph, column, label)
+2. sound processing 소개
+mfcc, stft, melspectogram 등
+
+코드
+3. processing.py 설명
+4. mfcc, stft, melspectogram 각각으로 나온 정확도
+5. 앙상블로 나온 정확도
+
+마무리
+6. 캐글에 올리고, 추천 권유
+
+승혁: sound processing + processing.py
+상욱: data set 설명(graph, column, label) mfcc, stft 그래프 등
+대곤: 앙상블로 나온 정확도/ 캐글에 올리기
+수원: 각각으로 나온 정확도 + 추천 권유
 </pre>
 
 

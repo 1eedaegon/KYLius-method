@@ -27,7 +27,7 @@ tf.reset_default_graph()     #그래프 초기화
 # hyper parameters
 learning_rate = 0.0002
 training_epochs = 700
-batch_size = 300
+batch_size = 50
 steps_for_validate = 5
 
 #placeholder
@@ -38,33 +38,56 @@ Y_onehot=tf.reshape(tf.one_hot(Y, 41), [-1, 41])
 p_keep_conv = tf.placeholder(tf.float32, name="p_keep_conv")
 p_keep_hidden = tf.placeholder(tf.float32, name="p_keep_hidden")
 
+# test flag for batch normalization
+tst = tf.placeholder(tf.bool)
+iter = tf.placeholder(tf.int32)
+
+def batchnorm(Ylogits, is_test, iteration, offset, convolutional=False):
+    exp_moving_avg = tf.train.ExponentialMovingAverage(0.999, iteration) # adding the iteration prevents from averaging across non-existing iterations
+    bnepsilon = 1e-5
+    if convolutional:
+        mean, variance = tf.nn.moments(Ylogits, [0, 1, 2])
+    else:
+        mean, variance = tf.nn.moments(Ylogits, [0])
+    update_moving_everages = exp_moving_avg.apply([mean, variance])
+    m = tf.cond(is_test, lambda: exp_moving_avg.average(mean), lambda: mean)
+    v = tf.cond(is_test, lambda: exp_moving_avg.average(variance), lambda: variance)
+    Ybn = tf.nn.batch_normalization(Ylogits, m, v, offset, None, bnepsilon)
+    return(Ybn, update_moving_everages)
+
 # L1 SoundIn shape=(?, 20, 430, 1)
 W1 = tf.get_variable("W1", shape=[2, 43, 1, 32],initializer=tf.contrib.layers.xavier_initializer())
+B1 = tf.Variable(tf.constant(0, tf.float32, [32]))
 L1 = tf.nn.conv2d(X_sound, W1, strides=[1, 1, 1, 1], padding='SAME')
+L1, _ = batchnorm(L1, tst, iter, B1, convolutional=True)
 L1 = tf.nn.elu(L1)
-L1 = tf.nn.max_pool(L1, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='SAME') 
+L1 = tf.nn.max_pool(L1, ksize=[1, 2, 43, 1],strides=[1, 2, 43, 1], padding='SAME') 
 L1 = tf.nn.dropout(L1, p_keep_conv)
 
 # L2 Input shape=(?,10,21,32)
-W2 = tf.get_variable("W2", shape=[3, 60, 32, 64],initializer=tf.contrib.layers.xavier_initializer())
+W2 = tf.get_variable("W2", shape=[3, 3, 32, 64],initializer=tf.contrib.layers.xavier_initializer())
+B2 = tf.Variable(tf.constant(0, tf.float32, [64]))
 L2 = tf.nn.conv2d(L1, W2, strides=[1, 1, 1, 1], padding='SAME')
+L2, _ = batchnorm(L2, tst, iter, B2, convolutional=True)
 L2 = tf.nn.elu(L2)
-L2 = tf.nn.max_pool(L2, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='SAME') 
+L2 = tf.nn.max_pool(L2, ksize=[1, 3, 3, 1],strides=[1, 3, 3, 1], padding='SAME') 
 L2 = tf.nn.dropout(L2, p_keep_conv)
 
 # L3 Input shape=(?,3,12,64)
-W3 = tf.get_variable("W3", shape=[3, 60, 64, 128],initializer=tf.contrib.layers.xavier_initializer())
+W3 = tf.get_variable("W3", shape=[3, 3, 64, 128],initializer=tf.contrib.layers.xavier_initializer())
+B3 = tf.Variable(tf.constant(0, tf.float32, [128]))
 L3 = tf.nn.conv2d(L2, W3, strides=[1, 1, 1, 1], padding='SAME')
+L3, _ = batchnorm(L3, tst, iter, B3, convolutional=True)
 L3 = tf.nn.elu(L3)
-L3 = tf.nn.max_pool(L3, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='SAME') 
+L3 = tf.nn.max_pool(L3, ksize=[1, 3, 3, 1],strides=[1, 3, 3, 1], padding='SAME') 
 L3 = tf.nn.dropout(L3, p_keep_conv)
-L3_flat= tf.reshape(L3, shape=[-1, 3*54*128])
+L3_flat= tf.reshape(L3, shape=[-1, 2*2*128])
 
 # Final FC 2*3*128 inputs -> 41 outputs
-W4 = tf.get_variable("W4", shape=[3*54*128, 625],initializer=tf.contrib.layers.xavier_initializer())
+W4 = tf.get_variable("W4", shape=[2*2*128, 512],initializer=tf.contrib.layers.xavier_initializer())
 L4 = tf.nn.elu(tf.matmul(L3_flat, W4))
 L4 = tf.nn.dropout(L4, p_keep_hidden)
-W_o = tf.get_variable("W_o", shape=[625,41],initializer=tf.contrib.layers.xavier_initializer())
+W_o = tf.get_variable("W_o", shape=[512,41],initializer=tf.contrib.layers.xavier_initializer())
 b = tf.Variable(tf.random_normal([41]))
 logits = tf.matmul(L4, W_o) + b
 
@@ -86,7 +109,8 @@ for epoch in range(training_epochs):
     for i in range(total_batch):
         batch_xs = trainData[i*batch_size:(i+1)*batch_size]
         batch_ys = trainLabel[i*batch_size:(i+1)*batch_size].reshape(-1, 1)
-        feed_dict = {X: batch_xs, Y: batch_ys, p_keep_conv: .8, p_keep_hidden: 0.7}
+        feed_dict = {X: batch_xs, Y: batch_ys, 
+                     p_keep_conv: .8, p_keep_hidden: 0.7, tst:False}
         c, _ = sess.run([cost, optimizer], feed_dict=feed_dict)
         avg_cost += c / total_batch
     print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost))
@@ -95,7 +119,8 @@ for epoch in range(training_epochs):
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
         x=np.random.choice(testLabel.shape[0], 500, replace=False)
         print('Accuracy:', sess.run(accuracy, feed_dict={
-                X: testData[x], Y: testLabel[x].reshape(-1, 1), p_keep_conv: 1, p_keep_hidden: 1}))
+                X: testData[x], Y: testLabel[x].reshape(-1, 1), 
+                p_keep_conv: 1, p_keep_hidden: 1, tst:True}))
         save_path = saver.save(sess, '/home/paperspace/Downloads/optx/optx')
 print('Finished!')
 
@@ -121,8 +146,4 @@ accuracy : 66~74%
 lr=0.0002, epoch = 700
 p_keep_conv, p_keep_hidden = 0.7, 0.5
 accuracy : 67~72%
-
-*다른 시도: batch_norm 해본거 SA_batch_norm_ps3.py - 인자값이 잘못됐는지 정확도가 엄청 떨어짐
-
-
 """

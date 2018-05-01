@@ -27,8 +27,6 @@ def mel2square(mel):
 # 1 zero padded to the right
     y,x=mel.shape
     return np.pad(mel, ((0,0),(0,abs(x-y))), 'constant')
-mel.shape #Out[96]: (105, 128)
-mel2square(mel).shape #Out[95]: (128, 128)
 
 
 def Mk_mel(audio_list):
@@ -44,4 +42,6 @@ a = train_list[0:10]
 
 lists = Mk_mel(a)
 
+np.savetxt("/home/itwill03/sound/mel_train2.csv",lists, delimiter=",")
+a = np.genfromtxt("/home/itwill03/sound/mel_train.csv", delimiter=',')
 

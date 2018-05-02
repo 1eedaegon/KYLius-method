@@ -13,9 +13,9 @@ from math import ceil
 tf.set_random_seed(777) 
 
 trainData = np.genfromtxt('/home/paperspace/Downloads/trainData6.csv', delimiter=',')
-trainData = trainData.reshape(-1, 20, 200)
+trainData = trainData.reshape(-1, 20, 430)
 testData = np.genfromtxt('/home/paperspace/Downloads/testData6.csv', delimiter=',')
-testData = testData.reshape(-1, 20, 200)
+testData = testData.reshape(-1, 20, 430)
 trainLabel = np.genfromtxt('/home/paperspace/Downloads/trainLabel6.csv', delimiter=',')
 testLabel = np.genfromtxt('/home/paperspace/Downloads/testLabel6.csv', delimiter=',')
 
@@ -32,19 +32,19 @@ batch_size = 200
 steps_for_validate = 5
 
 #placeholder
-X = tf.placeholder(tf.float32, [None, 20, 200], name="X")
-X_sound = tf.reshape(X, [-1, 20, 200, 1])          
+X = tf.placeholder(tf.float32, [None, 20, 430], name="X")
+X_sound = tf.reshape(X, [-1, 20, 430, 1])          
 Y = tf.placeholder(tf.int32, [None, 1], name="Y")
 Y_onehot=tf.reshape(tf.one_hot(Y, 41), [-1, 41])
 p_keep_conv = tf.placeholder(tf.float32, name="p_keep_conv")
 p_keep_hidden = tf.placeholder(tf.float32, name="p_keep_hidden")
 
 # L1 SoundIn shape=(?, 20, 430, 1)
-W1 = tf.get_variable("W1", shape=[2, 20, 1, 32],initializer=tf.contrib.layers.xavier_initializer())
+W1 = tf.get_variable("W1", shape=[2, 43, 1, 32],initializer=tf.contrib.layers.xavier_initializer())
 L1 = tf.nn.conv2d(X_sound, W1, strides=[1, 1, 1, 1], padding='SAME')
 L1 = tf.nn.elu(L1)
 L1 = tf.layers.batch_normalization(L1)
-L1 = tf.nn.max_pool(L1, ksize=[1, 2, 20, 1],strides=[1, 2, 20, 1], padding='SAME') 
+L1 = tf.nn.max_pool(L1, ksize=[1, 2, 43, 1],strides=[1, 2, 43, 1], padding='SAME') 
 L1 = tf.nn.dropout(L1, p_keep_conv)
 
 # L2 Input shape=(?,10,21,32)
@@ -84,7 +84,6 @@ sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 saver = tf.train.Saver()
 
-
 # train my model
 print('Learning started. It takes sometime.')
 for epoch in range(training_epochs):
@@ -96,13 +95,16 @@ for epoch in range(training_epochs):
         feed_dict = {X: batch_xs, Y: batch_ys, p_keep_conv: .8, p_keep_hidden: 0.7}
         c, _ = sess.run([cost, optimizer], feed_dict=feed_dict)
         avg_cost += c / total_batch
-    print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost))
     if epoch % steps_for_validate == steps_for_validate-1:
+        print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost))
         correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(Y_onehot, 1))
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-        x=np.random.choice(testLabel.shape[0], 500, replace=False)
-        print('Accuracy:', sess.run(accuracy, feed_dict={
-                X: testData[x], Y: testLabel[x].reshape(-1, 1), p_keep_conv: 1, p_keep_hidden: 1}))
+        x1=np.random.choice(testLabel.shape[0], 300, replace=False)
+        print('TrainAccuracy:', sess.run(accuracy, feed_dict={
+                X: trainData[x1], Y: trainLabel[x1].reshape(-1, 1), p_keep_conv: 1, p_keep_hidden: 1}))
+        x2=np.random.choice(testLabel.shape[0], 300, replace=False)
+        print('TestAccuracy:', sess.run(accuracy, feed_dict={
+                X: testData[x2], Y: testLabel[x2].reshape(-1, 1), p_keep_conv: 1, p_keep_hidden: 1}))
         save_path = saver.save(sess, '/home/paperspace/Downloads/optx/optx')
 print('Finished!')
 

@@ -110,8 +110,8 @@ print(min(trainLabel), max(trainLabel), min(testLabel), max(testLabel))
 #0 40 0 40
 
 #csv downdload totally about 600MB
-trainData2D=trainData.reshape(-1, 20*430)
-testData2D=testData.reshape(-1, 20*430)
+trainData2D=trainData.reshape(-1, 20*200)
+testData2D=testData.reshape(-1, 20*200)
 np.savetxt(path+'trainData6.csv', 
            trainData2D, delimiter=",")
 np.savetxt(path+'testData6.csv', 

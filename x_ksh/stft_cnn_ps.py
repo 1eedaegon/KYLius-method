@@ -65,11 +65,11 @@ L3 = tf.nn.dropout(L3, p_keep_conv)
 L3_flat= tf.reshape(L3, shape=[-1, 3*3*128])
 
 # Final FC 2*3*128 inputs -> 41 outputs
-W4 = tf.get_variable("W4", shape=[3*3*128, 512],initializer=tf.contrib.layers.xavier_initializer())
+W4 = tf.get_variable("W4", shape=[3*3*128, 217],initializer=tf.contrib.layers.xavier_initializer())
 L4 = tf.nn.elu(tf.matmul(L3_flat, W4))
 L4 = tf.layers.batch_normalization(L4)
 L4 = tf.nn.dropout(L4, p_keep_hidden)
-W_o = tf.get_variable("W_o", shape=[512,41],initializer=tf.contrib.layers.xavier_initializer())
+W_o = tf.get_variable("W_o", shape=[217,41],initializer=tf.contrib.layers.xavier_initializer())
 b = tf.Variable(tf.random_normal([41]))
 logits = tf.matmul(L4, W_o) + b
 logits = tf.layers.batch_normalization(logits)

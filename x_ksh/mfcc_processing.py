@@ -54,11 +54,11 @@ plt.plot(np.abs(mfcc[3,]))
 plt.plot(mfcc[2,])
 plt.plot(np.abs(mfcc[3,]))
 
-#2 seconds(200 segments) extract
-def two_sec_extract(file):
-    #zero padding to file.shape[0] X 20 X 200
+#5 seconds(430 segments) extract
+def five_sec_extract(file):
+    #zero padding to file.shape[0] X 20 X 430
     n=file.shape[0]
-    array = np.repeat(0., n * 20 * 200).reshape(n, 20, 200)
+    array = np.repeat(0., n * 20 * 430).reshape(n, 20, 430)
     k=0
     see = []
     for filename in file:
@@ -66,24 +66,26 @@ def two_sec_extract(file):
                                   mono=True, res_type="kaiser_fast")
         mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=20)
         length=mfcc.shape[1]
-        if length == 200:
+        if length == 430:
             array[k, :, :]=mfcc
-        elif length < 200:
+        elif length < 430:
             array[k, :, :length]=mfcc
-        elif length > 200:
-            sample = np.repeat(0., (length - 200)*20).reshape(20,length - 200)
-            for j in range(length - 200):
+        elif length > 430:
+            sample = np.repeat(0., (length - 430)*20).reshape(20,length - 430)
+            for j in range(length - 430):
                 for i in range(20):
-                    sample[i,j]=np.var(mfcc[i,j:j+200])
+                    sample[i,j]=np.var(mfcc[i,j:j+430])
             A=np.argmax(sample, axis=1)
             start=np.argmax(np.bincount(A))
-            array[k, :, :]=mfcc[:, start:start+200]
+            array[k, :, :]=mfcc[:, start:start+430]
             see.append(start)
         k+=1
     return(array, see)
 
-trainData, see1=two_sec_extract(trainfile)
-testData, see2=two_sec_extract(testfile)
+trainData, see1=five_sec_extract(trainfile)
+testData, see2=five_sec_extract(testfile)
+print(see1)
+print(see2)
 
 print(trainData.shape, testData.shape, trainLabel.shape, testLabel.shape)
 # (6631, 20, 200) (2842, 20, 200) (6631,) (2842,)
@@ -108,8 +110,8 @@ print(min(trainLabel), max(trainLabel), min(testLabel), max(testLabel))
 #0 40 0 40
 
 #csv downdload totally about 600MB
-trainData2D=trainData.reshape(-1, 20*200)
-testData2D=testData.reshape(-1, 20*200)
+trainData2D=trainData.reshape(-1, 20*430)
+testData2D=testData.reshape(-1, 20*430)
 np.savetxt(path+'trainData6.csv', 
            trainData2D, delimiter=",")
 np.savetxt(path+'testData6.csv', 

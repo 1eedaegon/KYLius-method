@@ -11,12 +11,12 @@ import numpy as np
 import tensorflow as tf
 tf.set_random_seed(777) 
 
-trainData = np.genfromtxt('/home/paperspace/Downloads/trainData5.csv', delimiter=',')
+trainData = np.genfromtxt('/home/paperspace/Downloads/trainData6.csv', delimiter=',')
 trainData = trainData.reshape(-1, 20, 200)
-testData = np.genfromtxt('/home/paperspace/Downloads/testData5.csv', delimiter=',')
+testData = np.genfromtxt('/home/paperspace/Downloads/testData6.csv', delimiter=',')
 testData = testData.reshape(-1, 20, 200)
-trainLabel = np.genfromtxt('/home/paperspace/Downloads/trainLabel5.csv', delimiter=',')
-testLabel = np.genfromtxt('/home/paperspace/Downloads/testLabel5.csv', delimiter=',')
+trainLabel = np.genfromtxt('/home/paperspace/Downloads/trainLabel6.csv', delimiter=',')
+testLabel = np.genfromtxt('/home/paperspace/Downloads/testLabel6.csv', delimiter=',')
 
 print(trainData.shape, testData.shape, trainLabel.shape, testLabel.shape)
 # (6631, 20, 200) (2842, 20, 200) (6631,) (2842,)
@@ -25,8 +25,8 @@ print(trainData.shape, testData.shape, trainLabel.shape, testLabel.shape)
 tf.reset_default_graph()     #그래프 초기화
 
 # hyper parameters
-learning_rate = 0.0004
-training_epochs = 400
+learning_rate = 0.0002
+training_epochs = 700
 batch_size = 200
 steps_for_validate = 5
 

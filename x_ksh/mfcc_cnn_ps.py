@@ -29,7 +29,7 @@ tf.reset_default_graph()     #그래프 초기화
 learning_rate = 0.0002
 training_epochs = 500
 batch_size = 200
-steps_for_validate = 5
+steps_for_validate = 20
 
 #placeholder
 X = tf.placeholder(tf.float32, [None, 20, 430], name="X")

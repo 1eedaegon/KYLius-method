@@ -59,7 +59,7 @@ def two_sec_extract(file):
     array = np.repeat(0., n * 513 * 100).reshape(n, 513, 100)
     k=0    
     for filename in file:    
-        y, sr = librosa.core.load(path+filename, mono=True, res_type="kaiser_fast")
+        y, sr = librosa.core.load(path+filename, mono=True, res_type="kaaiser_fast")
         stft=librosa.core.stft(y,1024,512)
         length=stft.shape[1]
         if length == 100:

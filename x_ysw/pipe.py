@@ -69,6 +69,7 @@ p_keep_hidden = tf.placeholder(tf.float32, name='p_keep_hidden')
 # img shape = (?, 128, 128, 1)
 c1 = tf.layers.conv2d(tf.reshape(X, [-1, 128, 128, 1]), 32, kernel_size=[4, 4], strides=(2, 2), 
                       padding='same', activation=tf.nn.elu, name="c1")  
+n1 = tf.layers.batch_normalization(c1)
 p1 = tf.layers.max_pooling2d(inputs=c1, pool_size=[2, 2], strides=(2,2)) 
 p1 = tf.nn.dropout(p1, p_keep_conv)
 
@@ -108,8 +109,9 @@ saver = tf.train.Saver()
 
 file_list = glob.glob("C:\data\sound\mel/train_*.csv")
 print('Learning started. It takes sometime.')
+
 for epoch in range(training_epochs):
-    avg_cost = 0    
+    avg_cost = 0        
     for n in range(len(file_list)):    
         data = file_list[n]
         train_data = pd.DataFrame(np.genfromtxt(data, delimiter=','))
@@ -125,10 +127,15 @@ for epoch in range(training_epochs):
             feed_dict = {X: batch_xs, Y: batch_ys, p_keep_conv: .7, p_keep_hidden: .5}
             c, _ = sess.run([cost, optimizer], feed_dict=feed_dict)
             avg_cost += c / total_batch
-        print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost))
-        if epoch % steps_for_validate == steps_for_validate:
+        print('Epoch:', '%04d' % (epochs + 1), 'cost =', '{:.9f}'.format(avg_cost))
+        if epoch % steps_for_validate == steps_for_validate-1:
             correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(Y_onehot, 1))
             accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-            print('Accuracy:', sess.run(accuracy, feed_dict={ X: validateData, Y: validataLabel.reshape(-1, 1), 
-                                                             p_keep_conv: 1, p_keep_hidden: 1}))       
+            x=np.random.choice(testLabel.shape[0], 500, replace=False)
+            print('Accuracy:', sess.run(accuracy, feed_dict={
+                X: testData[x], Y: testLabel[x].reshape(-1, 1), p_keep_conv: 1, p_keep_hidden: 1}))
+            #save_path = saver.save(sess, '/home/paperspace/Downloads/optx/optx')
 print('Finished!')
+
+
+

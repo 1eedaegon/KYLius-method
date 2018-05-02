@@ -1,46 +1,47 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Apr 26 18:53:10 2018
+#mfcc_cnn_ps.py
+#librosa.features.mfcc(n_mfcc=20) 이용해서 저장한 데이터와 CNN을 이용하여 사운드 분류하는 코드입니다.
+#데이터 프로세싱 코드는 mfcc_processing.py에 있습니다.
 
-@author: kimseunghyuck
-"""
-
-#import important modules
+#모듈 임포트(numpy, tensorflow, math.ceil) 및 랜덤 지정
 import numpy as np
 import tensorflow as tf
 from math import ceil
 tf.set_random_seed(777) 
 
-trainData = np.genfromtxt('/home/paperspace/Downloads/trainData7.csv', delimiter=',')
-trainData = trainData.reshape(-1, 17, 200)
-testData = np.genfromtxt('/home/paperspace/Downloads/testData7.csv', delimiter=',')
-testData = testData.reshape(-1, 17, 200)
-trainLabel = np.genfromtxt('/home/paperspace/Downloads/trainLabel7.csv', delimiter=',')
-testLabel = np.genfromtxt('/home/paperspace/Downloads/testLabel7.csv', delimiter=',')
+#트레이닝/테스트 셋 각각 데이터/라벨 임포트
+trainData = np.genfromtxt('/home/paperspace/Downloads/trainData6.csv', delimiter=',')
+trainData = trainData.reshape(-1, 20, 430)
+testData = np.genfromtxt('/home/paperspace/Downloads/testData6.csv', delimiter=',')
+testData = testData.reshape(-1, 20, 430)
+trainLabel = np.genfromtxt('/home/paperspace/Downloads/trainLabel6.csv', delimiter=',')
+testLabel = np.genfromtxt('/home/paperspace/Downloads/testLabel6.csv', delimiter=',')
 
+#임포트한 데이터가 원하는 데이터가 맞는지 shape을 통해 확인
 print(trainData.shape, testData.shape, trainLabel.shape, testLabel.shape)
-# (6631, 17, 200) (2842, 17, 200) (6631,) (2842,)
+# (6631, 20, 430) (2842, 20, 430) (6631,) (2842,)
 
+#데이터 준비 끝.
 #다시 돌릴때는 여기부터 
-tf.reset_default_graph()     #그래프 초기화
+#그래프 초기화
+tf.reset_default_graph()     
 
 # hyper parameters
 learning_rate = 0.0002
 training_epochs = 700
-batch_size = 100
+batch_size = 200
 steps_for_validate = 20
 
 #placeholder
-X = tf.placeholder(tf.float32, [None, 17, 200], name="X")
-X_sound = tf.reshape(X, [-1, 17, 200, 1])          
+X = tf.placeholder(tf.float32, [None, 20, 430], name="X")
+X_sound = tf.reshape(X, [-1, 20, 430, 1])          
 Y = tf.placeholder(tf.int32, [None, 1], name="Y")
 Y_onehot=tf.reshape(tf.one_hot(Y, 41), [-1, 41])
 p_keep_conv = tf.placeholder(tf.float32, name="p_keep_conv")
 p_keep_hidden = tf.placeholder(tf.float32, name="p_keep_hidden")
 
+
 # L1 SoundIn shape=(?, 20, 430, 1)
-W1 = tf.get_variable("W1", shape=[2, 12, 1, 32],initializer=tf.contrib.layers.xavier_initializer())
+W1 = tf.get_variable("W1", shape=[2, 21, 1, 32],initializer=tf.contrib.layers.xavier_initializer())
 L1 = tf.nn.conv2d(X_sound, W1, strides=[1, 1, 1, 1], padding='SAME')
 L1 = tf.nn.elu(L1)
 L1 = tf.layers.batch_normalization(L1)
@@ -48,7 +49,7 @@ L1 = tf.nn.max_pool(L1, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='VALID'
 L1 = tf.nn.dropout(L1, p_keep_conv)
 
 # L2 Input shape=(?,10,21,32)
-W2 = tf.get_variable("W2", shape=[2, 12, 32, 32],initializer=tf.contrib.layers.xavier_initializer())
+W2 = tf.get_variable("W2", shape=[2, 21, 32, 32],initializer=tf.contrib.layers.xavier_initializer())
 L2 = tf.nn.conv2d(L1, W2, strides=[1, 1, 1, 1], padding='SAME')
 L2 = tf.nn.elu(L2)
 L2 = tf.layers.batch_normalization(L2)
@@ -56,7 +57,7 @@ L2 = tf.nn.max_pool(L2, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='VALID'
 L2 = tf.nn.dropout(L2, p_keep_conv)
 
 # L3 Input shape=(?,3,12,64)
-W3 = tf.get_variable("W3", shape=[2, 12, 32, 32],initializer=tf.contrib.layers.xavier_initializer())
+W3 = tf.get_variable("W3", shape=[2, 21, 32, 32],initializer=tf.contrib.layers.xavier_initializer())
 L3 = tf.nn.conv2d(L2, W3, strides=[1, 1, 1, 1], padding='SAME')
 L3 = tf.nn.elu(L3)
 L3 = tf.layers.batch_normalization(L3)
@@ -64,23 +65,24 @@ L3 = tf.nn.max_pool(L3, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='VALID'
 L3 = tf.nn.dropout(L3, p_keep_conv)
 
 # L4 Input shape=(?,3,25,32)
-W4 = tf.get_variable("W4", shape=[2, 12, 32, 32],initializer=tf.contrib.layers.xavier_initializer())
+W4 = tf.get_variable("W4", shape=[2, 21, 32, 32],initializer=tf.contrib.layers.xavier_initializer())
 L4 = tf.nn.conv2d(L3, W4, strides=[1, 1, 1, 1], padding='SAME')
 L4 = tf.nn.elu(L4)
 L4 = tf.layers.batch_normalization(L4)
 L4 = tf.nn.max_pool(L4, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='VALID') 
 L4 = tf.nn.dropout(L4, p_keep_conv)
-L4_flat= tf.reshape(L4, shape=[-1, 12*32])
+L4_flat= tf.reshape(L4, shape=[-1, 26*32])
 
 # Final FC 2*3*128 inputs -> 41 outputs
-W5 = tf.get_variable("W5", shape=[12*32, 125],initializer=tf.contrib.layers.xavier_initializer())
+W5 = tf.get_variable("W5", shape=[26*32, 185],initializer=tf.contrib.layers.xavier_initializer())
 L5 = tf.nn.elu(tf.matmul(L4_flat, W5))
 L5 = tf.layers.batch_normalization(L5)
 L5 = tf.nn.dropout(L5, p_keep_hidden)
-W_o = tf.get_variable("W_o", shape=[125,41],initializer=tf.contrib.layers.xavier_initializer())
+W_o = tf.get_variable("W_o", shape=[185,41],initializer=tf.contrib.layers.xavier_initializer())
 b = tf.Variable(tf.random_normal([41]))
 logits = tf.matmul(L5, W_o) + b
 logits = tf.layers.batch_normalization(logits)
+#logits shape=(?,41)
 
 # define cost/loss & optimizer
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits,labels= Y_onehot))
@@ -113,5 +115,6 @@ for epoch in range(training_epochs):
         x2=np.random.choice(testLabel.shape[0], 300, replace=False)
         print('TestAccuracy:', sess.run(accuracy, feed_dict={
                 X: testData[x2], Y: testLabel[x2].reshape(-1, 1), p_keep_conv: 1, p_keep_hidden: 1}))
-        save_path = saver.save(sess, '/home/paperspace/Downloads/optx2/optx2')
+        save_path = saver.save(sess, '/home/paperspace/Downloads/optx/optx')
 print('Finished!')
+

@@ -1,5 +1,5 @@
 #mfcc_cnn_ps.py
-#librosa.features.mfcc(n_mfcc=20) 이용해서 저장한 데이터와 CNN을 이용하여 사운드 분류하는 코드입니다.
+#librosa.feature.mfcc(n_mfcc=20) 이용해서 저장한 데이터와 CNN을 이용하여 사운드 분류하는 코드입니다.
 #데이터 프로세싱 코드는 mfcc_processing.py에 있습니다.
 
 #모듈 임포트(numpy, tensorflow, math.ceil) 및 랜덤 지정
@@ -27,7 +27,7 @@ tf.reset_default_graph()
 
 # hyper parameters
 learning_rate = 0.0002
-training_epochs = 700
+training_epochs = 300
 batch_size = 200
 steps_for_validate = 20
 

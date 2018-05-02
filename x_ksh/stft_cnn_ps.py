@@ -27,7 +27,7 @@ tf.reset_default_graph()     #그래프 초기화
 
 # hyper parameters
 learning_rate = 0.0002
-training_epochs = 700
+training_epochs = 300
 batch_size = 100
 steps_for_validate = 20
 

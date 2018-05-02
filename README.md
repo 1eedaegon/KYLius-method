@@ -52,9 +52,21 @@ mfcc, stft, melspectogram 등
 6. 캐글에 올리고, 추천 권유
 
 승혁: sound processing + processing.py
-상욱: data set 설명(graph, column, label) mfcc, stft 그래프 등
+상욱: data set 설명(graph, column, label) mfcc, stft 그래프(이미지) 등
 대곤: 앙상블로 나온 정확도/ 캐글에 올리기
 수원: 각각으로 나온 정확도 + 추천 권유
+
+__________
+상욱: 40*350 으로 바꿔서 69~72%, 최대 73.4% 마지막 출력을 크게 해서 더 올라감.
+40*400 만들어놓음. 40*500 도 해보려고 함.
+
+대곤: 68~69%. 앙상블 코드. 앙상블 개념도.
+
+수원: conv1d 54%. MEL 64%.
+
+코드 각자 주석달아서 취합.
+앙상블은 일단 승혁+MEL+chroma 이렇게 테스트 모델.
+오늘 집에 가기 전에 PROJECT2 에 넣어놓기.
 </pre>
 
 

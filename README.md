@@ -27,43 +27,34 @@ https://www.kaggle.com/c/freesound-audio-tagging
 <pre> 엄선된 자료, 혹은 모듈식 개발에 끼워넣을 수 있는 완성된 코드만 올리는 공간입니다. </pre>
 <br>
 
-##### 4월 25일 회의
-<pre>
-대곤: 전처리하는 방법(과정). 샘플링(아날로그-> 디지털),
-중간에 짤린걸 라이키스트 정리로 사이값 보정.
-fft 로 분류. mfcc(샘플링, 라이키스트, fft까지 다 됨) 에 이런 기능이 있음.
-</pre>
-
-<pre>
-수원: 전처리/ conv2d로 돌린거 깃에 올림(실패)
-mfcc같은 값들이 몇가지 종류가 있음.
-본 사이트 중에 mfcc에다 다른 특징값을 붙여넣는 식으로 전처리.
-mfcc로 하면 41개 속성값이 나옴. 다른 특징 붙이니까 192개로 늘어남.
-</pre>
-
-<pre>
-상욱: librosa 로 전처리 다 했음. mfcc만 해봄.
-조대협 블로그에서 mfcc 행을 25개 주라고 함.
-그렇게 했는데 안돼서 캐글 커널처럼 40개로 함.
-원핫 썼는데 라벨이 안읽혀서 테스트 못해보고 있음.
-</pre>
-
-<pre>
-승혁: librosa feature 뽑아내봄
-</pre>
-
 ## 할거
 1. 각자 코드 완성/ 여러가지로 돌려보고 정확도랑 인수값 잘 기록해놓기
 <pre>
-대곤: stft(core.stft)
-상욱: 캐글 버전
-승혁: mfcc 하던거
-수원: melspectogram
+대곤: chroma.stft 3*3/ mfcc(?)
+상욱: mfcc 300 등으로 길이 바꿔가면서
+승혁: mfcc 하던거 + core.stft
+수원: melspectogram / 1d
 </pre>
 
 2. 발표할 개요 생각해보기
 <pre>
-시간날때
+개요
+1. data set 설명 (with graph, column, label)
+2. sound processing 소개
+mfcc, stft, melspectogram 등
+
+코드
+3. processing.py 설명
+4. mfcc, stft, melspectogram 각각으로 나온 정확도
+5. 앙상블로 나온 정확도
+
+마무리
+6. 캐글에 올리고, 추천 권유
+
+승혁: sound processing + processing.py
+상욱: data set 설명(graph, column, label) mfcc, stft 그래프 등
+대곤: 앙상블로 나온 정확도/ 캐글에 올리기
+수원: 각각으로 나온 정확도 + 추천 권유
 </pre>
 
 

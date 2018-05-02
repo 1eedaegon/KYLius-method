@@ -26,7 +26,7 @@ trainLabel = train_set.values[:,1]
 testLabel = test_set.values[:,1]
 
 #data load and extract mfcc (scaling indluded)
-path = '/Users/kimseunghyuck/desktop/audio_train/'
+path = '/Users/kimseunghyuck/desktop/'
 #path = '/home/paperspace/Downloads/audio_train/'
 
 def see_how_long(file):
@@ -54,38 +54,39 @@ plt.plot(np.abs(mfcc[3,]))
 plt.plot(mfcc[2,])
 plt.plot(np.abs(mfcc[3,]))
 
-#5 seconds(430 segments) extract
-def five_sec_extract(file):
-    #zero padding to file.shape[0] X 40 X 3000    
+#2 seconds(200 segments) extract
+def two_sec_extract(file):
+    #zero padding to file.shape[0] X 20 X 200
     n=file.shape[0]
-    array = np.repeat(0, n * 20 * 430).reshape(n, 20, 430)
-    k=0    
-    for filename in file:    
-        y, sr = sf.read(path+filename, dtype='float32')
+    array = np.repeat(0., n * 20 * 200).reshape(n, 20, 200)
+    k=0
+    see = []
+    for filename in file:
+        y, sr = librosa.core.load(path+'audio_train/'+filename, 
+                                  mono=True, res_type="kaiser_fast")
         mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=20)
         length=mfcc.shape[1]
-        abs_mfcc=np.abs(mfcc)
-        if length == 430:
+        if length == 200:
             array[k, :, :]=mfcc
-        elif length < 430:
+        elif length < 200:
             array[k, :, :length]=mfcc
-        elif length > 430:
-            argmax=np.argmax(abs_mfcc, axis=1)
-            sample=[]
-            for i in range(np.max(argmax)):
-                sample.append(np.sum((argmax>=i) & (argmax <i+430)))
-            start=sample.index(max(sample))
-            array[k, :, :]=mfcc[:, start:start+430]
+        elif length > 200:
+            sample = np.repeat(0., (length - 200)*20).reshape(20,length - 200)
+            for j in range(length - 200):
+                for i in range(20):
+                    sample[i,j]=np.var(mfcc[i,j:j+200])
+            A=np.argmax(sample, axis=1)
+            start=np.argmax(np.bincount(A))
+            array[k, :, :]=mfcc[:, start:start+200]
+            see.append(start)
         k+=1
-    array=array.reshape(-1,20*430)
-    array=((array-np.mean(array))/np.std(array)).reshape(-1,20,430)
-    return(array)
+    return(array, see)
 
-trainData=five_sec_extract(trainfile)
-testData=five_sec_extract(testfile)
+trainData, see1=two_sec_extract(trainfile)
+testData, see2=two_sec_extract(testfile)
 
 print(trainData.shape, testData.shape, trainLabel.shape, testLabel.shape)
-# (6631, 20, 430) (2842, 20, 430) (6631,) (2842,)
+# (6631, 20, 200) (2842, 20, 200) (6631,) (2842,)
 
 #how many kinds of label?
 print(len(np.unique(trainLabel)))   #41
@@ -107,14 +108,14 @@ print(min(trainLabel), max(trainLabel), min(testLabel), max(testLabel))
 #0 40 0 40
 
 #csv downdload totally about 600MB
-trainData2D=trainData.reshape(-1, 20*430)
-testData2D=testData.reshape(-1, 20*430)
-np.savetxt('/Users/kimseunghyuck/desktop/trainData5.csv', 
+trainData2D=trainData.reshape(-1, 20*200)
+testData2D=testData.reshape(-1, 20*200)
+np.savetxt(path+'trainData6.csv', 
            trainData2D, delimiter=",")
-np.savetxt('/Users/kimseunghyuck/desktop/testData5.csv', 
+np.savetxt(path+'testData6.csv', 
            testData2D, delimiter=",")
-np.savetxt('/Users/kimseunghyuck/desktop/trainLabel5.csv', 
+np.savetxt(path+'trainLabel6.csv', 
            trainLabel, delimiter=",")
-np.savetxt('/Users/kimseunghyuck/desktop/testLabel5.csv', 
+np.savetxt(path+'testLabel6.csv', 
            testLabel, delimiter=",")
 

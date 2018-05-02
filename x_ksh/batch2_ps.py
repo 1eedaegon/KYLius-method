@@ -25,9 +25,9 @@ print(trainData.shape, testData.shape, trainLabel.shape, testLabel.shape)
 tf.reset_default_graph()     #그래프 초기화
 
 # hyper parameters
-learning_rate = 0.0002
-training_epochs = 700
-batch_size = 50
+learning_rate = 0.0004
+training_epochs = 400
+batch_size = 200
 steps_for_validate = 5
 
 #placeholder
@@ -39,26 +39,38 @@ p_keep_conv = tf.placeholder(tf.float32, name="p_keep_conv")
 p_keep_hidden = tf.placeholder(tf.float32, name="p_keep_hidden")
 
 # L1 SoundIn shape=(?, 20, 430, 1)
-W1 = tf.get_variable("W1", shape=[2, 43, 1, 32],initializer=tf.contrib.layers.xavier_initializer())
+W1 = tf.get_variable("W1", shape=[2, 43, 1, 16],initializer=tf.contrib.layers.xavier_initializer())
 L1 = tf.nn.conv2d(X_sound, W1, strides=[1, 1, 1, 1], padding='SAME')
-L1 = tf.layers.batch_normalization(L1)
 L1 = tf.nn.elu(L1)
+L1 = tf.layers.batch_normalization(L1)
+W1_2 = tf.get_variable("W1_2", shape=[2, 43, 16, 32],initializer=tf.contrib.layers.xavier_initializer())
+L1 = tf.nn.conv2d(L1, W1_2, strides=[1, 1, 1, 1], padding='SAME')
+L1 = tf.nn.elu(L1)
+L1 = tf.layers.batch_normalization(L1)
 L1 = tf.nn.max_pool(L1, ksize=[1, 2, 43, 1],strides=[1, 2, 43, 1], padding='SAME') 
 L1 = tf.nn.dropout(L1, p_keep_conv)
 
 # L2 Input shape=(?,10,21,32)
-W2 = tf.get_variable("W2", shape=[3, 3, 32, 64],initializer=tf.contrib.layers.xavier_initializer())
+W2 = tf.get_variable("W2", shape=[3, 3, 32, 48],initializer=tf.contrib.layers.xavier_initializer())
 L2 = tf.nn.conv2d(L1, W2, strides=[1, 1, 1, 1], padding='SAME')
-L2 = tf.layers.batch_normalization(L2)
 L2 = tf.nn.elu(L2)
+L2 = tf.layers.batch_normalization(L2)
+W2_2 = tf.get_variable("W2_2", shape=[3, 3, 48, 64],initializer=tf.contrib.layers.xavier_initializer())
+L2 = tf.nn.conv2d(L2, W2_2, strides=[1, 1, 1, 1], padding='SAME')
+L2 = tf.nn.elu(L2)
+L2 = tf.layers.batch_normalization(L2)
 L2 = tf.nn.max_pool(L2, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='SAME') 
 L2 = tf.nn.dropout(L2, p_keep_conv)
 
 # L3 Input shape=(?,3,12,64)
-W3 = tf.get_variable("W3", shape=[3, 3, 64, 128],initializer=tf.contrib.layers.xavier_initializer())
+W3 = tf.get_variable("W3", shape=[3, 3, 64, 96],initializer=tf.contrib.layers.xavier_initializer())
 L3 = tf.nn.conv2d(L2, W3, strides=[1, 1, 1, 1], padding='SAME')
-L3 = tf.layers.batch_normalization(L3)
 L3 = tf.nn.elu(L3)
+L3 = tf.layers.batch_normalization(L3)
+W3_2 = tf.get_variable("W3_2", shape=[3, 3, 96, 128],initializer=tf.contrib.layers.xavier_initializer())
+L3 = tf.nn.conv2d(L3, W3_2, strides=[1, 1, 1, 1], padding='SAME')
+L3 = tf.nn.elu(L3)
+L3 = tf.layers.batch_normalization(L3)
 L3 = tf.nn.max_pool(L3, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='SAME') 
 L3 = tf.nn.dropout(L3, p_keep_conv)
 L3_flat= tf.reshape(L3, shape=[-1, 3*3*128])

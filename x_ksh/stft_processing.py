@@ -13,8 +13,8 @@ from matplotlib import pyplot as plt
 import tensorflow as tf
 tf.set_random_seed(777) 
 import pandas as pd
-#train = pd.read_csv('/Users/kimseunghyuck/desktop/sound_train.csv')
-train = pd.read_csv('/home/paperspace/Downloads/audio_train.csv')
+train = pd.read_csv('/Users/kimseunghyuck/desktop/sound_train.csv')
+#train = pd.read_csv('/home/paperspace/Downloads/audio_train.csv')
 
 #train/test, Data/Label split
 from sklearn.model_selection import train_test_split
@@ -25,8 +25,8 @@ trainLabel = train_set.values[:,1]
 testLabel = test_set.values[:,1]
 
 #data load and extract mfcc (scaling indluded)
-#path = '/Users/kimseunghyuck/desktop/audio_train/'
-path = '/home/paperspace/Downloads/audio_train/'
+path = '/Users/kimseunghyuck/desktop/'
+#path = '/home/paperspace/Downloads/'
 
 def see_how_long(file):
     c=[]
@@ -51,34 +51,47 @@ print(stft.shape)   #(513, 1148), (513, 25), (513, 28)
 plt.plot(stft[3,])
 plt.plot(stft[2,])
 
+filename=trainfile[10]
+        y, sr = librosa.core.load(path+'audio_train/'+filename, 
+                                  mono=True, res_type="kaiser_fast")
+        stft=librosa.core.stft(y,1024,512)
+        mag, pha = librosa.magphase(stft)
+mag, pha.real
+plt.plot(mag[10])
+plt.show
+plt.plot(pha.real[10])
+plt.show
+#magnitude만 해도 될 것 같음.
 
-#2 seconds(100 segments) extract
-def two_sec_extract(file):
+#5 seconds(100 segments) extract
+def five_sec_extract(file):
     #zero padding to file.shape[0] X 513 X 100    
     n=file.shape[0]
-    array = np.repeat(0., n * 513 * 100).reshape(n, 513, 100)
+    array = np.repeat(0., n * 17 * 200).reshape(n, 17, 200)
     k=0    
     for filename in file:    
-        y, sr = librosa.core.load(path+filename, mono=True, res_type="kaaiser_fast")
-        stft=librosa.core.stft(y,1024,512)
+        y, sr = librosa.core.load(path+'audio_train/'+filename, 
+                                  mono=True, res_type="kaiser_fast")
+        stft=librosa.core.stft(y,32,16)
+        mag, pha = librosa.magphase(stft)
         length=stft.shape[1]
-        if length == 100:
-            array[k, :, :]=stft
-        elif length < 100:
-            array[k, :, :length]=stft
-        elif length > 100:
-            sample = np.repeat(0., (length - 100)*513).reshape(513,length - 100)
-            for j in range(length - 100):
-                for i in range(513):
-                    sample[i,j]=np.var(stft[i,j:j+100])
+        if length == 200:
+            array[k, :, :]=mag
+        elif length < 200:
+            array[k, :, :length]=mag
+        elif length > 200:
+            sample = np.repeat(0., (length - 200)*17).reshape(17,length - 200)
+            for j in range(length - 200):
+                for i in range(17):
+                    sample[i,j]=np.var(mag[i,j:j+200])
             A=np.argmax(sample, axis=1)
             start=np.argmax(np.bincount(A))
-            array[k, :, :]=stft[:, start:start+100]
+            array[k, :, :]=mag[:, start:start+200]
         k+=1
     return(array)
 
-trainData=two_sec_extract(trainfile)
-testData=two_sec_extract(testfile)
+trainData=five_sec_extract(trainfile)
+testData=five_sec_extract(testfile)
 
 print(trainData.shape, testData.shape, trainLabel.shape, testLabel.shape)
 # (6631, 20, 430) (2842, 20, 430) (6631,) (2842,)
@@ -105,12 +118,13 @@ print(min(trainLabel), max(trainLabel), min(testLabel), max(testLabel))
 #csv downdload totally about 600MB
 trainData2D=trainData.reshape(-1, 513*100)
 testData2D=testData.reshape(-1, 513*100)
-np.savetxt('/home/paperspace/Downloads/trainData6.csv', 
+np.savetxt(path+'trainData7.csv', 
            trainData2D, delimiter=",")
-np.savetxt('/home/paperspace/Downloads/testData6.csv', 
+np.savetxt(path+'testData7.csv', 
            testData2D, delimiter=",")
-np.savetxt('/home/paperspace/Downloads/trainLabel6.csv', 
+np.savetxt(path+'trainLabel7.csv', 
            trainLabel, delimiter=",")
-np.savetxt('/home/paperspace/Downloads/testLabel6.csv', 
+np.savetxt(path+'testLabel7.csv', 
            testLabel, delimiter=",")
+
 

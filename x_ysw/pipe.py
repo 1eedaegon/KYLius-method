@@ -14,7 +14,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 tf.set_random_seed(777) 
-
+"""
 #train_info = pd.read_csv("/home/itwill03/sound/train.csv",delimiter=',')
 #train_data = np.genfromtxt("/home/itwill03/sound/yy/feature_train.csv", delimiter=',')
 train_info = pd.read_csv("C:\data\sound/train.csv",delimiter=',')
@@ -45,7 +45,7 @@ validateData = validate_set.values[:,0:16384]
 validataLabel = validate_set.values[:,-1]
 
 #print (trainData.shape,trainLabel.shape,validateData.shape,validataLabel.shape)
-
+"""
 tf.reset_default_graph()
 
 # 텐서플로우 모델 생성
@@ -67,25 +67,25 @@ p_keep_hidden = tf.placeholder(tf.float32, name='p_keep_hidden')
 
 
 # img shape = (?, 128, 128, 1)
-c1 = tf.layers.conv2d(tf.reshape(X, [-1, 128, 128, 1]), 32, kernel_size=[4, 4], strides=(1, 1), 
+c1 = tf.layers.conv2d(tf.reshape(X, [-1, 128, 128, 1]), 32, kernel_size=[4, 4], strides=(2, 2), 
                       padding='same', activation=tf.nn.elu, name="c1")  
-p1 = tf.layers.max_pooling2d(inputs=c1, pool_size=[5, 2], strides=(5,2)) 
+p1 = tf.layers.max_pooling2d(inputs=c1, pool_size=[2, 2], strides=(2,2)) 
 p1 = tf.nn.dropout(p1, p_keep_conv)
 
 # img shape = (?, 64, 64, 32)
-c2 = tf.layers.conv2d(tf.reshape(p1, [-1, 25, 64, 32]), 64, kernel_size=[4, 4], strides=(1, 1), 
+c2 = tf.layers.conv2d(tf.reshape(p1, [-1, 32, 32, 32]), 64, kernel_size=[4, 4], strides=(1, 1), 
                       padding='same', activation=tf.nn.elu, name="c2")
 p2 = tf.layers.max_pooling2d(inputs=c2, pool_size=[2, 2], strides=2) #shape = [?, 1, 48, 100]
 p2 = tf.nn.dropout(p2, p_keep_conv)
 
 # img shape = (?, 32, 32, 64)
-c3 = tf.layers.conv2d(tf.reshape(p2, [-1, 12, 32, 64]), 128, kernel_size=[4, 4], strides=(1, 1), 
+c3 = tf.layers.conv2d(tf.reshape(p2, [-1, 16, 16, 64]), 128, kernel_size=[4, 4], strides=(1, 1), 
                       padding='same', activation=tf.nn.elu, name="c3")
 p3 = tf.layers.max_pooling2d(inputs=c3, pool_size=[2, 2], strides=2) #shape = [?, 1, 24, 200]
 p3 = tf.nn.dropout(p3, p_keep_conv)
 
-L4_flat = tf.reshape(p3, shape=[-1, 6*16*128]) 
-W1 = tf.get_variable("W1", shape=[6*16*128, 64], initializer=tf.contrib.layers.xavier_initializer())
+L4_flat = tf.reshape(p3, shape=[-1, 8*8*128]) 
+W1 = tf.get_variable("W1", shape=[8*8*128, 64], initializer=tf.contrib.layers.xavier_initializer())
 L5 = tf.nn.relu(tf.matmul(L4_flat, W1))
 L5 = tf.nn.dropout(L5, p_keep_hidden)
 
@@ -132,5 +132,3 @@ for epoch in range(training_epochs):
             print('Accuracy:', sess.run(accuracy, feed_dict={ X: validateData, Y: validataLabel.reshape(-1, 1), 
                                                              p_keep_conv: 1, p_keep_hidden: 1}))       
 print('Finished!')
-
-

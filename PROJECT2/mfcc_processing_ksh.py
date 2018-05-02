@@ -65,7 +65,10 @@ def five_sec_extract(file):
         if length == 430:
             array[k, :, :]=mfcc
         elif length < 430:
-            array[k, :, :length]=mfcc
+            tile_num = (430//length)+1
+            tile_array=np.tile(mfcc,tile_num)
+            mfcc=tile_array[:,0:430]
+            array[k, :, :]=mfcc
         elif length > 430:
             sample = np.repeat(0., (length - 430)*20).reshape(20,length - 430)
             for j in range(length - 430):

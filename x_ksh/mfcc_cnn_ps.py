@@ -27,7 +27,7 @@ tf.reset_default_graph()     #그래프 초기화
 
 # hyper parameters
 learning_rate = 0.0002
-training_epochs = 1100
+training_epochs = 500
 batch_size = 200
 steps_for_validate = 5
 
@@ -44,28 +44,28 @@ W1 = tf.get_variable("W1", shape=[2, 43, 1, 32],initializer=tf.contrib.layers.xa
 L1 = tf.nn.conv2d(X_sound, W1, strides=[1, 1, 1, 1], padding='SAME')
 L1 = tf.nn.elu(L1)
 L1 = tf.layers.batch_normalization(L1)
-L1 = tf.nn.max_pool(L1, ksize=[1, 2, 43, 1],strides=[1, 2, 43, 1], padding='SAME') 
+#L1 = tf.nn.max_pool(L1, ksize=[1, 2, 43, 1],strides=[1, 2, 43, 1], padding='SAME') 
 L1 = tf.nn.dropout(L1, p_keep_conv)
-"""
+
 # L2 Input shape=(?,10,21,32)
-W2 = tf.get_variable("W2", shape=[3, 3, 32, 64],initializer=tf.contrib.layers.xavier_initializer())
+W2 = tf.get_variable("W2", shape=[2, 43, 32, 32],initializer=tf.contrib.layers.xavier_initializer())
 L2 = tf.nn.conv2d(L1, W2, strides=[1, 1, 1, 1], padding='SAME')
 L2 = tf.nn.elu(L2)
 L2 = tf.layers.batch_normalization(L2)
-L2 = tf.nn.max_pool(L2, ksize=[1, 3, 3, 1],strides=[1, 3, 3, 1], padding='SAME') 
+#L2 = tf.nn.max_pool(L2, ksize=[1, 3, 3, 1],strides=[1, 3, 3, 1], padding='SAME') 
 L2 = tf.nn.dropout(L2, p_keep_conv)
-"""
+
 # L3 Input shape=(?,3,12,64)
-W3 = tf.get_variable("W3", shape=[3, 3, 32, 64],initializer=tf.contrib.layers.xavier_initializer())
+W3 = tf.get_variable("W3", shape=[2, 43, 32, 32],initializer=tf.contrib.layers.xavier_initializer())
 L3 = tf.nn.conv2d(L1, W3, strides=[1, 1, 1, 1], padding='SAME')
 L3 = tf.nn.elu(L3)
 L3 = tf.layers.batch_normalization(L3)
-L3 = tf.nn.max_pool(L3, ksize=[1, 3, 3, 1],strides=[1, 3, 3, 1], padding='SAME') 
+#L3 = tf.nn.max_pool(L3, ksize=[1, 3, 3, 1],strides=[1, 3, 3, 1], padding='SAME') 
 L3 = tf.nn.dropout(L3, p_keep_conv)
-L3_flat= tf.reshape(L3, shape=[-1, 4*4*64])
+L3_flat= tf.reshape(L3, shape=[-1, 20*43*32])
 
 # Final FC 2*3*128 inputs -> 41 outputs
-W4 = tf.get_variable("W4", shape=[4*4*64, 512],initializer=tf.contrib.layers.xavier_initializer())
+W4 = tf.get_variable("W4", shape=[20*43*32, 512],initializer=tf.contrib.layers.xavier_initializer())
 L4 = tf.nn.elu(tf.matmul(L3_flat, W4))
 L4 = tf.layers.batch_normalization(L4)
 L4 = tf.nn.dropout(L4, p_keep_hidden)

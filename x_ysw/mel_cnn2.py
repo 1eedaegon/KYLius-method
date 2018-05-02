@@ -65,7 +65,8 @@ p_keep_hidden = tf.placeholder(tf.float32, name='p_keep_hidden')
 
 # img shape = (?, 128, 128, 1)
 c1 = tf.layers.conv2d(tf.reshape(X, [-1, 128, 128, 1]), 32, kernel_size=[4, 4], strides=(1, 1), 
-                      padding='same', activation=tf.nn.elu, name="c1")  
+                      padding='same', activation=tf.nn.elu, name="c1")
+n1 = tf.layers.batch_normalization(c1)  
 p1 = tf.layers.max_pooling2d(inputs=c1, pool_size=[2, 2], strides=2) 
 p1 = tf.nn.dropout(p1, p_keep_conv)
 
@@ -117,8 +118,10 @@ for epoch in range(training_epochs):
     if epoch % steps_for_validate == steps_for_validate-1:
         correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(Y_onehot, 1))
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+        x=np.random.choice(testLabel.shape[0], 500, replace=False)
         print('Accuracy:', sess.run(accuracy, feed_dict={
-                X: validateData, Y: validataLabel.reshape(-1, 1), p_keep_conv: 1, p_keep_hidden: 1}))       
+            X: testData[x], Y: testLabel[x].reshape(-1, 1), p_keep_conv: 1, p_keep_hidden: 1}))
+        #save_path = saver.save(sess, '/home/paperspace/Downloads/optx/optx')
 print('Finished!')
 
 tf.reset_default_graph()

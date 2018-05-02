@@ -126,7 +126,7 @@ for epoch in range(training_epochs):
             c, _ = sess.run([cost, optimizer], feed_dict=feed_dict)
             avg_cost += c / total_batch
         print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost))
-        if epoch % steps_for_validate == steps_for_validate-1:
+        if epoch % steps_for_validate == steps_for_validate:
             correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(Y_onehot, 1))
             accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
             print('Accuracy:', sess.run(accuracy, feed_dict={ X: validateData, Y: validataLabel.reshape(-1, 1), 

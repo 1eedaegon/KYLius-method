@@ -114,5 +114,5 @@ for epoch in range(training_epochs):
         x2=np.random.choice(testLabel.shape[0], 300, replace=False)
         print('TestAccuracy:', sess.run(accuracy, feed_dict={
                 X: testData[x2], Y: testLabel[x2].reshape(-1, 1), p_keep_conv: 1, p_keep_hidden: 1}))
-        save_path = saver.save(sess, '/home/paperspace/Downloads/optx2/optx2')
+        save_path = saver.save(sess, '/home/paperspace/Downloads/stft/opt')
 print('Finished!')

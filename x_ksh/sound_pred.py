@@ -2,8 +2,8 @@ import tensorflow as tf
 import numpy as np
 import pandas as pd
 
-#opt_addr="/Users/kimseunghyuck/desktop/git/daegon/KYLius-method/PROJECT2/optx2/optx2"
-#opt_addr="/Users/kimseunghyuck/desktop/git/daegon/KYLius-method/PROJECT2/optx/optx"
+#opt_addr="/Users/kimseunghyuck/desktop/git/daegon/KYLius-method/PROJECT2/mfcc/opt"
+#opt_addr="/Users/kimseunghyuck/desktop/git/daegon/KYLius-method/PROJECT2/stft/opt"
 #opt_addr="/Users/kimseunghyuck/desktop/git/daegon/KYLius-method/PROJECT2/one/optx"
 
 class sound_pred:
@@ -34,6 +34,7 @@ class sound_pred:
         self.pred=self.graph.get_tensor_by_name('pred:0')
         self.p_keep_conv=self.graph.get_tensor_by_name('p_keep_conv:0')
         self.p_keep_hidden=self.graph.get_tensor_by_name('p_keep_hidden:0')
+        self.softmax=self.graph.get_tensor_by_name('softmax:0')
         print("Variables Saved")
     
     def tryit(self, soundaddr, method):
@@ -189,13 +190,58 @@ class sound_pred:
                 #mfcc processing
                 mfcc=five_sec_extract(self.path+'audio_test/'+file)
                 #classification result
-                sm = tf.nn.softmax(self.logits)
-                softmax[k,] = self.sess.run(sm, feed_dict={self.X: mfcc.reshape(1, 20, 430), 
+                softmax[k,] = self.sess.run(self.softmax, feed_dict={self.X: mfcc.reshape(1, 20, 430), 
                                                       self.p_keep_conv: 1.0, 
                                                       self.p_keep_hidden: 1.0})
             k+=1
         return(softmax)
     
+    def softmax2(self, folder):  
+        import sys
+        sys.path.append('/Users/kimseunghyuck/desktop/git/daegon/KYLius-method/x_ksh')        
+        import os
+        #folder="audio_test"
+        file_list=os.listdir(self.path+folder)
+        file_list=np.array(file_list).reshape(-1)
+        length = len(file_list)
+        softmax = np.zeros((length, 41))
+        from mfcc import five_sec_extract
+        k=0
+        for file in file_list:
+            if (file.split('.')[-1]=="wav") & (file not in ['0b0427e2.wav', '6ea0099f.wav', 'b39975f5.wav']):
+                #mfcc processing
+                mfcc=five_sec_extract(self.path+'audio_test/'+file)
+                #classification result
+                softmax[k,] = self.sess.run(self.softmax, feed_dict={self.X: mfcc.reshape(1, 20, 430), 
+                                                      self.p_keep_conv: 1.0, 
+                                                      self.p_keep_hidden: 1.0})
+            k+=1
+        return(softmax)
+    
+    def softmax3(self, folder):  
+        import sys
+        sys.path.append('/Users/kimseunghyuck/desktop/git/daegon/KYLius-method/x_ksh')        
+        import os
+        #folder="audio_test"
+        file_list=os.listdir(self.path+folder)
+        file_list=np.array(file_list).reshape(-1)
+        length = len(file_list)
+        softmax = np.zeros((length, 41))
+        from mfcc import five_sec_extract
+        k=0
+        for file in file_list:
+            if (file.split('.')[-1]=="wav") & (file not in ['0b0427e2.wav', '6ea0099f.wav', 'b39975f5.wav']):
+                #mfcc processing
+                mfcc=five_sec_extract(self.path+'audio_test/'+file)
+                #classification result
+                softmax[k,] = self.sess.run(self.softmax, feed_dict={self.X: mfcc.reshape(1, 20, 430), 
+                                                      self.p_keep_conv: 1.0, 
+                                                      self.p_keep_hidden: 1.0})
+            k+=1
+        return(softmax)
+    
+
+
 
 
 """

@@ -1,0 +1,41 @@
+1.'Hi-hat' : 풋 심벌즈(드럼에 달린, 발로 치는 심벌즈)
+2.'Saxophone' : 섹소폰
+3.'Trumpet' : 트럼펫, 나팔
+4.'Glockenspiel' : 종금이라고도 불리는 오르프악기
+5.'Cello' : 첼로
+6.'Knock' : (문 등을 똑똑 하고) 두드리다, 노크하다 
+7.'Gunshot_or_gunfire' : 발포, 총격; 총소리
+8.'Clarinet' : 클라리넷
+9.'Computer_keyboard' : 컴퓨터 키보드
+10.'Keys_jangling' : 열쇠 쨍그랑 소리
+11.'Snare_drum' : 스네어드럼(뒷면에 쇠 울림줄을 댄 작은 북)
+12.'Writing' : (글자・숫자를) 쓰다 
+13.'Laughter' : (소리내어) 웃다
+14.'Tearing' : 찢다, 뜯다; 찢어지다 
+15.'Fart' : (특히 소리가 크게 나게) 방귀를 뀌다 
+16.'Oboe' : 오보에
+17.'Flute' : 플루트
+18.'Cough' : 기침하다
+19.'Telephone' : 전화; 전화기
+20.'Bark' : 1. (개 등이) 짖는 소리   2. (총・사람 목소리 등이 짧게 내는) 큰 소리
+21.'Chime' : (차임벨) 소리
+22.'Bass_drum' : 베이스 드럼
+23.'Bus' : 버스
+24.'Squeak' : (그렇게 크지 않게) 끽 하는 소리를 내다 
+25.'Scissors' : 가위
+26.'Harmonica' : 하모니카
+27.'Gong' : (악기・신호용) 공 , 권투등에 시작을 알리는 것
+28.'Microwave_oven' : 전자 레인지
+29.'Burping_or_eructation' : 트림
+30.'Double_bass' : 더블 베이스
+31.'Shatter' :  산산이 부서지다, 산산조각 나다
+32.'Fireworks' : 불꽃놀이
+33.'Tambourine' : 트랜버린 , 탬버린
+34.'Cowbell' : (소를 쉽게 찾기 위해 목에 다는) 소 방울, 카우 벨(독일 타악기)
+35.'Electric_piano' : 전자피아노
+36.'Meow' : 야옹(고양이 울음소리)
+37.'Drawer_open_or_close' : 서랍 여닫는 소리
+38.'Applause' : 박수 (갈채)
+39.'Acoustic_guitar' : 어쿠스틱 기타, 클래식 기타
+40.'Violin_or_fiddle' : 바이올린 과 피들
+41.'Finger_snapping' : 손가락 튕기는 소리

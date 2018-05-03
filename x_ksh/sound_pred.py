@@ -70,7 +70,7 @@ class sound_pred:
             #testfile8 = pd.read_csv('/Users/kimseunghyuck/desktop/testfile8.csv')
             test = pd.read_csv(self.path+soundaddr)
             test = np.array(test).reshape(-1)
-            testLabel = np.genfromtxt(path+'testLabel8.csv', delimiter=',')
+            testLabel = np.genfromtxt(self.path+'testLabel8.csv', delimiter=',')
             error=0
             k=0
             errorlist2=[]
@@ -78,7 +78,7 @@ class sound_pred:
                 #mfcc processing
                 stft=five_sec_extract2(self.path+'audio_train/'+file)
                 #classification result
-                result=self.sess.run(pred, feed_dict={self.X: stft.reshape(1, 17, 200), 
+                result=self.sess.run(self.pred, feed_dict={self.X: stft.reshape(1, 17, 200), 
                                                  self.p_keep_conv: 1.0, 
                                                  self.p_keep_hidden: 1.0})
                 if testLabel[k] != result:
@@ -95,25 +95,25 @@ class sound_pred:
         import sys
         sys.path.append('/Users/kimseunghyuck/desktop/git/daegon/KYLius-method/x_ksh')        
         import os
-        file_list=os.listdir(self.path+"audio_test")
+        #folder="audio_test"
+        file_list=os.listdir(self.path+folder)
         file_list=np.array(file_list).reshape(-1)
         submission={}
         from mfcc import five_sec_extract
         for file in file_list:
             if (file.split('.')[-1]=="wav") & (file not in ['0b0427e2.wav', '6ea0099f.wav', 'b39975f5.wav']):
                 #mfcc processing
-                stft=five_sec_extract2(self.path+'audio_test/'+file)
+                mfcc=five_sec_extract(self.path+'audio_test/'+file)
                 #classification result
-                result=self.sess.run(self.pred, feed_dict={self.X: stft.reshape(1, 17, 200), 
+                result=self.sess.run(self.pred, feed_dict={self.X: mfcc.reshape(1, 20, 430), 
                                                       self.p_keep_conv: 1.0, 
                                                       self.p_keep_hidden: 1.0})
                 submission[file]=self.idx[result[0]]
-
-        len(submission)
+        #len(submission)
         submission['0b0427e2.wav']=self.idx[0]
         submission['6ea0099f.wav']=self.idx[0]
         submission['b39975f5.wav']=self.idx[0]
-        len(submission)
+        #len(submission)
         KYLius1=pd.DataFrame([[k,v] for k,v in iter(submission.items())],columns=["fname","label"])
         KYLius1.to_csv(self.path+'KYLius1.csv', header=True, index=False, sep='\t')
 
@@ -121,7 +121,7 @@ class sound_pred:
         import sys
         sys.path.append('/Users/kimseunghyuck/desktop/git/daegon/KYLius-method/x_ksh')        
         import os
-        file_list=os.listdir(self.path+"audio_test")
+        file_list=os.listdir(self.path+folder)
         file_list=np.array(file_list).reshape(-1)
         submission={}
         from stft import five_sec_extract2
@@ -135,16 +135,67 @@ class sound_pred:
                                                       self.p_keep_hidden: 1.0})
                 submission[file]=self.idx[result[0]]
 
-        len(submission)
+        #len(submission)
         submission['0b0427e2.wav']=self.idx[0]
         submission['6ea0099f.wav']=self.idx[0]
         submission['b39975f5.wav']=self.idx[0]
-        len(submission)
+        #len(submission)
         KYLius2=pd.DataFrame([[k,v] for k,v in iter(submission.items())],columns=["fname","label"])
         KYLius2.to_csv(self.path+'KYLius2.csv', header=True, index=False, sep='\t')
 
+    def submission3(self, folder):  
+        import sys
+        sys.path.append('/Users/kimseunghyuck/desktop/git/daegon/KYLius-method/x_ksh')        
+        import os
+        #folder="audio_test"
+        file_list=os.listdir(self.path+folder)
+        file_list=np.array(file_list).reshape(-1)
+        submission={}
+        from mfcc_only1 import five_sec_extract3
+        for file in file_list:
+            if (file.split('.')[-1]=="wav") & (file not in ['0b0427e2.wav', '6ea0099f.wav', 'b39975f5.wav']):
+                #mfcc processing
+                mfcc=five_sec_extract3(self.path+'audio_test/'+file)
+                #classification result
+                result=self.sess.run(self.pred, feed_dict={self.X: mfcc.reshape(1, 40, 350, 1), 
+                                                      self.p_keep_conv: 1.0, 
+                                                      self.p_keep_hidden: 1.0})
+                submission[file]=self.idx[result[0]]
+        #len(submission)
+        submission['0b0427e2.wav']=self.idx[0]
+        submission['6ea0099f.wav']=self.idx[0]
+        submission['b39975f5.wav']=self.idx[0]
+        #len(submission)
+        KYLius3=pd.DataFrame([[k,v] for k,v in iter(submission.items())],columns=["fname","label"])
+        KYLius3.to_csv(self.path+'KYLius3.csv', header=True, index=False, sep='\t')
+
+
     def close(self):
         self.sess.close()
+
+    def softmax1(self, folder):  
+        import sys
+        sys.path.append('/Users/kimseunghyuck/desktop/git/daegon/KYLius-method/x_ksh')        
+        import os
+        #folder="audio_test"
+        file_list=os.listdir(self.path+folder)
+        file_list=np.array(file_list).reshape(-1)
+        length = len(file_list)
+        softmax = np.zeros((length, 41))
+        from mfcc import five_sec_extract
+        k=0
+        for file in file_list:
+            if (file.split('.')[-1]=="wav") & (file not in ['0b0427e2.wav', '6ea0099f.wav', 'b39975f5.wav']):
+                #mfcc processing
+                mfcc=five_sec_extract(self.path+'audio_test/'+file)
+                #classification result
+                sm = tf.nn.softmax(self.logits)
+                softmax[k,] = self.sess.run(sm, feed_dict={self.X: mfcc.reshape(1, 20, 430), 
+                                                      self.p_keep_conv: 1.0, 
+                                                      self.p_keep_hidden: 1.0})
+            k+=1
+        return(softmax)
+    
 
 
 """

@@ -81,6 +81,7 @@ W_o = tf.get_variable("W_o", shape=[125,41],initializer=tf.contrib.layers.xavier
 b = tf.Variable(tf.random_normal([41]))
 logits = tf.matmul(L5, W_o) + b
 logits = tf.layers.batch_normalization(logits)
+softmax = tf.nn.softmax(logits, name="softmax")
 
 # define cost/loss & optimizer
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits,labels= Y_onehot))

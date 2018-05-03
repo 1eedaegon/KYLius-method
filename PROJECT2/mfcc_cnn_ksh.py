@@ -74,14 +74,13 @@ W_o = tf.get_variable("W_o", shape=[217,41],initializer=tf.contrib.layers.xavier
 b = tf.Variable(tf.random_normal([41]))
 logits = tf.matmul(L4, W_o) + b
 logits = tf.layers.batch_normalization(logits)
-softmax=
+softmax = tf.nn.softmax(logits, name="softmax")
 #logits shape=(?,41)
 
 # define cost/loss & optimizer
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits,labels= Y_onehot))
 optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost) # 아담버젼
 predict_op = tf.argmax(logits, 1, name="pred")
-softmax = tf.nn.softmax(logits, name="softmax")
 
 # initialize
 sess = tf.Session()

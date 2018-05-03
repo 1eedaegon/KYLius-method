@@ -4,7 +4,6 @@
 #필요한 모듈 임포트
 import librosa
 import numpy as np
-from matplotlib import pyplot as plt
 #import labels
 import tensorflow as tf
 tf.set_random_seed(777) 
@@ -38,17 +37,6 @@ def see_how_long(file):
 #print(np.max(n), np.min(n))      #1292, 14
 #n2=see_how_long(testfile)
 #print(np.max(n2), np.min(n2))    #1292, 13
-
-#show me approximate wave shape
-filename= trainfile[0]
-y, sr = librosa.core.load(path+'audio_train/'+filename, 
-                          mono=True, res_type="kaiser_fast")
-mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=20)
-length=mfcc.shape[1]
-plt.plot(mfcc[3,])
-plt.plot(np.abs(mfcc[3,]))
-plt.plot(mfcc[2,])
-plt.plot(np.abs(mfcc[3,]))
 
 #5 seconds(430 segments) extract
 def five_sec_extract(file):
@@ -119,8 +107,8 @@ np.savetxt(path+'testLabel8.csv',
            testLabel, delimiter=",")
 np.savetxt(path+'testfile8.csv', 
            testfile, header = " ", fmt='%s')
-np.array(testfile)
-testfile.shape
+
+
 
 #trainData8 <- mfcc, 20*430, train/test: 95%/5%
 

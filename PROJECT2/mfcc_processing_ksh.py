@@ -54,7 +54,8 @@ plt.plot(np.abs(mfcc[3,]))
 def five_sec_extract(file):
     #zero padding to file.shape[0] X 20 X 430
     n=file.shape[0]
-    array = np.repeat(0., n * 20 * 430).reshape(n, 20, 430)
+    array = np.zeros(n, 20, 430)
+    #array = np.repeat(0., n * 20 * 430).reshape(n, 20, 430)
     k=0
     see = []
     for filename in file:
@@ -66,6 +67,7 @@ def five_sec_extract(file):
         if length == 430:
             array[k, :, :]=mfcc
         elif length < 430:
+<<<<<<< HEAD
             total_paste = int(430/length)
             for i in range(total_paste):
                 array[k, :, i*length:(i+1)*length]=mfcc
@@ -76,6 +78,20 @@ def five_sec_extract(file):
             for i in range(np.max(argmax)):
                  sample.append(np.sum((argmax>=i) & (argmax <i+430)))
             start=sample.index(max(sample))
+=======
+            tile_num = (430//length)+1
+            tile_array=np.tile(mfcc,tile_num)
+            mfcc=tile_array[:,0:430]
+            array[k, :, :]=mfcc
+        elif length > 430:
+            sample = np.zeros((20,length-430))
+            #sample = np.repeat(0., (length - 430)*20).reshape(20,length - 430)
+            for j in range(length - 430):
+                for i in range(20):
+                    sample[i,j]=np.var(mfcc[i,j:j+430])
+            A=np.argmax(sample, axis=1)
+            start=np.argmax(np.bincount(A))
+>>>>>>> 71857fe1a469d9d34deff22611bb13c08aa0dd0a
             array[k, :, :]=mfcc[:, start:start+430]
             see.append(start)
         k+=1

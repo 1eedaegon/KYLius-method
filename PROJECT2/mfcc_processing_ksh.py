@@ -14,7 +14,7 @@ train = pd.read_csv('/Users/kimseunghyuck/desktop/sound_train.csv')
 
 #train/test, Data/Label split
 from sklearn.model_selection import train_test_split
-train_set, test_set = train_test_split(train, test_size = 0.3)
+train_set, test_set = train_test_split(train, test_size = 0.05)
 trainfile = train_set.values[:,0]
 testfile = test_set.values[:,0]
 trainLabel = train_set.values[:,1]
@@ -40,7 +40,7 @@ def see_how_long(file):
 #print(np.max(n2), np.min(n2))    #1292, 13
 
 #show me approximate wave shape
-filename= trainfile[11]
+filename= trainfile[0]
 y, sr = librosa.core.load(path+'audio_train/'+filename, 
                           mono=True, res_type="kaiser_fast")
 mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=20)
@@ -62,17 +62,20 @@ def five_sec_extract(file):
                                   mono=True, res_type="kaiser_fast")
         mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=20)
         length=mfcc.shape[1]
+        abs_mfcc=np.abs(mfcc)
         if length == 430:
             array[k, :, :]=mfcc
         elif length < 430:
-            array[k, :, :length]=mfcc
+            total_paste = int(430/length)
+            for i in range(total_paste):
+                array[k, :, i*length:(i+1)*length]=mfcc
+            array[k, :, total_paste*length:]=mfcc[:,:430%length]
         elif length > 430:
-            sample = np.repeat(0., (length - 430)*20).reshape(20,length - 430)
-            for j in range(length - 430):
-                for i in range(20):
-                    sample[i,j]=np.var(mfcc[i,j:j+430])
-            A=np.argmax(sample, axis=1)
-            start=np.argmax(np.bincount(A))
+            argmax=np.argmax(abs_mfcc, axis=1)
+            sample=[]
+            for i in range(np.max(argmax)):
+                 sample.append(np.sum((argmax>=i) & (argmax <i+430)))
+            start=sample.index(max(sample))
             array[k, :, :]=mfcc[:, start:start+430]
             see.append(start)
         k+=1

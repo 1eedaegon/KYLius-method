@@ -1,6 +1,8 @@
 import tensorflow as tf
 import numpy as np
 
+opt_addr="/Users/kimseunghyuck/desktop/git/daegon/KYLius-method/x_ksh/optx2/optx2"
+
 class sound_pred:
     def __init__(self, opt_addr):
         # initialize/ load
@@ -21,6 +23,7 @@ class sound_pred:
         print("Variables Saved")
     
     def tryit(self, soundaddr):
+        
         import librosa
         import numpy as np
         from mfcc_processing import five_sec_extract

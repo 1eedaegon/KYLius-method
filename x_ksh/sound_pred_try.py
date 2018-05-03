@@ -6,30 +6,32 @@ opt_addr="/Users/kimseunghyuck/desktop/git/daegon/KYLius-method/x_ksh/optx2/optx
 class sound_pred:
     def __init__(self, opt_addr):
         # initialize/ load
-        self.saver=tf.train.import_meta_graph(opt_addr+".meta")
-        self.sess = tf.InteractiveSession()
+        saver=tf.train.import_meta_graph(opt_addr+".meta")
+        sess = tf.InteractiveSession()
         print("Meta_Graph Imported")
         
         # parameters save 
-        self.saver.restore(self.sess, opt_addr)
+        saver.restore(sess, opt_addr)
         print("Parameters Restored")
         
         # variables 
-        self.graph=tf.get_default_graph()
-        self.X=self.graph.get_tensor_by_name('X:0')
-        self.pred=self.graph.get_tensor_by_name('pred:0')
-        self.p_keep_conv=self.graph.get_tensor_by_name('p_keep_conv:0')
-        self.p_keep_hidden=self.graph.get_tensor_by_name('p_keep_hidden:0')
+        graph=tf.get_default_graph()
+        X=graph.get_tensor_by_name('X:0')
+        pred=graph.get_tensor_by_name('pred:0')
+        p_keep_conv=graph.get_tensor_by_name('p_keep_conv:0')
+        p_keep_hidden=graph.get_tensor_by_name('p_keep_hidden:0')
         print("Variables Saved")
     
     def tryit(self, soundaddr):
         
-        import librosa
-        import numpy as np
-        from mfcc_processing import five_sec_extract
-        self.soundaddr=soundaddr
+        import sys
+        sys.path.append('/Users/kimseunghyuck/desktop/git/daegon/KYLius-method/x_ksh')
+        
+        from stft import five_sec_extract2
+        soundaddr='/Users/kimseunghyuck/desktop/audio_train/0a0a8d4c.wav'
         #mfcc processing
-        mfcc, _=five_sec_extract(self.soundaddr)
+        stft=five_sec_extract(soundaddr)
         #classification result
-        self.result=self.sess.run(self.pred, feed_dict={self.X: mfcc, self.p_keep_conv: 1.0, self.p_keep_hidden: 1.0})
+        result=sess.run(pred, feed_dict={X: stft.reshape(17, 200), p_keep_conv: 1.0, p_keep_hidden: 1.0})
         print(self.result)
+sess.close()

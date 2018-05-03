@@ -175,6 +175,7 @@ class sound_pred:
         self.sess.close()
 
     def softmax1(self, folder):  
+        #mfcc 1
         import sys
         sys.path.append('/Users/kimseunghyuck/desktop/git/daegon/KYLius-method/x_ksh')        
         import os
@@ -197,6 +198,7 @@ class sound_pred:
         return(softmax)
     
     def softmax2(self, folder):  
+        # stft
         import sys
         sys.path.append('/Users/kimseunghyuck/desktop/git/daegon/KYLius-method/x_ksh')        
         import os
@@ -212,13 +214,14 @@ class sound_pred:
                 #mfcc processing
                 mfcc=five_sec_extract(self.path+'audio_test/'+file)
                 #classification result
-                softmax[k,] = self.sess.run(self.softmax, feed_dict={self.X: mfcc.reshape(1, 20, 430), 
+                softmax[k,] = self.sess.run(self.softmax, feed_dict={self.X: mfcc.reshape(1, 17, 200), 
                                                       self.p_keep_conv: 1.0, 
                                                       self.p_keep_hidden: 1.0})
             k+=1
         return(softmax)
     
     def softmax3(self, folder):  
+        # mfcc only label 1
         import sys
         sys.path.append('/Users/kimseunghyuck/desktop/git/daegon/KYLius-method/x_ksh')        
         import os
@@ -234,15 +237,12 @@ class sound_pred:
                 #mfcc processing
                 mfcc=five_sec_extract(self.path+'audio_test/'+file)
                 #classification result
-                softmax[k,] = self.sess.run(self.softmax, feed_dict={self.X: mfcc.reshape(1, 20, 430), 
+                softmax[k,] = self.sess.run(self.softmax, feed_dict={self.X: mfcc.reshape(1, 40, 350, 1), 
                                                       self.p_keep_conv: 1.0, 
                                                       self.p_keep_hidden: 1.0})
             k+=1
         return(softmax)
     
-
-
-
 
 """
 np.savetxt(path+'errorlist1.csv', 

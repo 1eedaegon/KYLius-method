@@ -12,66 +12,74 @@ import tensorflow as tf
 from math import ceil
 tf.set_random_seed(777) 
 
-trainData = np.genfromtxt('/home/paperspace/Downloads/trainData6.csv', delimiter=',')
-trainData = trainData.reshape(-1, 20, 430)
-testData = np.genfromtxt('/home/paperspace/Downloads/testData6.csv', delimiter=',')
-testData = testData.reshape(-1, 20, 430)
-trainLabel = np.genfromtxt('/home/paperspace/Downloads/trainLabel6.csv', delimiter=',')
-testLabel = np.genfromtxt('/home/paperspace/Downloads/testLabel6.csv', delimiter=',')
+trainData = np.genfromtxt('/home/paperspace/Downloads/trainData7.csv', delimiter=',')
+trainData = trainData.reshape(-1, 17, 200)
+testData = np.genfromtxt('/home/paperspace/Downloads/testData7.csv', delimiter=',')
+testData = testData.reshape(-1, 17, 200)
+trainLabel = np.genfromtxt('/home/paperspace/Downloads/trainLabel7.csv', delimiter=',')
+testLabel = np.genfromtxt('/home/paperspace/Downloads/testLabel7.csv', delimiter=',')
 
 print(trainData.shape, testData.shape, trainLabel.shape, testLabel.shape)
-# (6631, 20, 200) (2842, 20, 200) (6631,) (2842,)
+# (6631, 17, 200) (2842, 17, 200) (6631,) (2842,)
 
 #다시 돌릴때는 여기부터 
 tf.reset_default_graph()     #그래프 초기화
 
 # hyper parameters
 learning_rate = 0.0002
-training_epochs = 1100
-batch_size = 200
-steps_for_validate = 5
+training_epochs = 300
+batch_size = 100
+steps_for_validate = 20
 
 #placeholder
-X = tf.placeholder(tf.float32, [None, 20, 430], name="X")
-X_sound = tf.reshape(X, [-1, 20, 430, 1])          
+X = tf.placeholder(tf.float32, [None, 17, 200], name="X")
+X_sound = tf.reshape(X, [-1, 17, 200, 1])          
 Y = tf.placeholder(tf.int32, [None, 1], name="Y")
 Y_onehot=tf.reshape(tf.one_hot(Y, 41), [-1, 41])
 p_keep_conv = tf.placeholder(tf.float32, name="p_keep_conv")
 p_keep_hidden = tf.placeholder(tf.float32, name="p_keep_hidden")
 
 # L1 SoundIn shape=(?, 20, 430, 1)
-W1 = tf.get_variable("W1", shape=[2, 43, 1, 32],initializer=tf.contrib.layers.xavier_initializer())
+W1 = tf.get_variable("W1", shape=[2, 12, 1, 32],initializer=tf.contrib.layers.xavier_initializer())
 L1 = tf.nn.conv2d(X_sound, W1, strides=[1, 1, 1, 1], padding='SAME')
 L1 = tf.nn.elu(L1)
 L1 = tf.layers.batch_normalization(L1)
-L1 = tf.nn.max_pool(L1, ksize=[1, 2, 43, 1],strides=[1, 2, 43, 1], padding='SAME') 
+L1 = tf.nn.max_pool(L1, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='VALID') 
 L1 = tf.nn.dropout(L1, p_keep_conv)
 
 # L2 Input shape=(?,10,21,32)
-W2 = tf.get_variable("W2", shape=[3, 3, 32, 64],initializer=tf.contrib.layers.xavier_initializer())
+W2 = tf.get_variable("W2", shape=[2, 12, 32, 32],initializer=tf.contrib.layers.xavier_initializer())
 L2 = tf.nn.conv2d(L1, W2, strides=[1, 1, 1, 1], padding='SAME')
 L2 = tf.nn.elu(L2)
 L2 = tf.layers.batch_normalization(L2)
-L2 = tf.nn.max_pool(L2, ksize=[1, 3, 3, 1],strides=[1, 3, 3, 1], padding='SAME') 
+L2 = tf.nn.max_pool(L2, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='VALID') 
 L2 = tf.nn.dropout(L2, p_keep_conv)
 
 # L3 Input shape=(?,3,12,64)
-W3 = tf.get_variable("W3", shape=[3, 3, 64, 128],initializer=tf.contrib.layers.xavier_initializer())
+W3 = tf.get_variable("W3", shape=[2, 12, 32, 32],initializer=tf.contrib.layers.xavier_initializer())
 L3 = tf.nn.conv2d(L2, W3, strides=[1, 1, 1, 1], padding='SAME')
 L3 = tf.nn.elu(L3)
 L3 = tf.layers.batch_normalization(L3)
-L3 = tf.nn.max_pool(L3, ksize=[1, 3, 3, 1],strides=[1, 3, 3, 1], padding='SAME') 
+L3 = tf.nn.max_pool(L3, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='VALID') 
 L3 = tf.nn.dropout(L3, p_keep_conv)
-L3_flat= tf.reshape(L3, shape=[-1, 2*2*128])
+
+# L4 Input shape=(?,3,25,32)
+W4 = tf.get_variable("W4", shape=[2, 12, 32, 32],initializer=tf.contrib.layers.xavier_initializer())
+L4 = tf.nn.conv2d(L3, W4, strides=[1, 1, 1, 1], padding='SAME')
+L4 = tf.nn.elu(L4)
+L4 = tf.layers.batch_normalization(L4)
+L4 = tf.nn.max_pool(L4, ksize=[1, 2, 2, 1],strides=[1, 2, 2, 1], padding='VALID') 
+L4 = tf.nn.dropout(L4, p_keep_conv)
+L4_flat= tf.reshape(L4, shape=[-1, 12*32])
 
 # Final FC 2*3*128 inputs -> 41 outputs
-W4 = tf.get_variable("W4", shape=[2*2*128, 512],initializer=tf.contrib.layers.xavier_initializer())
-L4 = tf.nn.elu(tf.matmul(L3_flat, W4))
-L4 = tf.layers.batch_normalization(L4)
-L4 = tf.nn.dropout(L4, p_keep_hidden)
-W_o = tf.get_variable("W_o", shape=[512,41],initializer=tf.contrib.layers.xavier_initializer())
+W5 = tf.get_variable("W5", shape=[12*32, 125],initializer=tf.contrib.layers.xavier_initializer())
+L5 = tf.nn.elu(tf.matmul(L4_flat, W5))
+L5 = tf.layers.batch_normalization(L5)
+L5 = tf.nn.dropout(L5, p_keep_hidden)
+W_o = tf.get_variable("W_o", shape=[125,41],initializer=tf.contrib.layers.xavier_initializer())
 b = tf.Variable(tf.random_normal([41]))
-logits = tf.matmul(L4, W_o) + b
+logits = tf.matmul(L5, W_o) + b
 logits = tf.layers.batch_normalization(logits)
 
 # define cost/loss & optimizer
@@ -105,33 +113,5 @@ for epoch in range(training_epochs):
         x2=np.random.choice(testLabel.shape[0], 300, replace=False)
         print('TestAccuracy:', sess.run(accuracy, feed_dict={
                 X: testData[x2], Y: testLabel[x2].reshape(-1, 1), p_keep_conv: 1, p_keep_hidden: 1}))
-        save_path = saver.save(sess, '/home/paperspace/Downloads/optx/optx')
+        save_path = saver.save(sess, '/home/paperspace/Downloads/optx2/optx2')
 print('Finished!')
-
-#마지막에 정확도랑 코스트 그래프로 출력해주는 코드 넣기
-#정규화/ stft
-#label 1이랑 0이랑 나누기
-"""
-9) data5 (n_mfcc=20, length=430)
-lr=0.0002, epoch = 200    
-win : (2, 21), (2,4), (3,3)
-max_pool : (2,21), (2,4), (3,3)
-p_keep_conv, p_keep_hidden = 0.8, 0.7
-accuracy : 63~70% 
-
-10) 9와 같고
-lr=0.0002, epoch = 700    
-win : (2, 43), (3,3), (3,3)
-max_pool : (2,43), (3,3), (3,3)
-p_keep_conv, p_keep_hidden = 0.8, 0.7
-accuracy : 66~74%
-
-11) 9와 같고
-lr=0.0002, epoch = 700
-p_keep_conv, p_keep_hidden = 0.7, 0.5
-accuracy : 67~72%
-
-*다른 시도: batch_norm 해본거 SA_batch_norm_ps3.py - 인자값이 잘못됐는지 정확도가 엄청 떨어짐
-
-
-"""

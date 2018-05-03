@@ -191,9 +191,10 @@ class sound_pred:
                 #mfcc processing
                 mfcc=five_sec_extract(self.path+'audio_test/'+file)
                 #classification result
-                softmax[k,] = self.sess.run(self.softmax, feed_dict={self.X: mfcc.reshape(1, 20, 430), 
-                                                      self.p_keep_conv: 1.0, 
-                                                      self.p_keep_hidden: 1.0})
+                softmax[k,] = self.sess.run(self.softmax, 
+                       feed_dict={self.X: mfcc.reshape(1, 20, 430), 
+                                  self.p_keep_conv: 1.0, 
+                                  self.p_keep_hidden: 1.0})
             k+=1
         return(softmax)
     
@@ -207,16 +208,17 @@ class sound_pred:
         file_list=np.array(file_list).reshape(-1)
         length = len(file_list)
         softmax = np.zeros((length, 41))
-        from mfcc import five_sec_extract
+        from stft import five_sec_extract2
         k=0
         for file in file_list:
             if (file.split('.')[-1]=="wav") & (file not in ['0b0427e2.wav', '6ea0099f.wav', 'b39975f5.wav']):
-                #mfcc processing
-                mfcc=five_sec_extract(self.path+'audio_test/'+file)
+                #stft processing
+                stft=five_sec_extract2(self.path+'audio_test/'+file)
                 #classification result
-                softmax[k,] = self.sess.run(self.softmax, feed_dict={self.X: mfcc.reshape(1, 17, 200), 
-                                                      self.p_keep_conv: 1.0, 
-                                                      self.p_keep_hidden: 1.0})
+                softmax[k,] = self.sess.run(self.softmax, 
+                       feed_dict={self.X: stft.reshape(1, 17, 200), 
+                                  self.p_keep_conv: 1.0, 
+                                  self.p_keep_hidden: 1.0})
             k+=1
         return(softmax)
     
@@ -230,16 +232,17 @@ class sound_pred:
         file_list=np.array(file_list).reshape(-1)
         length = len(file_list)
         softmax = np.zeros((length, 41))
-        from mfcc import five_sec_extract
+        from label1 import five_sec_extract3
         k=0
         for file in file_list:
             if (file.split('.')[-1]=="wav") & (file not in ['0b0427e2.wav', '6ea0099f.wav', 'b39975f5.wav']):
                 #mfcc processing
-                mfcc=five_sec_extract(self.path+'audio_test/'+file)
+                mfcc=five_sec_extract3(self.path+'audio_test/'+file)
                 #classification result
-                softmax[k,] = self.sess.run(self.softmax, feed_dict={self.X: mfcc.reshape(1, 40, 350, 1), 
-                                                      self.p_keep_conv: 1.0, 
-                                                      self.p_keep_hidden: 1.0})
+                softmax[k,] = self.sess.run(self.softmax, 
+                       feed_dict={self.X: mfcc.reshape(1, 40, 350), 
+                                  self.p_keep_conv: 1.0, 
+                                  self.p_keep_hidden: 1.0})
             k+=1
         return(softmax)
     

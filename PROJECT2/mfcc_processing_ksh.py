@@ -85,7 +85,7 @@ print(see1)
 print(see2)
 
 print(trainData.shape, testData.shape, trainLabel.shape, testLabel.shape)
-# (6631, 20, 200) (2842, 20, 200) (6631,) (2842,)
+# 트레이닝 셋 5%만 뽑음 (8999, 20, 430) (474, 20, 430) (8999,) (474,)
 
 #라벨이 총 몇개가 되어야 하는지 확인
 print(len(np.unique(trainLabel)))   #41
@@ -107,14 +107,15 @@ print(min(trainLabel), max(trainLabel), min(testLabel), max(testLabel))
 
 #트레이닝 및 테스트에 적절히 사용하기 위해 csv파일로 다운로드한다. 
 #(3D array는 csv파일로 저장이 안되므로 2D로 변환하여 저장)
-trainData2D=trainData.reshape(-1, 20*200)
-testData2D=testData.reshape(-1, 20*200)
-np.savetxt(path+'trainData6.csv', 
+trainData2D=trainData.reshape(-1, 20*430)
+testData2D=testData.reshape(-1, 20*430)
+np.savetxt(path+'trainData8.csv', 
            trainData2D, delimiter=",")
-np.savetxt(path+'testData6.csv', 
+np.savetxt(path+'testData8.csv', 
            testData2D, delimiter=",")
-np.savetxt(path+'trainLabel6.csv', 
+np.savetxt(path+'trainLabel8.csv', 
            trainLabel, delimiter=",")
-np.savetxt(path+'testLabel6.csv', 
+np.savetxt(path+'testLabel8.csv', 
            testLabel, delimiter=",")
 
+#trainData8 <- mfcc, 20*430, train/test: 95%/5%

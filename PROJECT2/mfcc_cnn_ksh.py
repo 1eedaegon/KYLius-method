@@ -9,12 +9,12 @@ from math import ceil
 tf.set_random_seed(777) 
 
 #트레이닝/테스트 셋 각각 데이터/라벨 임포트
-trainData = np.genfromtxt('/home/paperspace/Downloads/trainData6.csv', delimiter=',')
+trainData = np.genfromtxt('/home/paperspace/Downloads/trainData8.csv', delimiter=',')
 trainData = trainData.reshape(-1, 20, 430)
-testData = np.genfromtxt('/home/paperspace/Downloads/testData6.csv', delimiter=',')
+testData = np.genfromtxt('/home/paperspace/Downloads/testData8.csv', delimiter=',')
 testData = testData.reshape(-1, 20, 430)
-trainLabel = np.genfromtxt('/home/paperspace/Downloads/trainLabel6.csv', delimiter=',')
-testLabel = np.genfromtxt('/home/paperspace/Downloads/testLabel6.csv', delimiter=',')
+trainLabel = np.genfromtxt('/home/paperspace/Downloads/trainLabel8.csv', delimiter=',')
+testLabel = np.genfromtxt('/home/paperspace/Downloads/testLabel8.csv', delimiter=',')
 
 #임포트한 데이터가 원하는 데이터가 맞는지 shape을 통해 확인
 print(trainData.shape, testData.shape, trainLabel.shape, testLabel.shape)

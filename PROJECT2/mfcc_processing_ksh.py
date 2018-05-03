@@ -123,3 +123,4 @@ np.array(testfile)
 testfile.shape
 
 #trainData8 <- mfcc, 20*430, train/test: 95%/5%
+

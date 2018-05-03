@@ -51,5 +51,5 @@ class sound_pred:
         print("error count :", error)
         print("error percentage :", (474-error)/474)
 
-
-errorlist
+    def close(self):
+        sess.close()

@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
 
-opt_addr="/Users/kimseunghyuck/desktop/git/daegon/KYLius-method/x_ksh/optx2/optx2"
+opt_addr="/Users/kimseunghyuck/desktop/git/daegon/KYLius-method/PROJECT2/optx/optx"
 
 class sound_pred:
     def __init__(self, opt_addr):
@@ -23,15 +23,33 @@ class sound_pred:
         print("Variables Saved")
     
     def tryit(self, soundaddr):
-        
+        import pandas as pd
+        train = pd.read_csv('/Users/kimseunghyuck/desktop/sound_train.csv')
+        idx = train.label.unique()        
         import sys
-        sys.path.append('/Users/kimseunghyuck/desktop/git/daegon/KYLius-method/x_ksh')
-        
-        from stft import five_sec_extract2
-        soundaddr='/Users/kimseunghyuck/desktop/audio_train/0a0a8d4c.wav'
-        #mfcc processing
-        stft=five_sec_extract(soundaddr)
-        #classification result
-        result=sess.run(pred, feed_dict={X: stft.reshape(17, 200), p_keep_conv: 1.0, p_keep_hidden: 1.0})
-        print(self.result)
-sess.close()
+        sys.path.append('/Users/kimseunghyuck/desktop/git/daegon/KYLius-method/x_ksh')        
+        from mfcc import five_sec_extract
+        soundaddr='/Users/kimseunghyuck/desktop/audio_train/0a2a5c05.wav'
+        testfile8 = pd.read_csv('/Users/kimseunghyuck/desktop/testfile8.csv')
+        testfile8 = np.array(testfile8).reshape(-1)
+        testLabel8 = np.genfromtxt('/Users/kimseunghyuck/desktop/testLabel8.csv', delimiter=',')
+        error=0
+        k=0
+        errorlist=[]
+        for file in testfile8:
+            #mfcc processing
+            mfcc=five_sec_extract('/Users/kimseunghyuck/desktop/audio_train/'+file)
+            #classification result
+            result=sess.run(pred, feed_dict={X: mfcc.reshape(1, 20, 430), p_keep_conv: 1.0, p_keep_hidden: 1.0})
+            if testLabel8[k] != result:
+                print('x : ', file)
+                error+=1
+                errorlist.append(file)
+            else:
+                print('o')
+            k+=1
+        print("error count :", error)
+        print("error percentage :", (474-error)/474)
+
+
+errorlist

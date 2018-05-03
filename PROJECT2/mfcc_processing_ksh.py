@@ -117,5 +117,9 @@ np.savetxt(path+'trainLabel8.csv',
            trainLabel, delimiter=",")
 np.savetxt(path+'testLabel8.csv', 
            testLabel, delimiter=",")
+np.savetxt(path+'testfile8.csv', 
+           testfile, header = " ", fmt='%s')
+np.array(testfile)
+testfile.shape
 
 #trainData8 <- mfcc, 20*430, train/test: 95%/5%

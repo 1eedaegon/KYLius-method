@@ -1,4 +1,4 @@
-# KYLius-method
+﻿# KYLius-method
 <p><i>2번째 도전</i></p>
 <img src="PROJECT1/logo/KYLius_logo4.png">
 
@@ -26,62 +26,6 @@ https://www.kaggle.com/c/freesound-audio-tagging
 3. PROJECT - 치열한 공개의 장 <br>
 <pre> 엄선된 자료, 혹은 모듈식 개발에 끼워넣을 수 있는 완성된 코드만 올리는 공간입니다. </pre>
 <br>
-
-## 할거
-1. 각자 코드 완성/ 여러가지로 돌려보고 정확도랑 인수값 잘 기록해놓기
-<pre>
-대곤: chroma.stft 3*3/ mfcc(?)
-상욱: mfcc 300 등으로 길이 바꿔가면서
-승혁: mfcc 하던거 + core.stft
-수원: melspectogram / 1d
-</pre>
-
-2. 발표할 개요 생각해보기
-<pre>
-개요
-1. data set 설명 (with graph, column, label)
-2. sound processing 소개
-mfcc, stft, melspectogram 등
-
-코드
-3. processing.py 설명
-4. mfcc, stft, melspectogram 각각으로 나온 정확도
-5. 앙상블로 나온 정확도
-
-마무리
-6. 캐글에 올리고, 추천 권유
-
-승혁: sound processing + processing.py
-상욱: data set 설명(graph, column, label) mfcc, stft 그래프(이미지) 등
-대곤: 앙상블로 나온 정확도/ 캐글에 올리기
-수원: 각각으로 나온 정확도 + 추천 권유
-
-__________
-상욱: 40*350 으로 바꿔서 69~72%, 최대 73.4% 마지막 출력을 크게 해서 더 올라감.
-40*400 만들어놓음. 40*500 도 해보려고 함.
-
-대곤: 68~69%. 앙상블 코드. 앙상블 개념도.
-
-수원: conv1d 54%. MEL 64%.
-
-코드 각자 주석달아서 취합.
-앙상블은 일단 승혁+MEL+chroma 이렇게 테스트 모델.
-오늘 집에 가기 전에 PROJECT2 에 넣어놓기.
-</pre>
-
-
-## 스케쥴표
-<pre>
-29일 일요일 오후 2시 사당역.
-5월 2일부터 피피티.
-5월 4일 발표.
-</pre>
-
-## 추가 정보
-연철이가 test.csv 중에 안되는 파일 목록 알려줌(3개)
-<pre>
-0b0427e2, 6ea0099f, b39975f5
-</pre>
 
 ## 지난 주제: 
 1. MNIST DIGITS RECOGNIZER (2018. 4/9 ~ 4/20)

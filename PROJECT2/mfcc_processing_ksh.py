@@ -67,9 +67,7 @@ def five_sec_extract(file):
             array[k, :, :]=mfcc
         elif length < 430:
             tile_num = (430//length)+1
-            tile_array=np.tile(mfcc,tile_num)
-            mfcc=tile_array[:,0:430]
-            array[k, :, :]=mfcc
+            array[k, :, :]=np.tile(mfcc,tile_num)[:,0:430]
         elif length > 430:
             argmax=np.argmax(abs_mfcc, axis=1)
             sample=[]

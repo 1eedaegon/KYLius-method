@@ -63,6 +63,8 @@ plt.plot(pha.real[10])
 plt.show
 #magnitude만 해도 될 것 같음.
 
+""" 
+# it takes too much time
 #5 seconds(100 segments) extract
 def five_sec_extract(file):
     #zero padding to file.shape[0] X 513 X 100    
@@ -89,12 +91,39 @@ def five_sec_extract(file):
             array[k, :, :]=mag[:, start:start+200]
         k+=1
     return(array)
+"""
+
+def five_sec_extract(file):
+    #zero padding to file.shape[0] X 17 X 200    
+    n=file.shape[0]
+    array = np.repeat(0., n * 17 * 200).reshape(n, 17, 200)
+    k=0    
+    for filename in file:    
+        y, sr = librosa.core.load(path+'audio_train/'+filename, 
+                                  mono=True, res_type="kaiser_fast")
+        stft=librosa.core.stft(y,32,16)
+        mag, pha = librosa.magphase(stft)
+        length=stft.shape[1]
+        abs_mag=np.abs(mag)
+        if length == 200:
+            array[k, :, :]=mag
+        elif length < 200:
+            array[k, :, :length]=mag
+        elif length > 200:
+            argmax=np.argmax(abs_mag, axis=1)
+            sample=[]
+            for i in range(np.max(argmax)):
+                 sample.append(np.sum((argmax>=i) & (argmax <i+200)))
+            start=sample.index(max(sample))
+            array[k, :, :]=mag[:, start:start+200]
+        k+=1
+    return(array)
 
 trainData=five_sec_extract(trainfile)
 testData=five_sec_extract(testfile)
 
 print(trainData.shape, testData.shape, trainLabel.shape, testLabel.shape)
-# (6631, 20, 430) (2842, 20, 430) (6631,) (2842,)
+# (6631, 17, 200) (2842, 17, 200) (6631,) (2842,)
 
 #how many kinds of label?
 print(len(np.unique(trainLabel)))   #41
@@ -116,8 +145,8 @@ print(min(trainLabel), max(trainLabel), min(testLabel), max(testLabel))
 #0 40 0 40
 
 #csv downdload totally about 600MB
-trainData2D=trainData.reshape(-1, 513*100)
-testData2D=testData.reshape(-1, 513*100)
+trainData2D=trainData.reshape(-1, 17*200)
+testData2D=testData.reshape(-1, 17*200)
 np.savetxt(path+'trainData7.csv', 
            trainData2D, delimiter=",")
 np.savetxt(path+'testData7.csv', 

@@ -1,13 +1,8 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Apr 26 18:53:10 2018
+#mfcc_processing.py
+#librosa.feature.mfcc를 이용해서 mfcc 데이터를 저장하는 코드입니다.
 
-@author: kimseunghyuck
-"""
-
+#필요한 모듈 임포트
 import librosa
-import soundfile as sf
 import numpy as np
 from matplotlib import pyplot as plt
 #import labels
@@ -32,21 +27,22 @@ path = '/Users/kimseunghyuck/desktop/'
 def see_how_long(file):
     c=[]
     for filename in file:
-        y, sr = sf.read(path+filename, dtype='float32')
+        y, sr = librosa.core.load(path+'audio_train/'+filename, 
+                                  mono=True, res_type="kaiser_fast")
         mfcc=librosa.feature.mfcc(y=y, sr=sr, n_mfcc=20)
         abs_mfcc=np.abs(mfcc)
-        #1025 X t 형태
         c.append(abs_mfcc.shape[1])
     return(c)
  
 #n=see_how_long(trainfile)
-#print(np.max(n), np.min(n))      #2584 28
+#print(np.max(n), np.min(n))      #1292, 14
 #n2=see_how_long(testfile)
-#print(np.max(n2), np.min(n2))    #2584 26
+#print(np.max(n2), np.min(n2))    #1292, 13
 
 #show me approximate wave shape
 filename= trainfile[11]
-y, sr = sf.read(path+filename, dtype='float32')
+y, sr = librosa.core.load(path+'audio_train/'+filename, 
+                          mono=True, res_type="kaiser_fast")
 mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=20)
 length=mfcc.shape[1]
 plt.plot(mfcc[3,])
@@ -90,12 +86,11 @@ print(see2)
 print(trainData.shape, testData.shape, trainLabel.shape, testLabel.shape)
 # (6631, 20, 200) (2842, 20, 200) (6631,) (2842,)
 
-#how many kinds of label?
+#라벨이 총 몇개가 되어야 하는지 확인
 print(len(np.unique(trainLabel)))   #41
 print(len(np.unique(testLabel)))    #41
 
-#label string -> integer(0~40)
-
+#문자열로 되어있는 라벨을 전부 0~40으로 바꾼다.
 def Labeling(label):
     #idx = np.unique(train.values[:,1])     #이건 abc 순
     idx = train.label.unique()
@@ -106,12 +101,13 @@ def Labeling(label):
 
 trainLabel=Labeling(trainLabel)
 testLabel=Labeling(testLabel)
+#라벨이 0~40으로 잘 들어갔는지 확인
 print(min(trainLabel), max(trainLabel), min(testLabel), max(testLabel))
-#0 40 0 40
 
-#csv downdload totally about 600MB
-trainData2D=trainData.reshape(-1, 20*430)
-testData2D=testData.reshape(-1, 20*430)
+#트레이닝 및 테스트에 적절히 사용하기 위해 csv파일로 다운로드한다. 
+#(3D array는 csv파일로 저장이 안되므로 2D로 변환하여 저장)
+trainData2D=trainData.reshape(-1, 20*200)
+testData2D=testData.reshape(-1, 20*200)
 np.savetxt(path+'trainData6.csv', 
            trainData2D, delimiter=",")
 np.savetxt(path+'testData6.csv', 

@@ -44,7 +44,7 @@ KYLius_total2.to_csv(path+'KYLius_total2.csv', header=True, index=False, sep='\t
 
 #array1 -> 75.4%, array2 -> 63.7%, array1and2(softmax multiply) -> 82.3%
 #array3 -> 69.7%, array1+2+3 (softmax multiply) -> 82%
-#array1+2+3 (weighted sum) -> 
+#array1+2+3 (weighted sum) -> 80%
 
 
 

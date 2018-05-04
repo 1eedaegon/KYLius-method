@@ -11,11 +11,11 @@ import pandas as pd
 train = pd.read_csv('/Users/kimseunghyuck/desktop/sound_train.csv')
 #train = pd.read_csv('/home/paperspace/Downloads/audio_train.csv')
 
-train_only_one = train[train['manually_verified']==1]
+#train_only_one = train[train['manually_verified']==1]
 
 #train/test, Data/Label split
 from sklearn.model_selection import train_test_split
-train_set, test_set = train_test_split(train_only_one, test_size = 0.05)
+train_set, test_set = train_test_split(train, test_size = 0.05)
 trainfile = train_set.values[:,0]
 testfile = test_set.values[:,0]
 trainLabel = train_set.values[:,1]

@@ -238,6 +238,10 @@ class sound_pred:
             if (file.split('.')[-1]=="wav") & (file not in ['0b0427e2.wav', '6ea0099f.wav', 'b39975f5.wav']):
                 #mfcc processing
                 mfcc=five_sec_extract3(self.path+'audio_test/'+file)
+                #Normalization
+                mean = np.mean(mfcc, axis=0)
+                std = np.std(mfcc, axis=0)
+                mfcc = (mfcc - mean)/std
                 #classification result
                 softmax[k,] = self.sess.run(self.softmax, 
                        feed_dict={self.X: mfcc.reshape(1, 40, 350), 

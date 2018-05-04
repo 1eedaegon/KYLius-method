@@ -22,7 +22,9 @@ array3=np.genfromtxt('/Users/kimseunghyuck/desktop/array3.csv', delimiter=',')
 print(array1.shape, array2.shape, array3.shape)
 
 #가중치를 곱하여 더한 후 argmax
-array=0.77/2*array1+0.64*array2+0.76/2*array3
+#array=0.77/2*array1+0.64*array2+0.76/2*array3
+array=array3
+
 predarray=np.argmax(array, axis=1)
 
 print(file_list.shape, predarray.shape)
@@ -37,7 +39,10 @@ for file in file_list:
     i+=1
 
 #파일 아웃풋
-KYLius5=pd.DataFrame([[k,v] for k,v in iter(submission.items())],columns=["fname","label"])
-KYLius5.to_csv(path+'KYLius5.csv', header=True, index=False, sep='\t')
+KYLius_array3=pd.DataFrame([[k,v] for k,v in iter(submission.items())],columns=["fname","label"])
+KYLius_array3.to_csv(path+'KYLius_array3.csv', header=True, index=False, sep='\t')
+
+#array1 -> 75.4%, array2 -> 63.7%, array1and2(softmax multiply) -> 82.3%
+
 
 

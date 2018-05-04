@@ -11,9 +11,11 @@ import pandas as pd
 train = pd.read_csv('/Users/kimseunghyuck/desktop/sound_train.csv')
 #train = pd.read_csv('/home/paperspace/Downloads/audio_train.csv')
 
+train_only_one = train[train['manually_verified']==1]
+
 #train/test, Data/Label split
 from sklearn.model_selection import train_test_split
-train_set, test_set = train_test_split(train, test_size = 0.05)
+train_set, test_set = train_test_split(train_only_one, test_size = 0.05)
 trainfile = train_set.values[:,0]
 testfile = test_set.values[:,0]
 trainLabel = train_set.values[:,1]
@@ -97,18 +99,18 @@ print(min(trainLabel), max(trainLabel), min(testLabel), max(testLabel))
 #(3D array는 csv파일로 저장이 안되므로 2D로 변환하여 저장)
 trainData2D=trainData.reshape(-1, 20*430)
 testData2D=testData.reshape(-1, 20*430)
-np.savetxt(path+'trainData8.csv', 
+np.savetxt(path+'trainData9.csv', 
            trainData2D, delimiter=",")
-np.savetxt(path+'testData8.csv', 
+np.savetxt(path+'testData9.csv', 
            testData2D, delimiter=",")
-np.savetxt(path+'trainLabel8.csv', 
+np.savetxt(path+'trainLabel9.csv', 
            trainLabel, delimiter=",")
-np.savetxt(path+'testLabel8.csv', 
+np.savetxt(path+'testLabel9.csv', 
            testLabel, delimiter=",")
-np.savetxt(path+'testfile8.csv', 
+np.savetxt(path+'testfile9.csv', 
            testfile, header = " ", fmt='%s')
 
 
 
 #trainData8 <- mfcc, 20*430, train/test: 95%/5%
-
+#trainData9 <- mfcc (label only 1), 20*430, train/test:95/5%

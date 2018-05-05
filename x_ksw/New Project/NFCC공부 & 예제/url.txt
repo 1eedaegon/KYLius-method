@@ -1,0 +1,6 @@
+https://tensorflow.blog/2016/11/06/urban-sound-classification/#more-18470
+https://librosa.github.io/librosa/tutorial.html
+http://cscp2.sogang.ac.kr/CSE5311/index.php/Tensor_Flow%EB%A5%BC_%EC%9D%B4%EC%9A%A9%ED%95%9C_%EC%9D%8C%ED%96%A5%EC%9D%B8%EC%8B%9D%EA%B8%B0_%EC%A0%9C%EC%9E%91
+http://keunwoochoi.blogspot.kr/search?q=%EC%9D%8C%EC%95%85%EC%8B%A0%ED%98%B8+%EB%A8%B8%EC%8B%A0%EB%9F%AC%EB%8B%9D+%EC%B4%88%EC%8B%AC%EC%9E%90%EB%A5%BC+%EC%9C%84%ED%95%9C+%EA%B0%80%EC%9D%B4%EB%93%9C&max-results=20&by-date=true
+https://m.blog.naver.com/PostView.nhn?blogId=mylogic&logNo=220988857132&proxyReferer=https%3A%2F%2Fwww.google.com%2F
+https://www.kaggle.com/c/freesound-audio-tagging/kernels
